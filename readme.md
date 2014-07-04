@@ -1,4 +1,4 @@
-# Walkner Pallet Tracking
+# Walkner PalTrack
 
 Pallet tracking application.
 
