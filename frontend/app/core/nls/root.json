@@ -1,0 +1,93 @@
+{
+  "root": {
+    "TITLE": "Walkner PalTrack",
+
+    "MSG:LOADING": "Loading...",
+    "MSG:LOADING_FAILURE": "Loading failed :(",
+    "MSG:LOG_OUT:FAILURE": "Logging out failed :(",
+    "MSG:LOG_OUT:SUCCESS": "You are now logged out!",
+
+    "PAGE_ACTION:filter": "Filter",
+
+    "LIST:COLUMN:actions": "Actions",
+    "LIST:NO_DATA": "No data.",
+    "LIST:NO_DATA:cell": "no data",
+    "LIST:ACTION:viewDetails": "View details",
+    "LIST:ACTION:edit": "Edit",
+    "LIST:ACTION:delete": "Delete",
+    "LIST:ACTION:print": "Print",
+
+    "BREADCRUMBS:edit": "Editing",
+    "BREADCRUMBS:delete": "Deleting",
+    "BREADCRUMBS:error": "Error {code}: {codeStr, select, e401{unauthorized access} e404{not found} other{bad request}}",
+
+    "ERROR:400": "The request cannot be fulfilled due to bad syntax :(",
+    "ERROR:401": "Unfortunately, you do not have the right privileges to perform the requested action :(",
+    "ERROR:404": "The requested resource could not be found :(",
+
+    "PAGINATION:FIRST_PAGE": "First page",
+    "PAGINATION:PREV_PAGE": "Previous page",
+    "PAGINATION:NEXT_PAGE": "Next page",
+    "PAGINATION:LAST_PAGE": "Last page",
+
+    "LOG_IN_FORM:DIALOG_TITLE": "Log in form",
+    "LOG_IN_FORM:LABEL:LOGIN": "Login",
+    "LOG_IN_FORM:LABEL:PASSWORD": "Password",
+    "LOG_IN_FORM:LABEL:SUBMIT": "Log in",
+
+    "BOOL:true": "Yes",
+    "BOOL:false": "No",
+    "BOOL:null": "N/A",
+
+    "#": "No.",
+
+    "GUEST_USER_NAME": "Guest",
+
+    "NAVBAR:TOGGLE": "Show menu",
+    "NAVBAR:DASHBOARD": "Dashboard",
+    "NAVBAR:EVENTS": "Events",
+    "NAVBAR:USERS": "Users",
+    "NAVBAR:MY_ACCOUNT": "My account",
+    "NAVBAR:UI_LOCALE": "UI locale",
+    "NAVBAR:LOCALE_PL": "In Polish",
+    "NAVBAR:LOCALE_US": "In English",
+    "NAVBAR:LOG_IN": "Log in",
+    "NAVBAR:LOG_OUT": "Log out",
+    "NAVBAR:DICTIONARIES": "Dictionaries",
+    "NAVBAR:REPORTS": "Reports",
+    "NAVBAR:REGISTRY": "Registry",
+    "NAVBAR:REGISTRY:GRN": "<code>GRN</code> Goods received",
+    "NAVBAR:REGISTRY:GDN": "<code>GDN</code> Goods dispatched",
+    "NAVBAR:REGISTRY:OB": "<code>OB</code> Opening balances",
+
+    "ACTION_FORM:BUTTON": "Perform action",
+    "ACTION_FORM:BUTTON:delete": "Delete",
+    "ACTION_FORM:BUTTON:cancel": "Cancel",
+    "ACTION_FORM:MESSAGE": "Are you sure you want to perform the requested action?",
+    "ACTION_FORM:MESSAGE:failure": "Action failed :(",
+
+    "highcharts:contextButtonTitle": "Chart's context menu",
+    "highcharts:downloadJPEG": "Save as JPEG",
+    "highcharts:downloadPDF": "Save as PDF",
+    "highcharts:downloadPNG": "Save as PNG",
+    "highcharts:downloadSVG": "Save as SVG",
+    "highcharts:printChart": "Print the chart",
+    "highcharts:decimalPoint": ".",
+    "highcharts:thousandsSep": ",",
+    "highcharts:noData": "No data :(",
+    "highcharts:resetZoom": "1:1",
+    "highcharts:resetZoomTitle": "Reset the zoom level to 1:1",
+    "highcharts:loading": "Loading...",
+    "highcharts:months": "January_February_March_April_May_June_July_August_September_October_November_December",
+    "highcharts:shortMonths": "Jan_Feb_Mar_Apr_May_Jun_Jul_Aug_Sep_Oct_Nov_Dec",
+    "highcharts:weekdays": "Sunday_Monday_Tuesday_Wednesday_Thursday_Friday_Saturday",
+
+    "dataTables:emptyTable": "No data.",
+    "dataTables:loadingRecords": "Loading...",
+    "dataTables:loadingFailed": "Loading failed :(",
+
+    "feedback:button:text": "Feedback",
+    "feedback:button:tooltip": "Report bugs, notes, opinions or ideas!"
+  },
+  "pl": true
+}

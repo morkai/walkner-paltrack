@@ -1,0 +1,61 @@
+{
+  "root": {
+    "BREADCRUMBS:grn:browse": "Goods received notes",
+    "BREADCRUMBS:gdn:browse": "Goods dispatched notes",
+    "BREADCRUMBS:addForm": "Adding",
+    "BREADCRUMBS:editForm": "Editing",
+    "BREADCRUMBS:ACTION_FORM:delete": "Deleting",
+
+    "MSG:LOADING_FAILURE": "Failed to load the notes :(",
+    "MSG:LOADING_SINGLE_FAILURE": "Failed to load the note :(",
+    "MSG:DELETED": "Note <em>{label}</em> was deleted.",
+
+    "PAGE_ACTION:edit": "Edit note",
+    "PAGE_ACTION:delete": "Delete note",
+
+    "LIST:ACTION:add": "Add note",
+    "LIST:ACTION:reset": "Reset the add note form",
+
+    "PANEL:TITLE:details": "Note details",
+    "PANEL:TITLE:addForm": "Add note form",
+    "PANEL:TITLE:editForm": "Edit note form",
+
+    "PROPERTY:supplier": "Supplier",
+    "PROPERTY:receiver": "Receiver",
+    "PROPERTY:date": "Date",
+    "PROPERTY:docNo": "Document no",
+    "PROPERTY:createdAt": "Created at",
+    "PROPERTY:updatedAt": "Updated at",
+    "PROPERTY:creator": "Creator",
+    "PROPERTY:updater": "Updater",
+
+    "FORM:ACTION:add": "Add note",
+    "FORM:ACTION:edit": "Edit note",
+    "FORM:ERROR:addFailure": "Failed to add the new note :-(",
+    "FORM:ERROR:editFailure": "Failed to edit the note :-(",
+    "FORM:ERROR:docNo:duplicate": "The specified document no already exists!",
+    "FORM:ERROR:date:duplicate": "OB from the specified day already exists!",
+    "FORM:ERROR:supplier:receiver": "A supplier cannot be also a receiver.",
+    "FORM:ERROR:receiver:supplier": "A receiver cannot be also a supplier.",
+    "FORM:ERROR:goods:required": "Total quantity must be greater than 0.",
+    "FORM:ERROR:date:future": "Date cannot be in the future.",
+
+    "FILTER:date:from": "From",
+    "FILTER:date:to": "To",
+    "FILTER:limit": "Limit",
+    "FILTER:submit": "Filter notes",
+
+    "ACTION_FORM:DIALOG_TITLE:delete": "Note deletion confirmation",
+    "ACTION_FORM:BUTTON:delete": "Delete note",
+    "ACTION_FORM:MESSAGE:delete": "Are you sure you want to delete the chosen note?",
+    "ACTION_FORM:MESSAGE_SPECIFIC:delete": "Are you sure you want to delete the <em>{label}</em> note?",
+    "ACTION_FORM:MESSAGE_FAILURE:delete": "Failed to delete the note :-(",
+
+    "lastAdded": "Last added note:",
+    "lastAdded:details": "no <em>{docNo}</em> from <em>{supplier}</em> to <em>{receiver}</em>",
+
+    "addPartner": "(add partner)",
+    "loadFromGdn": "Load quantities from the GDN"
+  },
+  "pl": true
+}

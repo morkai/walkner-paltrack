@@ -1,0 +1,33 @@
+<div class="panel panel-primary users-details">
+  <div class="panel-heading">
+    <%- t('users', 'PANEL:TITLE:details') %>
+  </div>
+  <div class="panel-details">
+    <div class="props first">
+      <div class="prop">
+        <div class="prop-name"><%- t('users', 'PROPERTY:name') %></div>
+        <div class="prop-value"><%= model.firstName || '' %> <%= model.lastName || '' %></div>
+      </div>
+      <div class="prop">
+        <div class="prop-name"><%- t('users', 'PROPERTY:partner') %></div>
+        <div class="prop-value"><%= model.partner || '-' %></div>
+      </div>
+      <div class="prop">
+        <div class="prop-name"><%- t('users', 'PROPERTY:login') %></div>
+        <div class="prop-value"><%= model.login %></div>
+      </div>
+      <div class="prop">
+        <div class="prop-name"><%- t('users', 'PROPERTY:email') %></div>
+        <div class="prop-value"><%= model.email || '-' %></div>
+      </div>
+      <div class="prop">
+        <div class="prop-name"><%- t('users', 'PROPERTY:privileges') %></div>
+        <div class="prop-value">
+          <% model.privileges.forEach(function(privilege) { %>
+          <span class="label label-<%- /MANAGE/.test(privilege) ? 'warning' : 'info' %>"><%- t('users', 'PRIVILEGE:' + privilege) %></span>
+          <% }) %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

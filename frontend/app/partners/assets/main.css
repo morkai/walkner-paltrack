@@ -1,0 +1,16 @@
+.partners-address .prop-value {
+  white-space: pre-line;
+}
+.partners-color {
+  text-shadow: 1px 1px 3px #333;
+  color: #fff;
+  font-weight: bold;
+}
+.label.partners-color {
+  font-family: Monaco, Menlo, Consolas, "Courier New", monospace;
+  font-size: 1em;
+  text-transform: uppercase;
+}
+.partners-list .partners-color {
+  text-transform: uppercase;
+}

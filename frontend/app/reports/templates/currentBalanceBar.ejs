@@ -1,0 +1,8 @@
+<div class="currentBalanceBar">
+  <% palletKinds.forEach(function(palletKind) { %>
+  <div class="palletKind">
+    <span class="palletKind-label"><%= palletKind.label %></span>
+    <span class="palletKind-count"><%- palletKind.count %></span>
+  </div>
+  <% }) %>
+</div>

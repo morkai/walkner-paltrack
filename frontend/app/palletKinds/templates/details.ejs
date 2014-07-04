@@ -1,0 +1,23 @@
+<div class="panel panel-primary">
+  <div class="panel-heading"><%- t('palletKinds', 'PANEL:TITLE:details') %></div>
+  <div class="panel-details">
+    <div class="props first">
+      <div class="prop">
+        <div class="prop-name"><%- t('palletKinds', 'PROPERTY:name') %></div>
+        <div class="prop-value"><%= model.name %></div>
+      </div>
+      <div class="prop">
+        <div class="prop-name"><%- t('palletKinds', 'PROPERTY:description') %></div>
+        <div class="prop-value"><%= model.description || '-' %></div>
+      </div>
+      <div class="prop">
+        <div class="prop-name"><%- t('palletKinds', 'PROPERTY:no') %></div>
+        <div class="prop-value"><%= model.no || '-' %></div>
+      </div>
+      <div class="prop">
+        <div class="prop-name"><%- t('palletKinds', 'PROPERTY:position') %></div>
+        <div class="prop-value"><%- model.position %></div>
+      </div>
+    </div>
+  </div>
+</div>

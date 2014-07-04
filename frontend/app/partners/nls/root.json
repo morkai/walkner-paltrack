@@ -1,0 +1,38 @@
+{
+  "root": {
+    "BREADCRUMBS:browse": "Partners",
+    "BREADCRUMBS:addForm": "Adding",
+    "BREADCRUMBS:editForm": "Editing",
+    "BREADCRUMBS:ACTION_FORM:delete": "Deleting",
+
+    "MSG:LOADING_FAILURE": "Failed to load the partners :(",
+    "MSG:LOADING_SINGLE_FAILURE": "Failed to load the partner :(",
+    "MSG:DELETED": "Partner <em>{label}</em> was deleted.",
+
+    "PAGE_ACTION:add": "Add partner",
+    "PAGE_ACTION:edit": "Edit partner",
+    "PAGE_ACTION:delete": "Delete partner",
+
+    "PANEL:TITLE:details": "Partner's details",
+    "PANEL:TITLE:addForm": "Add partner form",
+    "PANEL:TITLE:editForm": "Edit partner form",
+
+    "PROPERTY:name": "Name",
+    "PROPERTY:clientNo": "Client no",
+    "PROPERTY:address": "Address",
+    "PROPERTY:supplierColor": "Supplier color",
+    "PROPERTY:receiverColor": "Receiver color",
+
+    "FORM:ACTION:add": "Add partner",
+    "FORM:ACTION:edit": "Edit partner",
+    "FORM:ERROR:addFailure": "Failed to add the new partner :-(",
+    "FORM:ERROR:editFailure": "Failed to edit the partner :-(",
+
+    "ACTION_FORM:DIALOG_TITLE:delete": "Partner deletion confirmation",
+    "ACTION_FORM:BUTTON:delete": "Delete partner",
+    "ACTION_FORM:MESSAGE:delete": "Are you sure you want to delete the chosen partner?",
+    "ACTION_FORM:MESSAGE_SPECIFIC:delete": "Are you sure you want to delete the <em>{label}</em> partner?",
+    "ACTION_FORM:MESSAGE_FAILURE:delete": "Failed to delete the partner :-("
+  },
+  "pl": true
+}

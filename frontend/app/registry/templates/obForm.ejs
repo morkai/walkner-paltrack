@@ -1,0 +1,37 @@
+<form class="registryForm ob" method="post" action="<%- formAction %>">
+  <input type="hidden" name="_method" value="<%- formMethod %>">
+  <div class="panel panel-primary registryPanel ob">
+    <div class="panel-body">
+      <% if (!user.data.partner) { %>
+      <div class="row">
+        <div class="col-md-3 form-group has-required-select2">
+          <div>
+            <a class="addPartner" data-property="partner"><%- t('registry', 'addPartner') %></a>
+            <label for="<%- idPrefix %>-partner" class="control-label"><%- t('registry', 'PROPERTY:partner') %></label>
+          </div>
+          <input id="<%- idPrefix %>-partner" type="text" name="partner" required>
+        </div>
+      </div>
+      <% } %>
+      <div class="form-group">
+        <label for="<%- idPrefix %>-date" class="control-label"><%- t('registry', 'PROPERTY:date') %></label>
+        <input id="<%- idPrefix %>-date" class="form-control" type="date" name="date" required>
+      </div>
+      <div class="registryFormGoods">
+        <% palletKinds.forEach(function(palletKind) { %>
+        <div class="form-group">
+          <label for="<%- idPrefix %>-goods-<%- palletKind.id %>" class="control-label"><%= palletKind.text %></label>
+          <input id="<%- idPrefix %>-goods-<%- palletKind.id %>" class="form-control" type="number" name="goods.<%- palletKind.id %>" min="0" max="99999" step="1">
+        </div>
+        <% }) %>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button id="<%- idPrefix %>-submit" type="submit" class="btn btn-primary"><%- formActionText %></button>
+      <div class="registryLastAdded">
+        <%- t('registry', 'lastAdded') %>
+        <a href="#">-</a>
+      </div>
+    </div>
+  </div>
+</form>

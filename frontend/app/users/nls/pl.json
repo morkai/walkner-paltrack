@@ -1,0 +1,64 @@
+{
+  "BREADCRUMBS:browse": "Użytkownicy",
+  "BREADCRUMBS:addForm": "Dodawanie",
+  "BREADCRUMBS:editForm": "Edycja",
+  "BREADCRUMBS:ACTION_FORM:delete": "Usuwanie",
+
+  "MSG:LOADING_FAILURE": "Ładowanie użytkowników nie powiodło się :(",
+  "MSG:LOADING_SINGLE_FAILURE": "Ładowanie użytkownika nie powiodło się :(",
+  "MSG:DELETED": "Użytkownik <em>{label}</em> został usunięty.",
+
+  "PAGE_ACTION:add": "Dodaj użytkownika",
+  "PAGE_ACTION:edit": "Edytuj użytkownika",
+  "PAGE_ACTION:delete": "Usuń użytkownika",
+
+  "PANEL:TITLE:details": "Szczegóły użytkownika",
+  "PANEL:TITLE:addForm": "Formularz dodawania użytkownika",
+  "PANEL:TITLE:editForm": "Formularz edycji użytkownika",
+
+  "FILTER:BUTTON": "Filtruj użytkowników",
+  "FILTER:LIMIT": "Limit",
+  "FILTER:PLACEHOLDER:partner": "Dowolny dostawca",
+  "FILTER:PLACEHOLDER:lastName": "Dowolne nazwisko",
+
+  "PROPERTY:login": "Login",
+  "PROPERTY:password": "Hasło",
+  "PROPERTY:password2": "Potwierdzenie hasła",
+  "PROPERTY:email": "Adres e-mail",
+  "PROPERTY:privileges": "Uprawnienia",
+  "PROPERTY:partner": "Partner",
+  "PROPERTY:name": "Imię i nazwisko",
+  "PROPERTY:firstName": "Imię",
+  "PROPERTY:lastName": "Nazwisko",
+
+  "ACTIVE:true": "Tak",
+  "ACTIVE:false": "Nie",
+
+  "FORM:ACTION:add": "Dodaj użytkownika",
+  "FORM:ACTION:edit": "Edytuj użytkownika",
+  "FORM:ERROR:passwordMismatch": "Podane hasła nie pasują do siebie.",
+  "FORM:ERROR:addFailure": "Nie udało się dodać użytkownika :-(",
+  "FORM:ERROR:editFailure": "Nie udało się zmodyfikować użytkownika :-(",
+  "NO_DATA:partner": "Wszyscy",
+
+  "ACTION_FORM:DIALOG_TITLE:delete": "Potwierdzenie usunięcia użytkownika",
+  "ACTION_FORM:BUTTON:delete": "Usuń użytkownika",
+  "ACTION_FORM:MESSAGE:delete": "Czy na pewno chcesz bezpowrotnie usunąć wybranego użytkownika?",
+  "ACTION_FORM:MESSAGE_SPECIFIC:delete": "Czy na pewno chcesz bezpowrotnie usunąć użytkownika <em>{label}</em>?",
+  "ACTION_FORM:MESSAGE_FAILURE:delete": "Nie udało się usunąć użytkownika :-(",
+
+  "PRIVILEGE:EVENTS:VIEW": "Zdarzenia: przeglądanie",
+  "PRIVILEGE:EVENTS:MANAGE": "Zdarzenia: zarządzanie",
+  "PRIVILEGE:USERS:VIEW": "Użytkownicy: przeglądanie",
+  "PRIVILEGE:USERS:MANAGE": "Użytkownicy: zarządzanie",
+  "PRIVILEGE:DICTIONARIES:VIEW": "Słowniki: przeglądanie",
+  "PRIVILEGE:DICTIONARIES:MANAGE": "Słowniki: zarządzanie",
+  "PRIVILEGE:REPORTS:VIEW": "Raporty: przeglądanie",
+  "PRIVILEGE:REPORTS:MANAGE": "Raporty: zarządzanie",
+  "PRIVILEGE:REGISTRY:VIEW": "Rejestr: przeglądanie",
+  "PRIVILEGE:REGISTRY:MANAGE": "Rejestr: zarządzanie",
+  "PRIVILEGE:REGISTRY:CHECK": "Rejestr: sprawdzanie",
+
+  "select2:placeholder": "Szukaj po nazwisku...",
+  "select2:users:system": "System"
+}

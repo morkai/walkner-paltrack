@@ -1,0 +1,45 @@
+.currentBalanceList th {
+  white-space: nowrap;
+}
+.currentBalanceList td {
+  width: 1%;
+  white-space: nowrap;
+}
+.currentBalanceList td:last-child {
+  width: auto;
+}
+.currentBalanceList .number {
+  font-family: "Consolas", "Monaco", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+  font-size: 1.2em;
+}
+.currentBalanceBar {
+  z-index: 10;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background: #F8F8F8;
+  border-top: 4px solid #a0f;
+  display: flex;
+}
+.currentBalanceBar > .palletKind {
+  display: inline-block;
+  padding: 4px 16px;
+  line-height: 1;
+  flex: 1 1 auto;
+}
+.currentBalanceBar > .palletKind:hover {
+  background: #a0f;
+  color: #fff;
+}
+.currentBalanceBar > .palletKind > .palletKind-label {
+  display: block;
+  text-transform: lowercase;
+  font-variant: small-caps;
+  font-size: 1.2em;
+}
+.currentBalanceBar > .palletKind > .palletKind-count {
+  display: block;
+  font-family: "Consolas", "Monaco", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+  font-size: 1.4em;
+}

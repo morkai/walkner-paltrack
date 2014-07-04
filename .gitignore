@@ -1,0 +1,8 @@
+.idea
+node_modules
+build
+frontend-build
+data/gdn/*.pdf
+config/development
+config/production
+config/vps

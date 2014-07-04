@@ -1,0 +1,57 @@
+{
+  "private": true,
+  "name": "walkner-paltrack",
+  "version": "0.0.0",
+  "backendVersion": 3,
+  "frontendVersion": 5,
+  "description": "Pallet tracking application.",
+  "license": "CC BY-NC-SA 4.0",
+  "homepage": "https://github.com/morkai/walkner-paltrack",
+  "author": {
+    "name": "Łukasz Walukiewicz",
+    "email": "lukasz@walukiewicz.eu",
+    "url": "http://lukasz.walukiewicz.eu/"
+  },
+  "bugs": "https://github.com/morkai/walkner-paltrack/issues",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/morkai/walkner-paltrack.git"
+  },
+  "engine": [
+    "node >=0.10.28"
+  ],
+  "main": "./backend/main",
+  "dependencies": {
+    "axon": "~2.0.0",
+    "mongodb": "~1.3.23",
+    "mongoose": "~3.8.8",
+    "mongoose-auto-increment": "~3.0.1",
+    "bcrypt": "~0.7.7",
+    "cookie": "~0.1.1",
+    "connect": "~2.14.2",
+    "express": "~3.4.8",
+    "ejs": "~0.8.5",
+    "ejs-amd": "~0.0.4",
+    "socket.io": "~0.9.17",
+    "lodash": "~2.4.1",
+    "messageformat": "~0.1.8",
+    "messageformat-amd": "git+http://github.com/morkai/messageformat-amd.git#617a62a965",
+    "moment": "~2.5.1",
+    "deep-equal": "~0.2.1",
+    "h5.step": "~0.1.0",
+    "h5.pubsub": "git+http://github.com/morkai/h5.pubsub.git#c1a899cb7e",
+    "h5.rql": "git+http://github.com/morkai/h5.rql.git#fbb379fe6c",
+    "h5.main": "git+http://github.com/morkai/h5.main.git#7fb51e2571"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-concat": "~0.3.0",
+    "grunt-contrib-jshint": "~0.10.0",
+    "grunt-contrib-requirejs": "~0.4.3",
+    "grunt-ejs-amd": "git+http://github.com/morkai/grunt-ejs-amd.git#a09723eabe",
+    "grunt-messageformat-amd": "git+http://github.com/morkai/grunt-messageformat-amd.git#925ad3d218",
+    "uglify-js": "~2.4.13"
+  }
+}

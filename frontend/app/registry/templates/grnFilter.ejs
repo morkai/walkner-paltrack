@@ -1,0 +1,27 @@
+<div class="well">
+  <form id="<%- idPrefix %>-form" class="filter-form">
+    <% if (!user.data.partner) { %>
+    <div class="form-group">
+      <label for="<%- idPrefix %>-<%- firstPartnerProperty %>"><%- t('registry', 'PROPERTY:' + firstPartnerProperty) %></label>
+      <input id="<%- idPrefix %>-<%- firstPartnerProperty %>" name="<%- firstPartnerProperty %>" type="text">
+    </div><% } %><div class="form-group">
+      <label for="<%- idPrefix %>-<%- secondPartnerProperty %>"><%- t('registry', 'PROPERTY:' + secondPartnerProperty) %></label>
+      <input id="<%- idPrefix %>-<%- secondPartnerProperty %>" name="<%- secondPartnerProperty %>" type="text">
+    </div><div class="form-group">
+      <label for="<%- idPrefix %>-from"><%- t('registry', 'FILTER:date:from') %></label>
+      <input id="<%- idPrefix %>-from" class="form-control" name="from" type="date">
+    </div><div class="form-group">
+      <label for="<%- idPrefix %>-to"><%- t('registry', 'FILTER:date:to') %></label>
+      <input id="<%- idPrefix %>-to" class="form-control" name="to" type="date">
+    </div><div class="form-group">
+      <label for="<%- idPrefix %>-docNo"><%- t('registry', 'PROPERTY:docNo') %></label>
+      <input id="<%- idPrefix %>-docNo" class="form-control" name="docNo" type="text">
+    </div><div class="form-group">
+      <label for="<%- idPrefix %>-limit"><%- t('registry', 'FILTER:limit') %></label>
+      <input id="<%- idPrefix %>-limit" class="form-control" name="limit" type="number" value="25" min="5" max="100" step="1">
+    </div><div
+      class="form-group filter-actions">
+      <input type="submit" class="btn btn-default" value="<%= t('registry', 'FILTER:submit') %>">
+    </div>
+  </form>
+</div>

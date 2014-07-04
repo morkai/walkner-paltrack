@@ -1,0 +1,66 @@
+<div class="navbar-inner">
+  <div class="navbar-header">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only"><%- t('core', 'NAVBAR:TOGGLE') %></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+    <a class="navbar-brand" href="#"><i class="fa fa-truck"></i></a>
+  </div>
+  <div class="collapse navbar-collapse">
+    <ul class="nav navbar-nav">
+      <li><a href="#"><%- t('core', 'NAVBAR:DASHBOARD') %></a>
+      <li data-online data-privilege="EVENTS:VIEW"><a href="#events"><%- t('core', 'NAVBAR:EVENTS') %></a>
+      <li data-online class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown">
+          <%- t('core', 'NAVBAR:REGISTRY') %>
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li data-privilege="REGISTRY:VIEW"><a href="#registry/grn" class="navbar-registry grn"><%- t('core', 'NAVBAR:REGISTRY:GRN') %></a>
+          <li data-privilege="REGISTRY:VIEW"><a href="#registry/gdn" class="navbar-registry gdn"><%- t('core', 'NAVBAR:REGISTRY:GDN') %></a>
+          <li data-privilege="REGISTRY:VIEW"><a href="#registry/ob" class="navbar-registry ob"><%- t('core', 'NAVBAR:REGISTRY:OB') %></a>
+        </ul>
+      <li class="dropdown" data-online>
+        <a class="dropdown-toggle" data-toggle="dropdown">
+          <%- t('core', 'NAVBAR:REPORTS') %>
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li data-privilege="REPORTS:VIEW"><a href="#reports/current-balance"><%- t('core', 'NAVBAR:REPORTS:CURRENT_BALANCE') %></a>
+        </ul>
+      <li data-online class="dropdown">
+        <a class="dropdown-toggle" data-toggle="dropdown">
+          <%- t('core', 'NAVBAR:DICTIONARIES') %>
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li data-privilege="USERS:VIEW"><a href="#users"><%- t('core', 'NAVBAR:USERS') %></a>
+          <li data-privilege="DICTIONARIES:VIEW USERS:VIEW" class="divider">
+          <li data-privilege="DICTIONARIES:VIEW"><a href="#partners"><%- t('core', 'NAVBAR:PARTNERS') %></a>
+          <li data-privilege="DICTIONARIES:VIEW"><a href="#palletKinds"><%- t('core', 'NAVBAR:PALLET_KINDS') %></a>
+        </ul>
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+      <li class="dropdown navbar-account-dropdown">
+        <a href="#account" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="fa fa-user fa-lg navbar-account-status"></i>
+          <%- user.getLabel() %>
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li data-online><a href="#users/<%- user.data._id %>"><%- t('core', 'NAVBAR:MY_ACCOUNT') %></a>
+          <li class="divider">
+          <li class="dropdown-header"><%- t('core', 'NAVBAR:UI_LOCALE') %>
+          <li><a class="navbar-account-locale" href="#" data-locale="pl"><%- t('core', 'NAVBAR:LOCALE_PL') %></a>
+          <li><a class="navbar-account-locale" href="#" data-locale="en"><%- t('core', 'NAVBAR:LOCALE_US') %></a>
+          <li class="divider">
+          <li data-loggedin="false"><a class="navbar-account-logIn" href="#login"><%- t('core', 'NAVBAR:LOG_IN') %></a>
+          <li data-loggedin><a class="navbar-account-logOut" href="/logout"><%- t('core', 'NAVBAR:LOG_OUT') %></a>
+        </ul>
+      </li>
+    </ul>
+    <button class="btn btn-warning navbar-btn navbar-right navbar-feedback" type="button" title="<%- t('core', 'feedback:button:tooltip') %>"><i class="fa fa-bug"></i></button>
+  </div>
+</div>

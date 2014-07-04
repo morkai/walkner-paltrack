@@ -1,0 +1,8 @@
+{
+  "BREADCRUMBS:currentBalance": "Aktualny bilans",
+
+  "MSG:LOADING_FAILURE": "Nie udało się załadować danych do raportu :(",
+
+  "PROPERTY:partner": "Partner",
+  "PROPERTY:total": "Suma"
+}

@@ -1,0 +1,37 @@
+<form class="partners-form" method="post" action="<%- formAction %>">
+  <input type="hidden" name="_method" value="<%- formMethod %>">
+  <div class="panel panel-primary">
+    <div class="panel-heading"><%- panelTitleText %></div>
+    <div class="panel-body">
+      <div class="form-group">
+        <label for="<%- idPrefix %>-name" class="control-label"><%- t('partners', 'PROPERTY:name') %></label>
+        <input id="<%- idPrefix %>-name" class="form-control" type="text" name="name" autofocus required maxlength="200">
+      </div>
+      <div class="form-group">
+        <label for="<%- idPrefix %>-clientNo" class="control-label"><%- t('partners', 'PROPERTY:clientNo') %></label>
+        <input id="<%- idPrefix %>-clientNo" class="form-control" type="text" name="clientNo" maxlength="50">
+      </div>
+      <div class="form-group">
+        <label for="<%- idPrefix %>-address" class="control-label"><%- t('partners', 'PROPERTY:address') %></label>
+        <textarea id="<%- idPrefix %>-address" class="form-control" name="address" rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label for="<%- idPrefix %>-supplierColor" class="control-label"><%- t('partners', 'PROPERTY:supplierColor') %></label>
+        <div id="<%- idPrefix %>-supplierColorPicker" class="input-group colorpicker-component" data-color="<%- model.supplierColor %>" data-color-format="hex">
+          <input id="<%- idPrefix %>-supplierColor" class="form-control" name="supplierColor" type="text" value="<%- model.supplierColor %>">
+          <span class="input-group-addon"><i style="background-color: <%- model.supplierColor %>"></i></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="<%- idPrefix %>-receiverColor" class="control-label"><%- t('partners', 'PROPERTY:receiverColor') %></label>
+        <div id="<%- idPrefix %>-receiverColorPicker" class="input-group colorpicker-component" data-color="<%- model.receiverColor %>" data-color-format="hex">
+          <input id="<%- idPrefix %>-receiverColor" class="form-control" name="receiverColor" type="text" value="<%- model.receiverColor %>">
+          <span class="input-group-addon"><i style="background-color: <%- model.receiverColor %>"></i></span>
+        </div>
+      </div>
+    </div>
+    <div class="panel-footer">
+      <button type="submit" class="btn btn-primary"><%- formActionText %></button>
+    </div>
+  </div>
+</form>

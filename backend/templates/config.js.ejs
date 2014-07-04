@@ -1,0 +1,10 @@
+require = {
+  baseUrl: '/',
+  paths: <%- paths %>,
+  shim: <%- shim %>,
+  config: {
+    i18n: {
+      locale: localStorage.getItem('LOCALE') || navigator.language || 'pl'
+    }
+  }
+};

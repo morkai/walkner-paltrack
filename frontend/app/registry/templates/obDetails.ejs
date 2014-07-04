@@ -1,0 +1,36 @@
+<div class="panel panel-primary registryPanel ob">
+  <div class="panel-details row">
+    <div class="col-md-6">
+      <div class="props first">
+        <div class="prop">
+          <div class="prop-name"><%- t('registry', 'PROPERTY:partner') %></div>
+          <div class="prop-value"><%= model.partner %></div>
+        </div>
+        <div class="prop partners-address">
+          <div class="prop-name"><%- t('registry', 'PROPERTY:date') %></div>
+          <div class="prop-value"><%- model.date || '-' %></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="props">
+        <div class="prop">
+          <div class="prop-name"><%- t('registry', 'PROPERTY:createdAt') %></div>
+          <div class="prop-value"><%- model.createdAt || '?' %></div>
+        </div>
+        <div class="prop">
+          <div class="prop-name"><%- t('registry', 'PROPERTY:creator') %></div>
+          <div class="prop-value"><%- model.creator || '?' %></div>
+        </div>
+        <div class="prop partners-address">
+          <div class="prop-name"><%- t('registry', 'PROPERTY:updatedAt') %></div>
+          <div class="prop-value"><%- model.updatedAt || '-' %></div>
+        </div>
+        <div class="prop">
+          <div class="prop-name"><%- t('registry', 'PROPERTY:updater') %></div>
+          <div class="prop-value"><%- model.updater || '-' %></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

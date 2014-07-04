@@ -1,0 +1,94 @@
+{
+  "TITLE": "Walkner PalTrack",
+
+  "MSG:LOADING": "Ładowanie...",
+  "MSG:LOADING_FAILURE": "Ładowanie nie powiodło się :(",
+  "MSG:LOG_OUT:FAILURE": "Wylogowanie nie powiodło się :(",
+  "MSG:LOG_OUT:SUCCESS": "Zostałeś wylogowany!",
+
+  "PAGE_ACTION:filter": "Filtruj",
+
+  "LIST:COLUMN:actions": "Akcje",
+  "LIST:NO_DATA": "Brak danych.",
+  "LIST:NO_DATA:cell": "brak danych",
+  "LIST:ACTION:viewDetails": "Pokaż szczegóły",
+  "LIST:ACTION:edit": "Edytuj",
+  "LIST:ACTION:delete": "Usuń",
+  "LIST:ACTION:print": "Drukuj",
+
+  "BREADCRUMBS:edit": "Edycja",
+  "BREADCRUMBS:delete": "Usuwanie",
+  "BREADCRUMBS:error": "Błąd {code}: {codeStr, select, e401{nieautoryzowany dostęp} e404{nie znaleziono} other{nieprawidłowe zapytanie}}",
+
+  "ERROR:400": "Żądanie nie może być obsłużone z powodu błędnej składni zapytania :(",
+  "ERROR:401": "Niestety, ale nie masz wystarczających uprawnień do wykonania żądanej akcji :(",
+  "ERROR:404": "Wybrana strona nie istnieje :(",
+
+  "PAGINATION:FIRST_PAGE": "Pierwsza strona",
+  "PAGINATION:PREV_PAGE": "Poprzednia strona",
+  "PAGINATION:NEXT_PAGE": "Następna strona",
+  "PAGINATION:LAST_PAGE": "Ostatnia strona",
+
+  "LOG_IN_FORM:DIALOG_TITLE": "Logowanie do systemu",
+  "LOG_IN_FORM:LABEL:LOGIN": "Login",
+  "LOG_IN_FORM:LABEL:PASSWORD": "Hasło",
+  "LOG_IN_FORM:LABEL:SUBMIT": "Zaloguj się",
+  "LOG_IN_FORM:PROXY_MESSAGE": "Kolor przycisku <em>Zaloguj się</em> zmienia się na zielony, a ikonka <i class='fa fa-user navbar-status-offline'></i> w prawym górnym rogu ma kolor czerwony? <a href='http://walkner.pl/projects/'>Spróbuj wejść tutaj</a>, aby wymusić autoryzację proxy, a następnie wrócić do aplikacji Walkner PalTrack!",
+
+  "BOOL:true": "Tak",
+  "BOOL:false": "Nie",
+  "BOOL:null": "Nie dotyczy",
+
+  "#": "Lp.",
+
+  "GUEST_USER_NAME": "Gość",
+
+  "NAVBAR:TOGGLE": "Pokaż menu",
+  "NAVBAR:DASHBOARD": "Pulpit",
+  "NAVBAR:EVENTS": "Zdarzenia",
+  "NAVBAR:USERS": "Użytkownicy",
+  "NAVBAR:MY_ACCOUNT": "Moje konto",
+  "NAVBAR:UI_LOCALE": "Lokalizacja UI",
+  "NAVBAR:LOCALE_PL": "Po polsku",
+  "NAVBAR:LOCALE_US": "Po angielsku",
+  "NAVBAR:LOG_IN": "Zaloguj się",
+  "NAVBAR:LOG_OUT": "Wyloguj się",
+  "NAVBAR:DICTIONARIES": "Słowniki",
+  "NAVBAR:PALLET_KINDS": "Rodzaje palet",
+  "NAVBAR:PARTNERS": "Partnerzy",
+  "NAVBAR:REPORTS": "Raporty",
+  "NAVBAR:REPORTS:CURRENT_BALANCE": "Aktualny bilans",
+  "NAVBAR:REGISTRY": "Rejestr",
+  "NAVBAR:REGISTRY:GRN": "<code>PZ</code> Przyjęcia zewnętrzne",
+  "NAVBAR:REGISTRY:GDN": "<code>WZ</code> Wydania zewnętrzne",
+  "NAVBAR:REGISTRY:OB": "<code>BO</code> Bilanse otwarcia",
+
+  "ACTION_FORM:BUTTON": "Wykonaj akcję",
+  "ACTION_FORM:BUTTON:delete": "Usuń",
+  "ACTION_FORM:BUTTON:cancel": "Anuluj",
+  "ACTION_FORM:MESSAGE": "Czy na pewno chcesz wykonać żądaną akcję?",
+  "ACTION_FORM:MESSAGE:failure": "Wykonywanie akcji nie powiodło się :(",
+
+  "highcharts:contextButtonTitle": "Menu kontekstowe wykresu",
+  "highcharts:downloadJPEG": "Zapisz jako JPEG",
+  "highcharts:downloadPDF": "Zapisz jako PDF",
+  "highcharts:downloadPNG": "Zapisz jako PNG",
+  "highcharts:downloadSVG": "Zapisz jako SVG",
+  "highcharts:printChart": "Drukuj wykres",
+  "highcharts:decimalPoint": ",",
+  "highcharts:thousandsSep": ".",
+  "highcharts:noData": "Brak danych :(",
+  "highcharts:resetZoom": "1:1",
+  "highcharts:resetZoomTitle": "Zresetuj przybliżenie",
+  "highcharts:loading": "Ładowanie...",
+  "highcharts:months": "Styczeń_Luty_Marzec_Kwiecień_Maj_Czerwiec_Lipiec_Sierpień_Wrzesień_Październik_Listopad_Grudzień",
+  "highcharts:shortMonths": "Sty_Lut_Mar_Kwi_Maj_Cze_Lip_Sie_Wrz_Paź_Lis_Gru",
+  "highcharts:weekdays": "Niedziela_Poniedziałek_Wtorek_Środa_Czwartek_Piątek_Sobota",
+
+  "dataTables:emptyTable": "Brak danych.",
+  "dataTables:loadingRecords": "Ładowanie danych...",
+  "dataTables:loadingFailed": "Ładowanie danych nie powiodło się :(",
+
+  "feedback:button:text": "Feedback",
+  "feedback:button:tooltip": "Zgłoś błędy, uwagi, opinie lub pomysły!"
+}
