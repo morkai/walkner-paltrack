@@ -17,11 +17,25 @@ define([
 
     template: grnDetailsTemplate,
 
+    remoteTopics: function()
+    {
+      var topics = DetailsView.prototype.remoteTopics.call(this);
+
+      topics[this.model.getTopicPrefix() + '.checked.' + this.model.id] = 'onGrnChecked';
+
+      return topics;
+    },
+
     initialize: function()
     {
       DetailsView.prototype.initialize.call(this);
 
       this.insertView('.panel', new GoodsTableView({model: this.model}));
+    },
+
+    onGrnChecked: function()
+    {
+      this.promised(this.model.fetch());
     }
 
   });

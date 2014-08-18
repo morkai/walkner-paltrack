@@ -76,12 +76,14 @@ module.exports = function setUpGdnRoutes(app, registryModule)
       date: body.date + ' 00:00:00',
       docNo: body.docNo,
       goods: body.goods,
-      printed: false,
       createdAt: new Date(),
       creator: userModule.createUserInfo(req.session.user, req),
       updatedAt: null,
       updater: null,
-      changes: []
+      changes: [],
+      checked: false,
+      checkedAt: null,
+      checker: null
     });
 
     next();

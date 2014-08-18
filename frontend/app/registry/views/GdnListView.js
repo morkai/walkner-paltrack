@@ -33,16 +33,6 @@ define([
       }
     }),
 
-    initialize: function()
-    {
-      GrnListView.prototype.initialize.call(this);
-
-      var printedTopic = 'registry.gdn.printed.'
-        + user.data.partner ? (user.data.partner + '.*') : '**';
-
-      this.pubsub.subscribe(printedTopic, this.onGdnPrinted.bind(this));
-    },
-
     serializeActions: function()
     {
       var collection = this.collection;
@@ -61,7 +51,7 @@ define([
           ListView.actions.viewDetails(model)
         ];
 
-        if (canManage && !model.get('printedAt'))
+        if (canManage)
         {
           actions.push(
             ListView.actions.edit(model),
@@ -71,20 +61,6 @@ define([
 
         return actions;
       };
-    },
-
-    onGdnPrinted: function(message)
-    {
-      var gdn = this.collection.get(message._id);
-
-      if (gdn)
-      {
-        gdn.set('printedAt', message.printedAt);
-
-        this.$('.list-item[data-id="' + gdn.id + '"]')
-          .find('.action-edit, .action-delete')
-          .remove();
-      }
     }
 
   });

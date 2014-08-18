@@ -14,6 +14,10 @@
   font-family: Consolas, Menlo, Monaco, monospace;
   font-size: 1.4em;
 }
+.registryList .is-checked > .actions > .action-edit,
+.registryList .is-checked > .actions > .action-delete {
+  display: none;
+}
 .gn-checked {
   padding: 0 5px!important;
   font-size: 2.2em;

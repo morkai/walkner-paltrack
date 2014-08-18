@@ -37,7 +37,7 @@ define([
     {
       var remoteTopics = ListView.prototype.remoteTopics.call(this);
 
-      remoteTopics[this.collection.getTopicPrefix() + '.checked'] = 'onGnChecked';
+      remoteTopics[this.collection.getTopicPrefix() + '.checked.**'] = 'onGnChecked';
 
       return remoteTopics;
     },
@@ -122,6 +122,7 @@ define([
       if (model)
       {
         model.set({checked: message.checked}, {silent: true});
+
         this.renderCheckedIndicator(model);
       }
     },
@@ -175,6 +176,7 @@ define([
       }
 
       $td.removeClass('is-loading');
+      $td.parent().toggleClass('is-checked', model.get('checked'));
     }
 
   });

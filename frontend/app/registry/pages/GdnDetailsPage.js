@@ -46,7 +46,7 @@ define([
         }
       }];
 
-      if (!this.model.get('printedAt'))
+      if (!this.model.get('checked'))
       {
         actions.push(
           pageActions.edit(this.model, 'REGISTRY:MANAGE'),
@@ -63,7 +63,7 @@ define([
 
       this.view = new GdnDetailsView({model: this.model});
 
-      this.listenToOnce(this.model, 'sync', this.onModelSync);
+      this.listenTo(this.model, 'change:checked', this.onGdnChecked);
     },
 
     setUpLayout: function(layout)
@@ -76,22 +76,8 @@ define([
       return when(this.model.fetch());
     },
 
-    onModelSync: function()
+    onGdnChecked: function()
     {
-      if (this.model.get('printedAt'))
-      {
-        return;
-      }
-
-      var printedTopic = 'registry.gdn.printed.' + this.model.get('supplier') + '.' + this.model.id;
-
-      this.pubsub.subscribe(printedTopic, this.onGdnPrinted.bind(this));
-    },
-
-    onGdnPrinted: function(message)
-    {
-      this.model.set('printedAt', message.printedAt);
-
       if (this.layout)
       {
         this.layout.setActions(this.actions, this);

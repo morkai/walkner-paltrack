@@ -41,10 +41,6 @@ module.exports = function setupGdnModel(app, mongoose)
       default: null
     },
     checker: {},
-    printedAt: {
-      type: Date,
-      default: null
-    },
     createdAt: Date,
     creator: {},
     updatedAt: Date,

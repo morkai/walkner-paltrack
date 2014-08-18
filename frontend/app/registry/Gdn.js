@@ -57,6 +57,7 @@ define([
       var receiver = partners.get(this.get('receiver'));
 
       var obj = {
+        className: this.get('checked') ? 'is-checked' : '',
         _id: this.id,
         supplier: supplier ? supplier.getLabel() : this.get('supplier'),
         supplierColor: supplier ? supplier.get('supplierColor') : '',

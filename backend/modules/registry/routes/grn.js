@@ -56,7 +56,9 @@ module.exports = function setUpGrnRoutes(app, registryModule)
 
   function prepareNewGrnModel(req, res, next)
   {
-    if (req.session.user.partner && req.body.receiver !== req.session.user.partner)
+    var body = req.body;
+
+    if (req.session.user.partner && body.receiver !== req.session.user.partner)
     {
       res.statusCode = 400;
 
@@ -64,16 +66,19 @@ module.exports = function setUpGrnRoutes(app, registryModule)
     }
 
     req.model = new Grn({
-      receiver: req.body.receiver,
-      supplier: req.body.supplier,
-      date: req.body.date + ' 00:00:00',
-      docNo: req.body.docNo,
-      goods: req.body.goods,
+      receiver: body.receiver,
+      supplier: body.supplier,
+      date: body.date + ' 00:00:00',
+      docNo: body.docNo,
+      goods: body.goods,
       createdAt: new Date(),
       creator: userModule.createUserInfo(req.session.user, req),
       updatedAt: null,
       updater: null,
-      changes: []
+      changes: [],
+      checked: false,
+      checkedAt: null,
+      checker: null
     });
 
     next();
