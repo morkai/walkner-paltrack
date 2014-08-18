@@ -80,7 +80,6 @@ define([
       {
         this.$id('supplier').select2('disable', true);
         this.$id('receiver').select2('disable', true);
-        this.$id('date').prop('disabled', true);
         this.$('.addPartner').remove();
       }
     },

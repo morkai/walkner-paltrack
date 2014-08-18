@@ -122,7 +122,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
 
       var changeCount = recordChanges(
         gdn,
-        lodash.pick(req.body, ['goods']),
+        lodash.pick(req.body, ['date', 'goods']),
         userModule.createUserInfo(req.session.user, req)
       );
 

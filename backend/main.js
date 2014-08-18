@@ -4,6 +4,23 @@
 
 'use strict';
 
+var originalSetTimeout = setTimeout;
+var originalSetInterval = setInterval;
+
+setTimeout = function()
+{
+  arguments[1] = Math.ceil(arguments[1]);
+
+  return originalSetTimeout.apply(this, arguments);
+};
+
+setInterval = function()
+{
+  arguments[1] = Math.ceil(arguments[1]);
+
+  return originalSetInterval.apply(this, arguments);
+};
+
 var startTime = Date.now();
 
 require('./extensions');

@@ -104,7 +104,7 @@ module.exports = function setUpGrnRoutes(app, registryModule)
 
       var changeCount = recordChanges(
         grn,
-        lodash.pick(req.body, ['docNo', 'goods']),
+        lodash.pick(req.body, ['date', 'docNo', 'goods']),
         userModule.createUserInfo(req.session.user, req)
       );
 

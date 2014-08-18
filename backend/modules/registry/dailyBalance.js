@@ -428,6 +428,19 @@ module.exports = function setUpDailyBalance(app, registryModule)
     );
   }
 
+  function getOldestDateFromChanges(model)
+  {
+    var changes = model.changes;
+    var latestChange = changes[changes.length - 1];
+
+    if (latestChange.oldValues.date === undefined)
+    {
+      return model.date;
+    }
+
+    return new Date(Math.min(latestChange.oldValues.date, latestChange.newValues.date));
+  }
+
   function onGrnAdded(message)
   {
     var grn = message.model;
@@ -452,7 +465,7 @@ module.exports = function setUpDailyBalance(app, registryModule)
   {
     var grn = message.model;
 
-    recountDailyBalanceFromDate(grn.receiver, grn.date, function(err)
+    recountDailyBalanceFromDate(grn.receiver, getOldestDateFromChanges(grn), function(err)
     {
       if (err)
       {
@@ -512,7 +525,7 @@ module.exports = function setUpDailyBalance(app, registryModule)
   {
     var gdn = message.model;
 
-    recountDailyBalanceFromDate(gdn.supplier, gdn.date, function(err)
+    recountDailyBalanceFromDate(gdn.supplier, getOldestDateFromChanges(gdn), function(err)
     {
       if (err)
       {
