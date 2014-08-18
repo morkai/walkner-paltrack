@@ -4,6 +4,7 @@
 
 'use strict';
 
+var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 var exec = require('child_process').exec;
@@ -146,7 +147,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
 
   function printRoute(req, res, next)
   {
-    Gdn.findById(req.params.id).exec(function(err, gdn)
+    Gdn.findById(req.params.id, {changes: 0}).lean().exec(function(err, gdn)
     {
       if (err)
       {
@@ -160,20 +161,18 @@ module.exports = function setUpGdnRoutes(app, registryModule)
 
       if (req.wkhtmltopdf)
       {
-        return renderPrintableGdn(gdn, res, next);
+        return renderPrintableGdn(gdn, res);
       }
 
-      var pdfFile = path.join(registryModule.config.gdnStoragePath, gdn._id.toString() + '.pdf');
+      var fileNameHash = crypto.createHash('md5')
+        .update(gdn._id.toString())
+        .update(Date.now().toString())
+        .update(Math.random().toString())
+        .digest('hex');
 
-      fs.exists(pdfFile, function(exists)
-      {
-        if (!exists)
-        {
-          return generatePdf(pdfFile, gdn, res, next);
-        }
+      var pdfFile = path.join(registryModule.config.gdnStoragePath, fileNameHash + '.pdf');
 
-        res.sendfile(pdfFile);
-      });
+      return generatePdf(pdfFile, gdn, res, next);
     });
   }
 
@@ -252,23 +251,14 @@ module.exports = function setUpGdnRoutes(app, registryModule)
         ));
       }
 
-      res.sendfile(outputFile);
-
-      gdn.printedAt = new Date();
-      gdn.save(function(err)
+      res.sendfile(outputFile, function(err)
       {
-        if (err)
+        if (!res.headersSent)
         {
-          registryModule.error("Failed to save GDN after printing: %s", err.message);
+          next(err);
         }
-        else
-        {
-          app.broker.publish('registry.gdn.printed.' + gdn.supplier + '.' + gdn._id, {
-            _id: gdn._id,
-            supplier: gdn.supplier,
-            printedAt: gdn.printedAt
-          });
-        }
+
+        fs.unlink(outputFile);
       });
     });
   }
