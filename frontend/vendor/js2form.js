@@ -222,7 +222,6 @@
       i;
 
     name = name.replace(_arrayOfArraysRegexp, '[$1].[$2]');
-
     for (i = 0; i < nameChunks.length; i++)
     {
       currChunk = nameChunks[i];
@@ -255,7 +254,6 @@
 
     nameNormalized = nameChunksNormalized.join(delimiter);
     nameNormalized = nameNormalized.replace('].[', '][');
-
     return nameNormalized;
   }
 

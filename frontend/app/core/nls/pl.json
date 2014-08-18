@@ -90,5 +90,14 @@
   "dataTables:loadingFailed": "Ładowanie danych nie powiodło się :(",
 
   "feedback:button:text": "Feedback",
-  "feedback:button:tooltip": "Zgłoś błędy, uwagi, opinie lub pomysły!"
+  "feedback:button:tooltip": "Zgłoś błędy, uwagi, opinie lub pomysły!",
+
+  "colorPicker:label": "Kolor",
+
+  "filter:date:from": "Od",
+  "filter:date:from:info": "Dane od godziny 06:00 wybranego dnia",
+  "filter:date:to": "Do",
+  "filter:date:to:info": "Dane do godziny 06:00 wybranego dnia",
+  "filter:submit": "Filtruj",
+  "filter:limit": "Limit"
 }

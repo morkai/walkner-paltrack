@@ -6,7 +6,6 @@
 
 var lodash = require('lodash');
 var bcrypt = require('bcrypt');
-var crud = require('../express/crud');
 
 module.exports = function setUpUsersRoutes(app, usersModule)
 {
@@ -17,21 +16,15 @@ module.exports = function setUpUsersRoutes(app, usersModule)
   var canView = userModule.auth('USERS:VIEW');
   var canManage = userModule.auth('USERS:MANAGE');
 
-  express.get('/users', crud.browseRoute.bind(null, app, User));
+  express.get('/users', express.crud.browseRoute.bind(null, app, User));
 
-  express.post(
-    '/users', canManage, hashPassword, crud.addRoute.bind(null, app, User)
-  );
+  express.post('/users', canManage, hashPassword, express.crud.addRoute.bind(null, app, User));
 
-  express.get(
-    '/users/:id', canViewDetails, crud.readRoute.bind(null, app, User)
-  );
+  express.get('/users/:id', canViewDetails, express.crud.readRoute.bind(null, app, User));
 
-  express.put(
-    '/users/:id', canManage, hashPassword, crud.editRoute.bind(null, app, User)
-  );
+  express.put('/users/:id', canManage, hashPassword, express.crud.editRoute.bind(null, app, User));
 
-  express.del('/users/:id', canManage, crud.deleteRoute.bind(null, app, User));
+  express.delete('/users/:id', canManage, express.crud.deleteRoute.bind(null, app, User));
 
   express.post('/login', loginRoute);
 
@@ -115,7 +108,7 @@ module.exports = function setUpUsersRoutes(app, usersModule)
         delete user.password;
 
         user.loggedIn = true;
-        user.ipAddress = userModule.createUserInfo({}, req).ip;
+        user.ipAddress = userModule.getRealIp({}, req);
         user.local = userModule.isLocalIpAddress(user.ipAddress);
 
         req.session.user = user;
@@ -158,7 +151,7 @@ module.exports = function setUpUsersRoutes(app, usersModule)
 
       var guestUser = lodash.merge({}, userModule.guest);
       guestUser.loggedIn = false;
-      guestUser.ipAddress = req.socket.remoteAddress;
+      guestUser.ipAddress = userModule.getRealIp({}, req);
       guestUser.local = userModule.isLocalIpAddress(guestUser.ipAddress);
 
       req.session.user = guestUser;
@@ -176,7 +169,7 @@ module.exports = function setUpUsersRoutes(app, usersModule)
 
       if (user !== null)
       {
-        user.ipAddress = userModule.createUserInfo({}, req).ip;
+        user.ipAddress = req.socket.remoteAddress;
 
         app.broker.publish('users.logout', {
           user: user,

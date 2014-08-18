@@ -3,7 +3,6 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
-  'jquery',
   'app/viewport',
   'app/i18n',
   'app/core/util/bindLoadingMessage',
@@ -12,9 +11,8 @@ define([
   '../EventTypeCollection',
   '../views/EventListView',
   '../views/EventFilterView',
-  'app/events/templates/listPage'
+  'app/core/templates/listPage'
 ], function(
-  $,
   viewport,
   t,
   bindLoadingMessage,
@@ -45,7 +43,7 @@ define([
       this.defineViews();
 
       this.setView('.filter-container', this.filterView);
-      this.setView('.events-list-container', this.listView);
+      this.setView('.list-container', this.listView);
     },
 
     defineModels: function()

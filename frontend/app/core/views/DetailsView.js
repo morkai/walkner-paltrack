@@ -3,13 +3,9 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
-  'app/viewport',
-  'app/i18n',
   '../View',
   '../util/onModelDeleted'
 ], function(
-  viewport,
-  t,
   View,
   onModelDeleted
 ) {
@@ -31,18 +27,29 @@ define([
     serialize: function()
     {
       return {
+        idPrefix: this.idPrefix,
         model: this.serializeDetails(this.model)
       };
     },
 
     serializeDetails: function(model)
     {
-      return typeof model.serialize === 'function' ? model.serialize() : model.toJSON();
+      if (typeof model.serializeDetails === 'function')
+      {
+        return model.serializeDetails();
+      }
+
+      if (typeof model.serialize === 'function')
+      {
+        return model.serialize();
+      }
+
+      return model.toJSON();
     },
 
     beforeRender: function()
     {
-      this.stopListening(this.model, 'change', this.render);
+      this.stopListening(this.collection, 'change', this.render);
     },
 
     afterRender: function()

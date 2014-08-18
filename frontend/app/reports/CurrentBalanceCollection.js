@@ -31,22 +31,6 @@ define([
         });
       });
 
-      /*
-      if (!user.data.partner)
-      {
-        partners.forEach(function(partner)
-        {
-          if (!res[partner.id])
-          {
-            result.push({
-              _id: partner.id,
-              goods: {}
-            });
-          }
-        });
-      }
-      */
-
       return result;
     }
 

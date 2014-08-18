@@ -3,22 +3,19 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
-  'underscore',
   'app/viewport'
 ], function(
-  _,
   viewport
 ) {
   'use strict';
 
-  return function(optionsOrModel, req, referer)
+  return function(Model, req, referer)
   {
-    var options = typeof optionsOrModel === 'function' ? {Model: optionsOrModel} : optionsOrModel;
-    var model = new options.Model({_id: req.params.id});
+    var model = new Model({_id: req.params.id});
 
     viewport.loadPage('app/core/pages/ActionFormPage', function(ActionFormPage)
     {
-      return new ActionFormPage(_.extend({
+      return new ActionFormPage({
         model: model,
         actionKey: 'delete',
         successUrl: model.genClientUrl('base'),
@@ -26,7 +23,7 @@ define([
         formMethod: 'DELETE',
         formAction: model.url(),
         formActionSeverity: 'danger'
-      }, options));
+      });
     });
   };
 });

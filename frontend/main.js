@@ -94,6 +94,7 @@
     router,
     viewport,
     user,
+    updater,
     partners,
     PageLayout,
     PrintLayout,
@@ -131,7 +132,8 @@
         views: {
           '.navbar': createNavbarView(),
           '.currentBalanceBarContainer': new CurrentBalanceBarView()
-        }
+        },
+        version: updater.getCurrentVersionString()
       });
     });
 
@@ -305,6 +307,7 @@
       'app/router',
       'app/viewport',
       'app/user',
+      'app/updater/index',
       'app/data/partners',
       'app/core/layouts/PageLayout',
       'app/core/layouts/PrintLayout',
@@ -314,8 +317,6 @@
       'app/reports/views/CurrentBalanceBarView',
       'app/time',
       'app/routes',
-      'app/visibility',
-      'app/updater/index',
       'bootstrap',
       'moment-lang/pl',
       'select2-lang/' + locale,
@@ -396,7 +397,7 @@
       return $modalDialog.length === 0 ? $body : $modalDialog;
     };
 
-    $body.on('focusin', 'input.select2-offscreen[tabindex="-1"]', function()
+    $body.on('focusin', '.select2-offscreen[tabindex="-1"]', function()
     {
       $(this).select2('focus');
     });

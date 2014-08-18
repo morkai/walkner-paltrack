@@ -87,17 +87,22 @@ define([
 
     serializeColumns: function()
     {
+      var columns;
+
       if (Array.isArray(this.options.columns))
       {
-        return this.options.columns;
+        columns = this.options.columns;
       }
-
-      if (Array.isArray(this.columns))
+      else if (Array.isArray(this.columns))
       {
-        return this.columns;
+        columns = this.columns;
+      }
+      else
+      {
+        columns = [];
       }
 
-      return [];
+      return columns;
     },
 
     decorateColumns: function(columns)
@@ -132,6 +137,16 @@ define([
 
     serializeRow: function(model)
     {
+      if (typeof model.serializeRow === 'function')
+      {
+        return model.serializeRow();
+      }
+
+      if (typeof model.serialize === 'function')
+      {
+        return model.serialize();
+      }
+
       return model.toJSON();
     },
 

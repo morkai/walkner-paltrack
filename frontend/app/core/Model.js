@@ -3,10 +3,8 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
-  'underscore',
   'backbone'
 ], function(
-  _,
   Backbone
 ) {
   'use strict';

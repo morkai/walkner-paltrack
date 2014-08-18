@@ -66,17 +66,17 @@ exports.start = function startExpressModule(app, module, done)
   module.use(express.session({
     store: module.sessionStore,
     key: module.config.sessionCookieKey,
-    cookie: module.config.sessionCookie
+    cookie: module.config.sessionCookie,
+    secret: module.config.cookieSecret
   }));
   module.use(express.json());
   module.use(express.urlencoded());
-  module.use(express.methodOverride());
   module.use(rqlMiddleware());
   module.use(module.router);
   module.use(express.static(staticPath));
 
   var errorHandlerOptions = {
-    title: 'PalTrack',
+    title: 'WMES',
     basePath: path.resolve(__dirname, '../../../')
   };
 

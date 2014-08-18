@@ -25,10 +25,7 @@ define([
     {
       return [
         {
-          label: t.bound(
-            this.model.getNlsDomain(),
-            this.options.breadcrumbsBrowseKey || 'BREADCRUMBS:browse'
-          ),
+          label: t.bound(this.model.getNlsDomain(), 'BREADCRUMBS:browse'),
           href: this.model.genClientUrl('base')
         },
         {

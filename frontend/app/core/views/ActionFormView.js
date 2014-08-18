@@ -4,7 +4,6 @@
 
 define([
   'underscore',
-  'jquery',
   'app/i18n',
   'app/viewport',
   'app/router',
@@ -12,7 +11,6 @@ define([
   'app/core/templates/actionForm'
 ], function(
   _,
-  $,
   t,
   viewport,
   router,
@@ -103,11 +101,6 @@ define([
       }
     },
 
-    onDialogShown: function()
-    {
-      this.$('.form-actions').find('.btn').first().focus();
-    },
-
     submitForm: function()
     {
       this.hideErrorMessage();
@@ -130,7 +123,7 @@ define([
         data = JSON.stringify(data);
       }
 
-      var req = $.ajax({
+      var req = this.ajax({
         type: options.formMethod,
         url: options.formAction,
         data: data

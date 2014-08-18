@@ -3,11 +3,9 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
-  'jquery',
   'visibly',
   'app/broker'
 ], function(
-  $,
   visibly,
   broker
 ) {

@@ -3,7 +3,6 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
-  'jquery',
   'app/i18n',
   'app/user',
   '../View',
@@ -11,7 +10,6 @@ define([
   './PaginationView',
   'app/core/templates/printableList'
 ], function(
-  $,
   t,
   user,
   View,
@@ -74,10 +72,11 @@ define([
       var theadHeight = $tableTpl.find('thead').outerHeight();
       var pages = [[]];
       var currentPageHeight = theadHeight;
+      var view = this;
 
       this.$('tbody > tr').each(function()
       {
-        var $tr = $(this);
+        var $tr = view.$(this);
         var trHeight = $tr.height();
 
         if (currentPageHeight + trHeight > maxPageHeight)

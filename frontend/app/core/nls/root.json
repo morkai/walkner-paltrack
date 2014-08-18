@@ -87,7 +87,16 @@
     "dataTables:loadingFailed": "Loading failed :(",
 
     "feedback:button:text": "Feedback",
-    "feedback:button:tooltip": "Report bugs, notes, opinions or ideas!"
+    "feedback:button:tooltip": "Report bugs, notes, opinions or ideas!",
+
+    "colorPicker:label": "Color",
+
+    "filter:date:from": "From",
+    "filter:date:from:info": "Data from 06:00 of the selected day",
+    "filter:date:to": "To",
+    "filter:date:to:info": "Data to 06:00 of the selected day",
+    "filter:submit": "Filter",
+    "filter:limit": "Limit"
   },
   "pl": true
 }

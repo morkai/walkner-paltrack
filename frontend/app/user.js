@@ -3,7 +3,6 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
-  'jquery',
   'underscore',
   'app/i18n',
   'app/broker',
@@ -12,7 +11,6 @@ define([
   'app/core/pages/ErrorPage'
 ],
 function(
-  $,
   _,
   t,
   broker,
@@ -168,15 +166,6 @@ function(
     }
 
     return matches === privileges.length;
-  };
-
-  user.hasAccessToAor = function(aorId)
-  {
-    return !aorId
-      || user.data.super
-      || !user.data.aors
-      || !user.data.aors.length
-      || user.data.aors.indexOf(aorId) !== -1;
   };
 
   /**

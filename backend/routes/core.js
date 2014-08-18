@@ -56,6 +56,7 @@ module.exports = function startCoreRoutes(app, express)
       appCache: appCache,
       appData: {
         VERSIONS: JSON.stringify({
+          package: app.updater.package.version,
           backend: app.updater.package.backendVersion,
           frontend: app.updater.package.frontendVersion
         }),

@@ -22,21 +22,7 @@ exports.paths = {
   'reltime': 'vendor/reltime',
   'select2': 'vendor/select2/select2',
   'select2-lang': 'vendor/select2-lang',
-  'd3': 'vendor/d3/d3.v3',
-  'd3.timeline': 'vendor/d3/d3.timeline',
-  'visibly': 'vendor/visibly',
-  'highcharts': 'vendor/highcharts/js/highcharts.src',
-  'highcharts-noData': 'vendor/highcharts/js/modules/no-data-to-display.src',
-  'highcharts-exporting': 'vendor/highcharts/js/modules/exporting.src',
-  'zeroclipboard': 'vendor/zeroclipboard/ZeroClipboard',
-  'screenfull': 'vendor/screenfull',
-  'datatables': 'vendor/datatables/media/js/jquery.dataTables',
-  'datatables-fixedcolumns': 'vendor/datatables/extensions/FixedColumns/js/dataTables.fixedColumns',
-  'datatables-fixedheader': 'vendor/datatables/extensions/FixedHeader/js/dataTables.fixedHeader',
-  'datatables-scroller': 'vendor/datatables/extensions/Scroller/js/dataTables.scroller',
-  'datatables-tabletools': 'vendor/datatables/extensions/TableTools/js/dataTables.tableTools',
-  'jquery.stickytableheaders': 'vendor/jquery.stickytableheaders',
-  'highlight': 'vendor/highlight/highlight.pack'
+  'zeroclipboard': 'vendor/zeroclipboard/ZeroClipboard'
 };
 
 exports.shim = {
@@ -55,26 +41,6 @@ exports.shim = {
   'select2': {
     deps: ['jquery'],
     exports: 'Select2'
-  },
-  'visibly': {
-    exports: 'visibly'
-  },
-  'highcharts': {
-    deps: ['jquery'],
-    exports: 'Highcharts'
-  },
-  'highcharts-noData': {
-    deps: ['highcharts']
-  },
-  'highcharts-exporting': {
-    deps: ['highcharts']
-  },
-  'screenfull': {
-    exports: 'screenfull'
-  },
-  'jquery.stickytableheaders': ['jquery'],
-  'highlight': {
-    exports: 'hljs'
   }
 };
 

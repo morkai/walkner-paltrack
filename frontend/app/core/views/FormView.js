@@ -3,14 +3,12 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
-  'jquery',
   'underscore',
   'form2js',
   'js2form',
   'app/viewport',
   '../View'
 ], function(
-  $,
   _,
   form2js,
   js2form,
@@ -25,13 +23,10 @@ define([
       'submit': 'submitForm'
     },
 
-    idPrefix: 'formView',
-
     $errorMessage: null,
 
     initialize: function()
     {
-      this.idPrefix = _.uniqueId(this.idPrefix);
       this.$errorMessage = null;
 
       this.listenTo(this.model, 'change', function()
@@ -98,7 +93,22 @@ define([
         wait: true
       }));
 
-      req.done(this.handleSuccess.bind(this));
+      var view = this;
+
+      req.done(function()
+      {
+        if (typeof view.options.done === 'function')
+        {
+          view.options.done(true);
+        }
+        else
+        {
+          view.broker.publish('router.navigate', {
+            url: view.model.genClientUrl(),
+            trigger: true
+          });
+        }
+      });
 
       req.fail(this.handleFailure.bind(this));
 
@@ -108,17 +118,6 @@ define([
       });
 
       return false;
-    },
-
-    showErrorMessage: function(text)
-    {
-      this.hideErrorMessage();
-
-      this.$errorMessage = viewport.msg.show({
-        type: 'error',
-        time: 5000,
-        text: text
-      });
     },
 
     hideErrorMessage: function()
@@ -136,24 +135,12 @@ define([
       return !!formData;
     },
 
-    handleSuccess: function()
-    {
-      if (typeof this.options.done === 'function')
-      {
-        this.options.done(true);
-      }
-      else
-      {
-        this.broker.publish('router.navigate', {
-          url: this.model.genClientUrl(),
-          trigger: true
-        });
-      }
-    },
-
     handleFailure: function()
     {
-      this.showErrorMessage(this.options.failureText);
+      this.$errorMessage = viewport.msg.show({
+        type: 'error',
+        text: this.options.failureText
+      });
     }
 
   });

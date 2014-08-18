@@ -4,15 +4,15 @@
 
 define([
   'underscore',
-  'app/i18n',
   'app/time',
+  'app/i18n',
   'app/data/partners',
   'app/core/views/ListView',
   'app/events/templates/list'
 ], function(
   _,
-  t,
   time,
+  t,
   partners,
   ListView,
   listTemplate
