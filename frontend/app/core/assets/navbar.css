@@ -41,6 +41,7 @@
   font-weight: bold;
 }
 .navbar-feedback {
+  display: none;
   font-variant: small-caps;
   text-transform: uppercase;
   line-height: 1;
