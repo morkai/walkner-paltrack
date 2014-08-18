@@ -18,9 +18,17 @@
     h1 {
       position: relative;
       margin: 0 0 26px 0;
-      font-size: 96px;
+      font-size: 48px;
       line-height: 1;
       border-bottom: 2px solid #000;
+    }
+    #docNo {
+      display: block;
+      white-space: nowrap;
+      max-width: 740px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      margin-bottom: 5px;
     }
     #sendDate {
       position: absolute;
@@ -97,7 +105,7 @@
 </head>
 <body>
 <h1>
-  WZ #<%- docNo %>
+  <span id="docNo">WZ #<%- docNo %></span>
   <span id="sendDate">Data wysyłki:<br><span><%- sendDate %></span></span>
 </h1>
 <div class="supplier">
