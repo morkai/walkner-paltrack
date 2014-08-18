@@ -61,40 +61,30 @@ module.exports = function setUpGdnRoutes(app, registryModule)
 
   function prepareNewGdnModel(req, res, next)
   {
-    if (req.session.user.partner && req.body.supplier !== req.session.user.partner)
+    var body = req.body;
+
+    if (req.session.user.partner && body.supplier !== req.session.user.partner)
     {
       res.statusCode = 400;
 
       return next(new Error('supplier:privilege'));
     }
 
-    Gdn
-      .findOne({supplier: req.body.supplier}, {docNo: 1})
-      .sort({docNo: -1})
-      .lean()
-      .exec(function(err, lastGdn)
-      {
-        if (err)
-        {
-          return next(err);
-        }
+    req.model = new Gdn({
+      supplier: body.supplier,
+      receiver: body.receiver,
+      date: body.date + ' 00:00:00',
+      docNo: body.docNo,
+      goods: body.goods,
+      printed: false,
+      createdAt: new Date(),
+      creator: userModule.createUserInfo(req.session.user, req),
+      updatedAt: null,
+      updater: null,
+      changes: []
+    });
 
-        req.model = new Gdn({
-          supplier: req.body.supplier,
-          receiver: req.body.receiver,
-          date: req.body.date + ' 00:00:00',
-          docNo: (lastGdn ? lastGdn.docNo : 0) + 1,
-          goods: req.body.goods,
-          printed: false,
-          createdAt: new Date(),
-          creator: userModule.createUserInfo(req.session.user, req),
-          updatedAt: null,
-          updater: null,
-          changes: []
-        });
-
-        next();
-      });
+    next();
   }
 
   function prepareExistingGdnModel(req, res, next)
@@ -122,7 +112,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
 
       var changeCount = recordChanges(
         gdn,
-        lodash.pick(req.body, ['date', 'goods']),
+        lodash.pick(req.body, ['date', 'docNo', 'goods']),
         userModule.createUserInfo(req.session.user, req)
       );
 

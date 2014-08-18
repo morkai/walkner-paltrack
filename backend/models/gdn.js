@@ -27,9 +27,9 @@ module.exports = function setupGdnModel(app, mongoose)
       required: true
     },
     docNo: {
-      type: Number,
+      type: String,
       required: true,
-      min: 1
+      trim: true
     },
     goods: {},
     checked: {

@@ -310,7 +310,7 @@ define([
         supplier: this.$id('supplier').val()
       };
 
-      if (!/^[0-9]+$/.test(data.docNo) || !data.receiver.length || !data.supplier.length)
+      if (!data.docNo.length || !data.receiver.length || !data.supplier.length)
       {
         return;
       }
