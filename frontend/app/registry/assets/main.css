@@ -98,3 +98,6 @@
   text-decoration: none;
   cursor: pointer;
 }
+.loadFromGdn {
+  vertical-align: top;
+}
