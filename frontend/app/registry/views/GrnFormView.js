@@ -341,6 +341,8 @@ define([
       {
         this.value = goods[this.name.replace('goods.', '')] || 0;
       });
+
+      this.checkGoodsValidity();
     }
 
   });
