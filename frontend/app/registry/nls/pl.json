@@ -33,7 +33,7 @@
   "PROPERTY:updater": "Ostatnio zmieniony przez",
   "PROPERTY:checker": "Sprawdzony przez",
   "PROPERTY:checkedAt": "Czas sprawdzenia",
-  "PROPERTY:checked": "Wpis sprawdzony?",
+  "PROPERTY:checked": "OK?",
 
   "FORM:ACTION:add": "Dodaj wpis",
   "FORM:ACTION:edit": "Edytuj wpis",

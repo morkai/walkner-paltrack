@@ -28,6 +28,9 @@
     "PROPERTY:updatedAt": "Updated at",
     "PROPERTY:creator": "Creator",
     "PROPERTY:updater": "Updater",
+    "PROPERTY:checker": "Checked by",
+    "PROPERTY:checkedAt": "Checked at",
+    "PROPERTY:checked": "OK?",
 
     "FORM:ACTION:add": "Add note",
     "FORM:ACTION:edit": "Edit note",
