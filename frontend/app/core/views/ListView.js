@@ -3,6 +3,7 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
+  'underscore',
   'jquery',
   'app/i18n',
   'app/user',
@@ -11,6 +12,7 @@ define([
   './PaginationView',
   'app/core/templates/list'
 ], function(
+  _,
   $,
   t,
   user,
@@ -205,7 +207,7 @@ define([
 
       delete this.timers.refreshCollection;
 
-      this.promised(this.collection.fetch(options || {reset: true}));
+      this.promised(this.collection.fetch(_.isObject(options) ? options : {reset: true}));
     },
 
     scrollTop: function()
