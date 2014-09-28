@@ -6,12 +6,16 @@ define([
   'underscore',
   'backbone',
   'h5.rql/index',
+  'h5.rql/serializers/mongoSerializer',
+  'sift',
   './util',
   './PaginationData'
 ], function(
   _,
   Backbone,
   rql,
+  mongoSerializer,
+  sift,
   util,
   PaginationData
 ) {
@@ -160,6 +164,16 @@ define([
     this.rqlQuery.skip = (newPage - 1) * this.rqlQuery.limit;
 
     this.fetch({reset: true});
+  };
+
+  Collection.prototype.matchesRqlQuery = function(obj)
+  {
+    if (!this.rqlQuery.sift)
+    {
+      this.rqlQuery.sift = sift(mongoSerializer.fromQuery(this.rqlQuery).selector);
+    }
+
+    return this.rqlQuery.sift.test(obj);
   };
 
   return Collection;

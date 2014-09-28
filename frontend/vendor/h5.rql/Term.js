@@ -1,12 +1,15 @@
-define(function (require, exports, module) {'use strict';
+define(function (require, exports, module) {// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
+// Licensed under the MIT License <http://opensource.org/licenses/MIT>.
+// Part of the h5.rql project <http://lukasz.walukiewicz.eu/p/h5.rql>
+
+'use strict';
 
 module.exports = Term;
 
 /**
- * @name h5.rql.Term
  * @constructor
- * @param {string=} name
- * @param {Array=} args
+ * @param {string} [name]
+ * @param {Array} [args]
  */
 function Term(name, args)
 {

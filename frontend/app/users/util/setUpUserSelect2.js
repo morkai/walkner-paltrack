@@ -13,9 +13,47 @@ define([
 ) {
   'use strict';
 
+  function userToData(user)
+  {
+    if (user.id && user.text)
+    {
+      return user;
+    }
+
+    var name = user.lastName && user.firstName
+      ? (user.lastName + ' ' + user.firstName)
+      : (user.name || '-');
+
+    return {
+      id: user._id,
+      text: name,
+      user: user
+    };
+  }
+
+  function getSystemData()
+  {
+    return {
+      id: '$SYSTEM',
+      text: t('users', 'select2:users:system'),
+      user: null
+    };
+  }
+
+  function getRootData()
+  {
+    var root = user.getRootUserData();
+
+    return {
+      id: root._id,
+      text: root.name || root.login,
+      user: root
+    };
+  }
+
   return function setUpUserSelect2($input, options)
   {
-    return $input.select2(_.extend({
+    $input.select2(_.extend({
       openOnEnter: null,
       allowClear: true,
       minimumInputLength: 3,
@@ -25,33 +63,13 @@ define([
         quietMillis: 300,
         url: function(term)
         {
-          term = term.trim();
-
-          var property = 'lastName';
-
-          term = encodeURIComponent('^' + term);
-
-          return '/users'
-            + '?select(lastName,firstName,login)'
-            + '&sort(' + property + ')'
-            + '&limit(20)&regex(' + property + ',' + term + ',i)';
+          return '/users?sort(lastName)&limit(20)&regex(lastName,' + encodeURIComponent('^' + term.trim()) + ',i)';
         },
-        results: function(data, query)
+        results: function(data, page, query)
         {
-          var root = user.getRootUserData();
-          var results = [{
-            id: '$SYSTEM',
-            text: t('users', 'select2:users:system'),
-            name: t('users', 'select2:users:system'),
-            login: null
-          }, {
-            id: root._id,
-            text: root.name || root.login,
-            name: root.name || root.login,
-            login: root.login
-          }].filter(function(user)
+          var results = [getSystemData(), getRootData()].filter(function(user)
           {
-            return user.text.indexOf(query.term) !== -1;
+            return user.text.toLowerCase().indexOf(query.term.toLowerCase()) !== -1;
           });
 
           var users = results.concat(data.collection || []);
@@ -62,26 +80,44 @@ define([
           }
 
           return {
-            results: users.map(function(user)
-            {
-              var name = user.lastName && user.firstName
-                ? (user.lastName + ' ' + user.firstName)
-                : user.login;
-
-              return {
-                id: user._id,
-                text: name,
-                name: name,
-                login: user.login
-              };
-            })
-            .sort(function(a, b)
-            {
-              return a.text.localeCompare(b.text);
-            })
+            results: users.map(userToData).sort(function(a, b) { return a.text.localeCompare(b.text); })
           };
         }
       }
     }, options));
+
+    var userId = $input.val();
+    var rootData = getRootData();
+
+    if (userId === rootData.id)
+    {
+      $input.select2('data', rootData);
+    }
+    else if (userId === '$SYSTEM')
+    {
+      $input.select2('data', getSystemData());
+    }
+    else if (userId && options.view)
+    {
+      var req = options.view.ajax({
+        type: 'GET',
+        url: '/users?_id=' + userId
+      });
+
+      req.done(function(res)
+      {
+        if (res.collection && res.collection.length)
+        {
+          $input.select2('data', userToData(res.collection[0]));
+
+          if (options.onDataLoaded)
+          {
+            options.onDataLoaded();
+          }
+        }
+      });
+    }
+
+    return $input;
   };
 });

@@ -1,4 +1,5 @@
 @import url("../vendor/bootstrap/css/bootstrap.css");
+@import url("../vendor/bootstrap/css/bootstrap-theme.css");
 @import url("../vendor/bootstrap-colorpicker/css/bootstrap-colorpicker.css");
 @import url("../vendor/font-awesome/css/font-awesome.css");
 @import url("../vendor/select2/select2.css");
@@ -27,4 +28,27 @@
 }
 #app-loading.error {
   color: red;
+}
+.navbar-default .navbar-brand,
+.navbar-default .navbar-brand:hover,
+.navbar-default .navbar-brand:focus {
+  color: #aa00ff;
+  text-shadow: none;
+}
+.navbar-registry > code {
+  margin-left: -12px;
+  margin-right: 4px;
+  font-weight: bold;
+  font-size: 1em;
+  color: #fff;
+  text-shadow: 1px 1px 1px #444;
+}
+.navbar-registry.grn > code {
+  background: #fa0;
+}
+.navbar-registry.gdn > code {
+  background: #9e0;
+}
+.navbar-registry.ob > code {
+  background: #0af;
 }

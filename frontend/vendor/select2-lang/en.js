@@ -47,7 +47,7 @@
       return 'Searching...';
     }
   };
-  
+
   $.extend($.fn.select2.defaults, lang);
 
   return lang;

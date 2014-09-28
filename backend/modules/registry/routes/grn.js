@@ -52,7 +52,7 @@ module.exports = function setUpGrnRoutes(app, registryModule)
     express.crud.editRoute.bind(null, app, Grn)
   );
 
-  express.del('/registry/grn/:id', canManage, express.crud.deleteRoute.bind(null, app, Grn));
+  express.delete('/registry/grn/:id', canManage, express.crud.deleteRoute.bind(null, app, Grn));
 
   function prepareNewGrnModel(req, res, next)
   {

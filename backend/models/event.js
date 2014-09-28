@@ -4,6 +4,8 @@
 
 'use strict';
 
+var userInfoSchema = require('./userInfoSchema');
+
 module.exports = function setupEventModel(app, mongoose)
 {
   var eventSchema = mongoose.Schema({
@@ -21,9 +23,7 @@ module.exports = function setupEventModel(app, mongoose)
       type: Number,
       default: Date.now
     },
-    user: {
-      type: Object
-    },
+    user: userInfoSchema,
     data: {
       type: Object
     }

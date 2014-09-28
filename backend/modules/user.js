@@ -102,6 +102,11 @@ exports.start = function startUserModule(app, module)
       return true;
     }
 
+    if (typeof anyPrivileges === 'string')
+    {
+      anyPrivileges = [[anyPrivileges]];
+    }
+
     if (anyPrivileges.length
       && user.local
       && anyPrivileges[0].some(function(privilege) { return privilege === 'LOCAL'; }))
@@ -182,23 +187,31 @@ exports.start = function startUserModule(app, module)
     };
   }
 
+  /**
+   * @param {object|null} userData
+   * @param {object} [addressData]
+   * @returns {UserInfo|null}
+   */
   function createUserInfo(userData, addressData)
   {
     /**
      * @name UserInfo
-     * @type {{id: string, ip: string, label: string}}
+     * @type {{_id: mongoose.Types.ObjectId, ip: string, label: string}}
      */
     var userInfo = {
-      id: null,
+      _id: null,
       ip: '',
       label: ''
     };
 
     try
     {
-      userInfo.id = ObjectId.createFromHexString(String(userData._id || userData.id));
+      userInfo._id = ObjectId.createFromHexString(String(userData._id || userData.id));
     }
-    catch (err) {}
+    catch (err)
+    {
+      return null;
+    }
 
     if (typeof userData.label === 'string')
     {
@@ -206,7 +219,7 @@ exports.start = function startUserModule(app, module)
     }
     else if (userData.firstName && userData.lastName)
     {
-      userInfo.label = userData.lastName + ' ' + userData.firstName;
+      userInfo.label = userData.firstName + ' ' + userData.lastName;
     }
     else
     {
@@ -214,6 +227,11 @@ exports.start = function startUserModule(app, module)
     }
 
     userInfo.ip = getRealIp(userData, addressData);
+
+    if (userInfo.ip === '0.0.0.0')
+    {
+      userInfo.ip = '';
+    }
 
     return userInfo;
   }

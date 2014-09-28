@@ -4,16 +4,22 @@
 
 define([
   'underscore',
+  'jquery',
   'js2form',
   'h5.rql/specialTerms',
+  'app/i18n',
   'app/core/View',
+  'app/core/util/buttonGroup',
   'app/core/templates/filterLimit',
   'select2'
 ], function(
   _,
+  $,
   js2form,
   specialTerms,
+  t,
   View,
+  buttonGroup,
   filterLimitTemplate
 ) {
   'use strict';
@@ -32,8 +38,11 @@ define([
         this.changeFilter();
 
         return false;
-      }
+      },
+      'click .filter-toggle': 'toggle'
     },
+
+    collapsed: false,
 
     destroy: function()
     {
@@ -59,19 +68,12 @@ define([
 
     toggleButtonGroup: function(groupName)
     {
-      this.$id(groupName).find('input:checked').parent().addClass('active');
+      return buttonGroup.toggle(this.$id(groupName));
     },
 
     getButtonGroupValue: function(groupName)
     {
-      var $inputs = this.$id(groupName).find('input');
-
-      if ($inputs[0].type === 'radio' || $inputs.length === 1)
-      {
-        return $inputs.filter(':checked').val();
-      }
-
-      return $inputs.filter(':checked').map(function() { return this.value; });
+      return buttonGroup.getValue(this.$id(groupName));
     },
 
     afterRender: function()
@@ -79,6 +81,29 @@ define([
       this.formData = this.serializeQueryToForm();
 
       js2form(this.el, this.formData);
+
+      this.$toggleFilter = $('<button class="btn btn-default btn-block filter-toggle" type="button"></button>')
+        .append('<i class="fa"></i>')
+        .append('<span></span>');
+
+      this.$el.append(this.$toggleFilter);
+
+      this.toggle();
+    },
+
+    toggle: function()
+    {
+      if (window.innerWidth < 768)
+      {
+        this.collapsed = !this.collapsed;
+
+        this.$el.toggleClass('is-collapsed', this.collapsed);
+      }
+
+      this.$toggleFilter.find('span').text(t('core', 'filter:' + (this.collapsed ? 'show' : 'hide')));
+      this.$toggleFilter.find('.fa')
+        .removeClass('fa-caret-up fa-caret-down')
+        .addClass('fa-caret-' + (this.collapsed ? 'down' : 'up'));
     },
 
     serializeQueryToForm: function()
@@ -131,6 +156,7 @@ define([
       rqlQuery.selector = {name: 'and', args: selector};
       rqlQuery.skip = 0;
       rqlQuery.limit = Math.min(Math.max(parseInt(this.$id('limit').val(), 10) || 15, this.minLimit), this.maxLimit);
+      rqlQuery.sift = null;
 
       this.trigger('filterChanged', rqlQuery);
     },

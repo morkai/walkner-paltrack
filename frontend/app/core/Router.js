@@ -65,6 +65,15 @@ define([
   };
 
   /**
+   * @param {string} url
+   */
+  Router.prototype.setCurrentRequest = function(url)
+  {
+    this.currentRequest = new Request(url);
+    this.previousUrl = this.currentRequest.url;
+  };
+
+  /**
    * @param {string|RegExp} pattern
    * @param {...function(app.core.Request, string)} handlers
    */

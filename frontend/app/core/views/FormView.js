@@ -33,7 +33,7 @@ define([
       {
         if (this.isRendered())
         {
-          js2form(this.el, this.serializeToForm());
+          js2form(this.el, this.serializeToForm(true), '.', null, false, false);
         }
       });
     },
@@ -58,10 +58,10 @@ define([
 
     afterRender: function()
     {
-      js2form(this.el, this.serializeToForm());
+      js2form(this.el, this.serializeToForm(false));
     },
 
-    serializeToForm: function()
+    serializeToForm: function(partial)
     {
       return this.model.toJSON();
     },
@@ -120,6 +120,29 @@ define([
       return false;
     },
 
+    checkValidity: function(formData)
+    {
+      return !!formData;
+    },
+
+    handleFailure: function()
+    {
+      this.showErrorMessage(this.options.failureText);
+    },
+
+    showErrorMessage: function(text)
+    {
+      this.hideErrorMessage();
+
+      this.$errorMessage = viewport.msg.show({
+        type: 'error',
+        time: 3000,
+        text: text
+      });
+
+      return false;
+    },
+
     hideErrorMessage: function()
     {
       if (this.$errorMessage !== null)
@@ -128,19 +151,6 @@ define([
 
         this.$errorMessage = null;
       }
-    },
-
-    checkValidity: function(formData)
-    {
-      return !!formData;
-    },
-
-    handleFailure: function()
-    {
-      this.$errorMessage = viewport.msg.show({
-        type: 'error',
-        text: this.options.failureText
-      });
     }
 
   });

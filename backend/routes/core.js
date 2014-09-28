@@ -9,19 +9,32 @@ var lodash = require('lodash');
 module.exports = function startCoreRoutes(app, express)
 {
   var appCache = app.options.env === 'production';
+  var updaterModule = app[app.options.updaterId || 'updater'];
+  var userModule = app[app.options.userId || 'user'];
+  var mongoose = app[app.options.mongooseId || 'mongoose'];
   var requirejsPaths;
   var requirejsShim;
 
+  var ROOT_USER = JSON.stringify(lodash.omit(userModule.root, 'password'));
+  var GUEST_USER = JSON.stringify(userModule.guest);
+  var PRIVILEGES = JSON.stringify(userModule.config.privileges);
+  var MODULES = JSON.stringify(app.options.modules.map(function(module)
+  {
+    return module.id || module;
+  }));
+  var DASHBOARD_URL_AFTER_LOG_IN = JSON.stringify(app.options.dashboardUrlAfterLogIn || '/');
+
   app.broker.subscribe('updater.newVersion', reloadRequirejsConfig).setFilter(function(message)
   {
-    return message.service === 'frontend';
+    return message.service === app.options.id;
   });
 
   reloadRequirejsConfig();
 
-  [
-
-  ].forEach(setUpFrontendVersionUpdater);
+  if (updaterModule && app.options.dictionaryModules)
+  {
+    Object.keys(app.options.dictionaryModules).forEach(setUpFrontendVersionUpdater);
+  }
 
   express.get('/', showIndex);
 
@@ -36,38 +49,35 @@ module.exports = function startCoreRoutes(app, express)
     res.send('pong');
   });
 
-  express.get('/ip', function(req, res)
-  {
-    res.send({
-      ip: req.ip,
-      ips: req.ips
-    });
-  });
-
   express.get('/config.js', sendRequireJsConfig);
 
   function showIndex(req, res)
   {
     var sessionUser = req.session.user;
     var locale = sessionUser && sessionUser.locale ? sessionUser.locale : 'pl';
+    var appData = {
+      VERSIONS: JSON.stringify(!updaterModule ? {} : {
+        package: updaterModule.package.version,
+        backend: updaterModule.package.backendVersion,
+        frontend: updaterModule.package.frontendVersion
+      }),
+      TIME: JSON.stringify(Date.now()),
+      LOCALE: JSON.stringify(locale),
+      ROOT_USER: ROOT_USER,
+      GUEST_USER: GUEST_USER,
+      PRIVILEGES: PRIVILEGES,
+      MODULES: MODULES,
+      DASHBOARD_URL_AFTER_LOG_IN: DASHBOARD_URL_AFTER_LOG_IN
+    };
 
-    // TODO: Add caching
+    lodash.forEach(app.options.dictionaryModules, function(appDataKey, moduleName)
+    {
+      appData[appDataKey] = JSON.stringify(app[moduleName].models);
+    });
+
     res.render('index', {
       appCache: appCache,
-      appData: {
-        VERSIONS: JSON.stringify({
-          package: app.updater.package.version,
-          backend: app.updater.package.backendVersion,
-          frontend: app.updater.package.frontendVersion
-        }),
-        TIME: JSON.stringify(Date.now()),
-        LOCALE: JSON.stringify(locale),
-        ROOT_USER: JSON.stringify(lodash.omit(app.user.root, 'password')),
-        GUEST_USER: JSON.stringify(app.user.guest),
-        PRIVILEGES: JSON.stringify(app.user.config.privileges),
-        PARTNERS: JSON.stringify(app.partners.models),
-        PALLET_KINDS: JSON.stringify(app.palletKinds.models)
-      }
+      appData: appData
     });
   }
 

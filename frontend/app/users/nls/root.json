@@ -1,6 +1,7 @@
 {
   "root": {
     "BREADCRUMBS:browse": "Users",
+    "BREADCRUMBS:account": "My account",
     "BREADCRUMBS:addForm": "Adding",
     "BREADCRUMBS:editForm": "Editing",
     "BREADCRUMBS:ACTION_FORM:delete": "Deleting",

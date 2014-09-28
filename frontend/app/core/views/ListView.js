@@ -162,17 +162,24 @@ define([
 
     onModelDeleted: function(message)
     {
-      if (!message || !message.model || !message.model._id)
+      if (!message)
       {
         return;
       }
 
-      this.$('.list-item[data-id="' + message.model._id + '"]').addClass('is-deleted');
+      var model = message.model || message;
 
-      this.refreshCollection(message);
+      if (!model._id)
+      {
+        return;
+      }
+
+      this.$('.list-item[data-id="' + model._id + '"]').addClass('is-deleted');
+
+      this.refreshCollection(model);
     },
 
-    refreshCollection: function(message)
+    refreshCollection: function(message, options)
     {
       if (message && this.timers.refreshCollection)
       {
@@ -181,11 +188,11 @@ define([
 
       if (Date.now() - this.lastRefreshAt > 3000)
       {
-        this.refreshCollectionNow();
+        this.refreshCollectionNow(options);
       }
       else
       {
-        this.timers.refreshCollection = setTimeout(this.refreshCollectionNow.bind(this), 3000);
+        this.timers.refreshCollection = setTimeout(this.refreshCollectionNow.bind(this, options), 3000);
       }
     },
 
@@ -274,7 +281,11 @@ define([
         var model = collection.get(row._id);
         var actions = [ListView.actions.viewDetails(model, nlsDomain)];
 
-        if (user.isAllowedTo((privilegePrefix || model.getPrivilegePrefix()) + ':MANAGE'))
+        var canManage = typeof privilegePrefix === 'function'
+          ? privilegePrefix(model)
+          : user.isAllowedTo((privilegePrefix || model.getPrivilegePrefix()) + ':MANAGE');
+
+        if (canManage)
         {
           actions.push(
             ListView.actions.edit(model, nlsDomain),

@@ -6,6 +6,7 @@
 
 var validateGoods = require('./util/validateGoods');
 var createChangeSchema = require('./util/createChangeSchema');
+var userInfoSchema = require('./userInfoSchema');
 
 module.exports = function setupObModel(app, mongoose)
 {
@@ -23,7 +24,7 @@ module.exports = function setupObModel(app, mongoose)
     },
     goods: {},
     createdAt: Date,
-    creator: {},
+    creator: userInfoSchema,
     updatedAt: Date,
     updater: {},
     changes: [obChangeSchema]

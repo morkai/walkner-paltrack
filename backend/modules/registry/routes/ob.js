@@ -42,7 +42,7 @@ module.exports = function setUpObRoutes(app, registryModule)
     express.crud.editRoute.bind(null, app, Ob)
   );
 
-  express.del('/registry/ob/:id', canManage, express.crud.deleteRoute.bind(null, app, Ob));
+  express.delete('/registry/ob/:id', canManage, express.crud.deleteRoute.bind(null, app, Ob));
 
   function prepareNewObModel(req, res, next)
   {

@@ -8,13 +8,15 @@ define([
   '../user',
   '../core/util/showDeleteFormPage',
   './User',
+  './UserCollection',
   'i18n!app/nls/users'
 ], function(
   router,
   viewport,
   user,
   showDeleteFormPage,
-  User
+  User,
+  UserCollection
 ) {
   'use strict';
 
@@ -25,7 +27,11 @@ define([
   {
     viewport.loadPage(['app/users/pages/UserListPage'], function(UserListPage)
     {
-      return new UserListPage({rql: req.rql});
+      return new UserListPage({
+        collection: new UserCollection(null, {
+          rqlQuery: req.rql
+        })
+      });
     });
   });
 
@@ -44,16 +50,12 @@ define([
     },
     function(req)
     {
-      viewport.loadPage(
-        ['app/core/pages/DetailsPage', 'app/users/views/UserDetailsView'],
-        function(DetailsPage, UserDetailsView)
-        {
-          return new DetailsPage({
-            DetailsView: UserDetailsView,
-            model: new User({_id: req.params.id})
-          });
-        }
-      );
+      viewport.loadPage(['app/users/pages/UserDetailsPage'], function(UserDetailsPage)
+      {
+        return new UserDetailsPage({
+          model: new User({_id: req.params.id})
+        });
+      });
     }
   );
 

@@ -58,9 +58,9 @@ exports.start = function startPubsubModule(app, module)
 
   module.config.republishTopics.forEach(function(topic)
   {
-    app.broker.subscribe(topic, function(message, topic)
+    app.broker.subscribe(topic, function(message, topic, meta)
     {
-      module.publish(topic, message);
+      module.publish(topic, message, meta);
     });
   });
 
@@ -73,7 +73,7 @@ exports.start = function startPubsubModule(app, module)
       meta.messageId = getNextMessageId();
     }
 
-    idToMessageMap[meta.messageId] = [topic, message];
+    idToMessageMap[meta.messageId] = [topic, message, meta];
   });
 
   module.on('subscribe', function()
@@ -284,7 +284,7 @@ exports.start = function startPubsubModule(app, module)
       {
         var message = idToMessageMap[messageIds[j]];
 
-        socket.emit('pubsub.message', message[0], message[1]);
+        socket.emit('pubsub.message', message[0], message[1], message[2]);
 
         ++stats.sentMessages;
       }

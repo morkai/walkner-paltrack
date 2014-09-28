@@ -6,11 +6,13 @@ define([
   '../router',
   '../viewport',
   '../user',
+  './EventCollection',
   'i18n!app/nls/events'
 ], function(
   router,
   viewport,
-  user
+  user,
+  EventCollection
 ) {
   'use strict';
 
@@ -18,7 +20,11 @@ define([
   {
     viewport.loadPage('app/events/pages/EventListPage', function(EventListPage)
     {
-      return new EventListPage({rql: req.rql});
+      return new EventListPage({
+        collection: new EventCollection(null, {
+          rqlQuery: req.rql
+        })
+      });
     });
   });
 });

@@ -6,6 +6,7 @@
 
 var validateGoods = require('./util/validateGoods');
 var createChangeSchema = require('./util/createChangeSchema');
+var userInfoSchema = require('./userInfoSchema');
 
 module.exports = function setupGrnModel(app, mongoose)
 {
@@ -42,7 +43,7 @@ module.exports = function setupGrnModel(app, mongoose)
     },
     checker: {},
     createdAt: Date,
-    creator: {},
+    creator: userInfoSchema,
     updatedAt: Date,
     updater: {},
     changes: [grnChangeSchema]

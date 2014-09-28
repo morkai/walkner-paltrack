@@ -1,9 +1,14 @@
-define(function (require, exports, module) {'use strict';
+define(function (require, exports, module) {// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
+// Licensed under the MIT License <http://opensource.org/licenses/MIT>.
+// Part of the h5.rql project <http://lukasz.walukiewicz.eu/p/h5.rql>
+
+'use strict';
 
 var Term = require('./Term');
 var valueConverters = require('./valueConverters');
 
 module.exports = Parser;
+module.exports.Options = ParserOptions;
 
 /**
  * @const
@@ -43,25 +48,17 @@ var operatorMap = {
 };
 
 /**
- * @name h5.rql.Parser
  * @constructor
- * @param {(h5.rql.Parser.Options|object)=} options
+ * @param {object} [options]
+ * @param {boolean} [options.jsonQueryCompatible]
+ * @param {boolean} [options.fiqlCompatible]
+ * @param {boolean} [options.allowSlashedArrays]
+ * @param {boolean} [options.allowEmptyValues]
+ * @param {function(string, Parser): *} [options.defaultValueConverter]
+ * @param {Array.<string>} [options.specialTerms]
+ * @param {*} [options.emptyValue]
  */
-function Parser(options)
-{
-  /**
-   * @type {h5.rql.Parser.Options}
-   */
-  this.options = options instanceof Parser.Options
-    ? options
-    : new Parser.Options(options);
-}
-
-/**
- * @constructor
- * @param {object=} options
- */
-Parser.Options = function(options)
+function ParserOptions(options)
 {
   if (typeof options !== 'object' || options === null)
   {
@@ -76,8 +73,7 @@ Parser.Options = function(options)
   /**
    * @type {boolean}
    */
-  this.fiqlCompatible = !options.hasOwnProperty('fiqlCompatible')
-    || options.fiqlCompatible === true;
+  this.fiqlCompatible = options.fiqlCompatible === undefined ? true : (options.fiqlCompatible === true);
 
   /**
    * @type {boolean}
@@ -92,38 +88,45 @@ Parser.Options = function(options)
   /**
    * @type {function}
    */
-  this.defaultValueConverter =
-    typeof options.defaultValueConverter === 'function'
-      ? options.defaultValueConverter
-      : valueConverters.default;
+  this.defaultValueConverter = typeof options.defaultValueConverter === 'function'
+    ? options.defaultValueConverter
+    : valueConverters.default;
 
   /**
    * @type {Array.<string>}
    */
-  this.specialTerms = Array.isArray(options.specialTerms)
-    ? options.specialTerms
-    : [];
+  this.specialTerms = Array.isArray(options.specialTerms) ? options.specialTerms : [];
 
   /**
    * @type {*}
    */
-  this.emptyValue = options.hasOwnProperty('emptyValue')
-    ? options.emptyValue
-    : '';
-};
+  this.emptyValue = options.hasOwnProperty('emptyValue') ? options.emptyValue : '';
+}
+
+/**
+ * @name Parser
+ * @constructor
+ * @param {ParserOptions} [options]
+ */
+function Parser(options)
+{
+  /**
+   * @type {ParserOptions}
+   */
+  this.options = options instanceof ParserOptions ? options : new ParserOptions(options);
+}
 
 /**
  * @param {string} input
  * @param {object=} specialTerms
- * @returns {h5.rql.Term}
+ * @returns {Term}
  * @throws {Error}
  */
 Parser.prototype.parse = function(input, specialTerms)
 {
   /*jshint maxstatements:999,-W015*/
 
-  var collectSpecialTerms = typeof specialTerms === 'object'
-    && specialTerms !== null;
+  var collectSpecialTerms = typeof specialTerms === 'object' && specialTerms !== null;
   var specialTermsNames = this.options.specialTerms;
 
   var token = null;
@@ -179,9 +182,7 @@ Parser.prototype.parse = function(input, specialTerms)
           }
           else
           {
-            throw new Error(
-              "Empty value at position " + i + " is not allowed."
-            );
+            throw new Error("Empty value at position " + i + " is not allowed.");
           }
         }
 
@@ -240,10 +241,7 @@ Parser.prototype.parse = function(input, specialTerms)
       default:
         if (!validCharactersRegExp.test(chr))
         {
-          throw new Error(
-            "Invalid character at position " + i + ": '"
-              + chr + "' (" + chr.charCodeAt(0) + ")"
-          );
+          throw new Error("Invalid character at position " + i + ": '" + chr + "' (" + chr.charCodeAt(0) + ")");
         }
 
         if (token === null)
@@ -289,16 +287,11 @@ Parser.prototype.parse = function(input, specialTerms)
  */
 Parser.prototype.makeJsonQueryCompatible = function(input)
 {
-  if (this.options.jsonQueryCompatible)
-  {
-    input = input
-      .replace(/%3C=/g, '=le=')
-      .replace(/%3E=/g, '=ge=')
-      .replace(/%3C/g, '=lt=')
-      .replace(/%3E/g, '=gt=');
-  }
-
-  return input;
+  return input
+    .replace(/%3C=/g, '=le=')
+    .replace(/%3E=/g, '=ge=')
+    .replace(/%3C/g, '=lt=')
+    .replace(/%3E/g, '=gt=');
 };
 
 /**

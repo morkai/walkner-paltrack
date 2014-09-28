@@ -23,5 +23,5 @@ module.exports = function setUpPalletKindsRoutes(app, palletKindsModule)
 
   express.put('/palletKinds/:id', canManage, crud.editRoute.bind(null, app, PalletKind));
 
-  express.del('/palletKinds/:id', canManage, crud.deleteRoute.bind(null, app, PalletKind));
+  express.delete('/palletKinds/:id', canManage, crud.deleteRoute.bind(null, app, PalletKind));
 };

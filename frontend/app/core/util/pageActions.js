@@ -27,7 +27,7 @@ define([
     return collection.length;
   }
 
-  function onJumpFormSubmit(page, collection, $form)
+  function onJumpFormSubmit(page, collection, options, $form)
   {
     var ridEl = $form[0].rid;
 
@@ -58,7 +58,7 @@ define([
     req.done(function(modelId)
     {
       page.broker.publish('router.navigate', {
-        url: collection.genClientUrl() + '/' + modelId,
+        url: options.genClientUrl ? options.genClientUrl(modelId) : (collection.genClientUrl() + '/' + modelId),
         trigger: true
       });
     });
@@ -68,7 +68,7 @@ define([
       viewport.msg.show({
         type: 'error',
         time: 2000,
-        text: t(collection.getNlsDomain(), 'MSG:jump:404', {rid: rid})
+        text: t(collection.getNlsDomain(), options.notFoundKey || 'MSG:jump:404', {rid: rid})
       });
 
       $iconEl.removeClass('fa-spinner fa-spin').addClass('fa-search');
@@ -87,7 +87,7 @@ define([
         label: t.bound(collection.getNlsDomain(), 'PAGE_ACTION:add'),
         icon: 'plus',
         href: collection.genClientUrl('add'),
-        privileges: privilege || (collection.getPrivilegePrefix() + ':MANAGE')
+        privileges: privilege === undefined ? (collection.getPrivilegePrefix() + ':MANAGE') : privilege
       };
     },
     edit: function(model, privilege)
@@ -96,7 +96,7 @@ define([
         label: t.bound(model.getNlsDomain(), 'PAGE_ACTION:edit'),
         icon: 'edit',
         href: model.genClientUrl('edit'),
-        privileges: privilege || (model.getPrivilegePrefix() + ':MANAGE')
+        privileges: privilege === undefined ? (model.getPrivilegePrefix() + ':MANAGE') : privilege
       };
     },
     delete: function(model, privilege)
@@ -105,7 +105,7 @@ define([
         label: t.bound(model.getNlsDomain(), 'PAGE_ACTION:delete'),
         icon: 'times',
         href: model.genClientUrl('delete'),
-        privileges: privilege || (model.getPrivilegePrefix() + ':MANAGE'),
+        privileges: privilege === undefined ? (model.getPrivilegePrefix() + ':MANAGE') : privilege,
         callback: function(e)
         {
           if (e.button === 0)
@@ -142,24 +142,31 @@ define([
         icon: 'download',
         type: getTotalCount(collection) >= 10000 ? 'warning' : 'default',
         href: _.result(collection, 'url') + ';export?' + collection.rqlQuery,
-        privileges: privilege || (collection.getPrivilegePrefix() + ':VIEW'),
+        privileges: privilege === undefined ? (collection.getPrivilegePrefix() + ':VIEW') : privilege,
         className: 'export' + (collection.length ? '' : ' disabled')
       };
     },
-    jump: function(page, collection)
+    jump: function(page, collection, options)
     {
+      if (!options)
+      {
+        options = {};
+      }
+
       return {
         template: function()
         {
           return jumpActionTemplate({
-            nlsDomain: collection.getNlsDomain()
+            type: options.type || 'number',
+            title: options.title || t(collection.getNlsDomain(), 'PAGE_ACTION:jump:title'),
+            placeholder: options.placeholder || t(collection.getNlsDomain(), 'PAGE_ACTION:jump:placeholder')
           });
         },
         afterRender: function($action)
         {
           var $form = $action.find('form');
 
-          $form.submit(onJumpFormSubmit.bind(null, page, collection, $form));
+          $form.submit(onJumpFormSubmit.bind(null, page, collection, options, $form));
         }
       };
     }

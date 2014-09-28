@@ -6,38 +6,36 @@
 @import url(./properties.css);
 @import url(./logInForm.css);
 @import url(./filter.css);
+@import url(./highcharts.css);
 
 body {
+  font-family: Arial, "Helvetic Neue", Helvetica, sans-serif;
   cursor: default;
   overflow-y: scroll;
   -ms-overflow-style: scrollbar;
 }
-
+body.no-overflow {
+  overflow: hidden;
+}
 body.modal-open {
   overflow-y: hidden;
 }
-
 :only-child {
   margin-top: 0;
   margin-bottom: 0;
 }
-
 dt {
   margin-top: .5em;
 }
-
 dt:first-child {
   margin-top: 0;
 }
-
 dd {
   margin-left: 1em;
 }
-
 p:last-child {
   margin-bottom: 0;
 }
-
 kbd {
   padding: .1em .25em;
   font-family: Consolas, Menlo, Monaco, monospace;
@@ -47,7 +45,6 @@ kbd {
   border-radius: 3px;
   background: #eee;
 }
-
 .unselectable {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -56,17 +53,15 @@ kbd {
   -ms-user-select: none;
   user-select: none;
 }
-
 .well {
   padding: 1em;
+  background-image: none;
 }
-
 .messages {
   position: fixed;
   top: 1.5em;
   display: inline-block;
 }
-
 .message {
   z-index: 1050;
   display: inline-block;
@@ -79,12 +74,11 @@ kbd {
   font-weight: bold;
   line-height: 1;
   text-align: center;
-  background-color: #fff;
+  background-color: #FFF;
   border: 1px solid transparent;
   box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
   opacity: 0;
 }
-
 .message-inline {
   position: static;
   display: block;
@@ -93,48 +87,39 @@ kbd {
   text-align: left;
   font-weight: normal;
 }
-
 .panel > .message-inline {
   box-shadow: none;
   border-top: 0;
   border-left: 0;
   border-right: 0;
 }
-
 .message-info {
-  background-color: #e8f6ff;
-  border-color: #b8e2fb;
+  background-color: #E8F6FF;
+  border-color: #B8E2FB;
 }
-
 .message-warning {
-  background-color: #f9edbe;
-  border-color: #f0c36d;
+  background-color: #F9EDBE;
+  border-color: #F0C36D;
 }
-
 .message-success {
-  background-color: #eaf7d9;
-  border-color: #bbdf8d;
+  background-color: #EAF7D9;
+  border-color: #BBDF8D;
 }
-
 .message-error {
-  background-color: #ffd1d1;
-  border-color: #f8acac;
+  background-color: #FFD1D1;
+  border-color: #F8ACAC;
 }
-
 .bd {
   margin: 1em;
 }
-
 .bd > :last-child {
   margin-bottom: 0;
 }
-
 .ft {
   color: gray;
   text-align: center;
   margin: 1em;
 }
-
 .ft p {
   font-size: .9em;
   padding: 0;
@@ -150,46 +135,41 @@ kbd {
   margin: 1em;
   padding-bottom: 0;
 }
-
 .page-breadcrumbs {
   display: block;
   list-style: none;
   margin: 0;
   padding: 0;
 }
-
 .page-breadcrumbs li {
   display: inline-block;
   line-height: 1;
   font-weight: bold;
-  font-size: 38.5px;
+  font-size: 34px;
 }
-
 .page-breadcrumbs li:after {
   content: "\0000a0\\\0000a0";
 }
-
 .page-breadcrumbs li:last-child:after {
   content: none;
 }
-
 .page-actions {
   display: inline-block;
   float: right;
   list-style: none;
-  margin: 4.5px 0 0 0;
+  margin: 0 0 0 0;
 }
-
 .page-actions > li {
   display: inline-block;
   margin-left: 1em;
   vertical-align: top;
 }
-
 .page-actions-jump {
   width: 150px;
 }
-
+.page-actions-jump .form-control {
+  text-align: left;
+}
 [class^="fa-"] + span,
 [class*=" fa-"] + span {
   margin-left: 7px;
@@ -198,11 +178,9 @@ kbd {
 .pagination-container {
   text-align: center;
 }
-
 .pagination {
   line-height: 0;
 }
-
 .pagination > li > a,
 .pagination > li > span {
   min-width: 4.25em;
@@ -210,97 +188,114 @@ kbd {
   -moz-box-sizing: border-box;
 }
 
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+  background-image: none;
+  background-color: #ffffd6;
+}
+
+.panel-heading {
+  text-shadow: 1px 1px 1px #333;
+  font-weight: bold;
+  letter-spacing: 0.025em;
+}
+.panel-default > .panel-heading {
+  text-shadow: none;
+}
 .panel-warning {
   border-color: #f0ad4e;
 }
-
 .panel-warning > .panel-heading {
   color: #fff;
   background-color: #f0ad4e;
   border-color: #f0ad4e;
+  background-image: -webkit-linear-gradient(top, #f0ad4e 0%, #dc993a 100%);
+  background-image: linear-gradient(to bottom, #f0ad4e 0%, #dc993a 100%);
 }
-
+.panel-primary {
+  border-color: #428bca;
+}
+.panel-primary > .panel-heading {
+  color: #fff;
+  background-color: #428bca;
+  border-color: #428bca;
+  background-image: -webkit-linear-gradient(top, #428bca 0%, #2e77b6 100%);
+  background-image: linear-gradient(to bottom, #428bca 0%, #2e77b6 100%);
+}
+.panel-info {
+  border-color: #6BB4F3;
+}
+.panel-info > .panel-heading {
+  color: #fff;
+  background-color: #6BB4F3;
+  border-color: #6BB4F3;
+  background-image: -webkit-linear-gradient(top, #6BB4F3 0%, #569FDE 100%);
+  background-image: linear-gradient(to bottom, #6BB4F3 0%, #569FDE 100%);
+}
 .panel-success {
   border-color: #5cb85c;
 }
-
 .panel-success > .panel-heading {
   color: #fff;
   background-color: #5cb85c;
   border-color: #5cb85c;
+  background-image: -webkit-linear-gradient(top, #5cb85c 0%, #48A448 100%);
+  background-image: linear-gradient(to bottom, #5cb85c 0%, #48A448 100%);
 }
-
 .panel-danger {
   border-color: #d9534f;
 }
-
 .panel-danger > .panel-heading {
   color: #fff;
   background-color: #d9534f;
   border-color: #d9534f;
+  background-image: -webkit-linear-gradient(top, #d9534f 0%, #C53F3B 100%);
+  background-image: linear-gradient(to bottom, #d9534f 0%, #C53F3B 100%);
 }
-
 .panel-heading.is-with-actions {
   position: relative;
 }
-
 .panel-actions {
   position: absolute;
   top: 3px;
   right: 3px;
 }
-
 .panel > .btn-toolbar {
   padding: 5px;
   border-bottom: 1px solid #ddd;
-  background: linear-gradient(to bottom, #f5f5f5, #eee);
+  background: linear-gradient(to bottom, #F5F5F5, #EEE);
 }
 
 .btn:active, .btn.active {
   box-shadow: inset 0 3px 9px rgba(0, 0, 0, 0.25);
 }
-
+.btn-default:active, .btn-default.active {
+  border-color: #bbb;
+}
 .btn-link:active, .btn-link.active {
   box-shadow: none;
 }
 
-.dropdown-menu > li > a:hover,
-.dropdown-menu > li > a:focus {
-  color: #fff;
-  background-color: #428bca;
-}
-
 @-webkit-keyframes yellow-fade {
-  0% {
-    background: yellow;
-  }
-  100% {
-    background: none;
-  }
+  0% { background: yellow; }
+  100% { background: none; }
 }
-
 @keyframes yellow-fade {
-  0% {
-    background: yellow;
-  }
-  100% {
-    background: none;
-  }
+  0% { background: yellow; }
+  100% { background: none; }
 }
-
 .highlight {
   -webkit-animation: yellow-fade 1s ease-out 1;
   animation: yellow-fade 1s ease-out 1;
 }
 
 .btn-default.zeroclipboard-is-hover {
-  background-color: #ebebeb;
-  border-color: #adadad;
+  background-color: #EBEBEB;
+  border-color: #ADADAD;
 }
-
 .btn-default.zeroclipboard-is-active {
-  background-color: #ebebeb;
-  border-color: #adadad;
+  background-color: #EBEBEB;
+  border-color: #ADADAD;
   box-shadow: inset 0 3px 9px rgba(0, 0, 0, 0.25);
 }
 
@@ -309,37 +304,70 @@ kbd {
   margin-bottom: 5px;
 }
 
-.list-item > td.number {
-  text-align: right;
-}
-
-.list-item > td.no {
-  text-align: right;
-  width: 1%;
-}
-
 .list-item.is-deleted > td {
   opacity: .5;
-  text-decoration: line-through !important;
+  text-decoration: line-through!important;
 }
-
 .list-item.is-deleted > td.actions {
-  text-decoration: none !important;
-}
-
-.tableFloatingHeaderOriginal > tr > th {
-  background-color: #fff;
-}
-
-.colorpicker.dropdown-menu {
-  z-index: 2000;
+  text-decoration: none!important;
 }
 
 .colorpicker-component {
   width: 8em;
 }
-
 .colorpicker-component > .form-control {
   font-family: Consolas, Menlo, Monaco, monospace;
   text-align: center;
+}
+
+.select2-choices > .select2-search-choice.sortable-ghost {
+  border-color: #0af;
+}
+
+.text-mono {
+  font-family: Consolas, Menlo, Monaco, monospace;
+  white-space: pre-wrap;
+}
+.is-changed {
+  color: #e00;
+}
+
+@media (max-width: 767px) {
+  .page-actions {
+    float: none;
+    display: block;
+    padding: 0;
+  }
+  .page-actions > li {
+    display: block;
+    margin-left: 0;
+    margin-bottom: 1em;
+  }
+  .page-actions > li > .btn {
+    width: 100%;
+  }
+  .page-actions-jump {
+    width: 100%;
+  }
+  .page-breadcrumbs {
+    position: absolute;
+    top: 8px;
+    left: 53px;
+    right: 73px;
+    text-align: center;
+    line-height: 1.4;
+    max-height: 36px;
+    overflow: hidden;
+  }
+  .page-breadcrumbs > li {
+    font-size: 16px;
+  }
+  .pagination > .pagination-page,
+  .pagination > .pagination-leftDots,
+  .pagination > .pagination-rightDots {
+    display: none;
+  }
+  .pagination > .pagination-page.active {
+    display: inline;
+  }
 }

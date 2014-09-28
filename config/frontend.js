@@ -19,6 +19,13 @@ exports.modules = [
   'sio'
 ];
 
+exports.dashboardUrlAfterLogIn = '/';
+
+exports.dictionaryModules = {
+  partners: 'PARTNERS',
+  palletKinds: 'PALLET_KINDS'
+};
+
 exports.events = {
   collection: function(app) { return app.mongoose.model('Event').collection; },
   insertDelay: 1000,
@@ -83,7 +90,8 @@ exports.express = {
   cookieSecret: '1ee7\\/\\/alkner-paltrack',
   ejsAmdHelpers: {
     t: 'app/i18n'
-  }
+  },
+  title: 'PalTrack'
 };
 
 exports.user = {

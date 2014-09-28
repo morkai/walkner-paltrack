@@ -1,45 +1,23 @@
-define(function (require, exports, module) {'use strict';
+define(function (require, exports, module) {// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
+// Licensed under the MIT License <http://opensource.org/licenses/MIT>.
+// Part of the h5.rql project <http://lukasz.walukiewicz.eu/p/h5.rql>
+
+'use strict';
 
 exports.fromQuery = serializeRqlToMongo;
-
-/**
- * @name h5.rql.serializers.mongoSerializer
- * @param {h5.rql.Query} query
- * @param {(h5.rql.serializers.mongoSerializer.Options|object)=} options
- * @returns {object}
- */
-function serializeRqlToMongo(query, options)
-{
-  if (!(options instanceof serializeRqlToMongo.Options))
-  {
-    options = new serializeRqlToMongo.Options(options);
-  }
-
-  var mongoQuery = {
-    selector: convertTerm(options, query.selector) || {},
-    fields: query.fields,
-    sort: query.sort,
-    limit: query.limit < 1 ? 0 : query.limit,
-    skip: query.skip
-  };
-
-  if (options.compactAnd
-    && Array.isArray(mongoQuery.selector.$and)
-    && Object.keys(mongoQuery.selector).length === 1)
-  {
-    mongoQuery.selector = compactQueries(mongoQuery.selector.$and);
-  }
-
-  return mongoQuery;
-}
+exports.fromQuery.Options = MongoSerializerOptions;
 
 /**
  * @constructor
- * @param {object=} options
+ * @param {object} [options]
+ * @param {boolean} [options.compactAnd]
+ * @param {boolean} [options.allowWhere]
+ * @param {Array.<string>} [options.whitelist]
+ * @param {Array.<string>} [options.blacklist]
  */
-serializeRqlToMongo.Options = function(options)
+function MongoSerializerOptions(options)
 {
-  if (typeof options !== 'object' || options === null)
+  if (options == null)
   {
     options = {};
   }
@@ -47,8 +25,7 @@ serializeRqlToMongo.Options = function(options)
   /**
    * @type {boolean}
    */
-  this.compactAnd = !options.hasOwnProperty('compactAnd')
-    || options.compactAnd === true;
+  this.compactAnd = options.compactAnd === undefined ? true : (options.compactAnd === true);
 
   /**
    * @type {boolean}
@@ -56,19 +33,19 @@ serializeRqlToMongo.Options = function(options)
   this.allowWhere = options.allowWhere === true;
 
   /**
-   * @type {function}
+   * @type {function(string): boolean}
    */
   this.isPropertyAllowed = typeof options.isPropertyAllowed === 'function'
     ? options.isPropertyAllowed
     : this.createPropertyFilter(options);
-};
+}
 
 /**
  * @private
  * @param {object} options
- * @returns {function}
+ * @returns {function(string): boolean}
  */
-serializeRqlToMongo.Options.prototype.createPropertyFilter = function(options)
+MongoSerializerOptions.prototype.createPropertyFilter = function(options)
 {
   if (Array.isArray(options.whitelist))
   {
@@ -90,11 +67,42 @@ serializeRqlToMongo.Options.prototype.createPropertyFilter = function(options)
     };
   }
 
-  return function() { return true; };
+  return function()
+  {
+    return true;
+  };
 };
 
 /**
- * @param {h5.rql.serializers.mongoSerializer.Options} options
+ * @param {Query} query
+ * @param {MongoSerializerOptions} [options]
+ * @returns {object}
+ */
+function serializeRqlToMongo(query, options)
+{
+  if (!(options instanceof MongoSerializerOptions))
+  {
+    options = new MongoSerializerOptions(options);
+  }
+
+  var mongoQuery = {
+    selector: convertTerm(options, query.selector) || {},
+    fields: query.fields,
+    sort: query.sort,
+    limit: query.limit < 1 ? 0 : query.limit,
+    skip: query.skip
+  };
+
+  if (options.compactAnd && Array.isArray(mongoQuery.selector.$and) && Object.keys(mongoQuery.selector).length === 1)
+  {
+    mongoQuery.selector = compactQueries(mongoQuery.selector.$and);
+  }
+
+  return mongoQuery;
+}
+
+/**
+ * @param {MongoSerializerOptions} options
  * @param {*} term
  * @returns {object}
  */
@@ -141,9 +149,7 @@ function convertTerm(options, term)
     case 'exists':
       if (typeof term.args[1] === 'boolean')
       {
-        return convertBinaryOperator(
-          options, 'exists', term.args[0], term.args[1]
-        );
+        return convertBinaryOperator(options, 'exists', term.args[0], term.args[1]);
       }
 
       break;
@@ -151,9 +157,7 @@ function convertTerm(options, term)
     case 'type':
       if (typeof term.args[1] === 'number')
       {
-        return convertBinaryOperator(
-          options, 'type', term.args[0], term.args[1]
-        );
+        return convertBinaryOperator(options, 'type', term.args[0], term.args[1]);
       }
 
       break;
@@ -175,9 +179,7 @@ function convertTerm(options, term)
     case 'size':
       if (typeof term.args[1] === 'number')
       {
-        return convertBinaryOperator(
-          options, 'size', term.args[0], term.args[1]
-        );
+        return convertBinaryOperator(options, 'size', term.args[0], term.args[1]);
       }
 
       break;
@@ -190,7 +192,7 @@ function convertTerm(options, term)
 }
 
 /**
- * @param {h5.rql.serializers.mongoSerializer.Options} options
+ * @param {MongoSerializerOptions} options
  * @param {string} operator
  * @param {string} property
  * @param {*} value
@@ -216,7 +218,7 @@ function convertBinaryOperator(options, operator, property, value)
 }
 
 /**
- * @param {h5.rql.serializers.mongoSerializer.Options} options
+ * @param {MongoSerializerOptions} options
  * @param {Array} args
  * @returns {object|null}
  */
@@ -241,14 +243,13 @@ function convertModOperator(options, args)
 }
 
 /**
- * @param {h5.rql.serializers.mongoSerializer.Options} options
+ * @param {MongoSerializerOptions} options
  * @param {Array} args
  * @returns {object|null}
  */
 function convertRegexOperator(options, args)
 {
-  if (args.length >= 2
-    && (typeof args[1] === 'string' || args[1] instanceof RegExp))
+  if (args.length >= 2 && (typeof args[1] === 'string' || args[1] instanceof RegExp))
   {
     var property = Array.isArray(args[0]) ? args[0].join('.') : args[0];
 
@@ -271,7 +272,7 @@ function convertRegexOperator(options, args)
 }
 
 /**
- * @param {h5.rql.serializers.mongoSerializer.Options} options
+ * @param {MongoSerializerOptions} options
  * @param {Array} args
  * @returns {object|null}
  */
@@ -305,7 +306,7 @@ function convertElemMatchOperator(options, args)
 }
 
 /**
- * @param {h5.rql.serializers.mongoSerializer.Options} options
+ * @param {MongoSerializerOptions} options
  * @param {string} operator
  * @param {Array} args
  * @returns {object|null}
@@ -336,7 +337,7 @@ function convertLogicalOperator(options, operator, args)
 }
 
 /**
- * @param {h5.rql.serializers.mongoSerializer.Options} options
+ * @param {MongoSerializerOptions} options
  * @param {Array} args
  * @returns {object|null}
  */
@@ -386,10 +387,7 @@ function convertNotOperator(options, args)
 
       Object.keys(nestedValue).forEach(function(nestedProperty)
       {
-        if (nestedProperty[0] === '$')
-        {
-          query[property].$not[nestedProperty] = nestedValue[nestedProperty];
-        }
+        query[property].$not[nestedProperty] = nestedValue[nestedProperty];
       });
     });
   }
@@ -398,7 +396,7 @@ function convertNotOperator(options, args)
 }
 
 /**
- * @param {h5.rql.serializers.mongoSerializer.Options} options
+ * @param {MongoSerializerOptions} options
  * @param {string} operator
  * @param {Array} args
  * @returns {object|null}
@@ -482,25 +480,18 @@ function compactQuery(selector, query)
  */
 function compactQueryValue(selector, property, value)
 {
-  // Change the value only if the current operator is not eq
-  if (isOperatorObject(selector[property], true))
+  // Merge operators if the value is not an eq operator
+  if (isOperatorObject(value, false))
   {
-    // Merge operators if the value is not an eq operator
-    if (isOperatorObject(value, false))
+    Object.keys(value).forEach(function(op)
     {
-      for (var op in value)
-      {
-        if (value.hasOwnProperty(op))
-        {
-          selector[property][op] = value[op];
-        }
-      }
-    }
-    // Otherwise, overwrite the previous operators with an eq operator
-    else
-    {
-      selector[property] = value;
-    }
+      selector[property][op] = value[op];
+    });
+  }
+  // Otherwise, overwrite the previous operators with an eq operator
+  else
+  {
+    selector[property] = value;
   }
 }
 

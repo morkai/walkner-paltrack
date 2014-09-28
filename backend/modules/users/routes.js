@@ -16,15 +16,15 @@ module.exports = function setUpUsersRoutes(app, usersModule)
   var canView = userModule.auth('USERS:VIEW');
   var canManage = userModule.auth('USERS:MANAGE');
 
-  express.get('/users', express.crud.browseRoute.bind(null, app, User));
+  express.get('/users', userModule.auth(), express.crud.browseRoute.bind(null, app, User));
 
   express.post('/users', canManage, hashPassword, express.crud.addRoute.bind(null, app, User));
 
   express.get('/users/:id', canViewDetails, express.crud.readRoute.bind(null, app, User));
 
-  express.put('/users/:id', canManage, hashPassword, express.crud.editRoute.bind(null, app, User));
+  express.put('/users/:id', canManage, restrictSpecial, hashPassword, express.crud.editRoute.bind(null, app, User));
 
-  express.delete('/users/:id', canManage, express.crud.deleteRoute.bind(null, app, User));
+  express.delete('/users/:id', canManage, restrictSpecial, express.crud.deleteRoute.bind(null, app, User));
 
   express.post('/login', loginRoute);
 
@@ -40,6 +40,16 @@ module.exports = function setUpUsersRoutes(app, usersModule)
     {
       canView(req, res, next);
     }
+  }
+
+  function restrictSpecial(req, res, next)
+  {
+    if (req.params.id === userModule.root._id || req.params.id === userModule.guest._id)
+    {
+      return res.send(400);
+    }
+
+    return next();
   }
 
   function loginRoute(req, res, next)

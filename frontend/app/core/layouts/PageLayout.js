@@ -51,10 +51,16 @@ define([
      * @type {jQuery|null}
      */
     this.$actions = null;
+
+    this.onWindowResize = _.debounce(this.onWindowResize.bind(this), 1000 / 15);
+
+    $(window).on('resize', this.onWindowResize);
   };
 
   PageLayout.prototype.destroy = function()
   {
+    $(window).off('resize', this.onWindowResize);
+
     if (this.el.ownerDocument)
     {
       this.el.ownerDocument.body.classList.remove('page');
@@ -286,6 +292,14 @@ define([
 
   /**
    * @private
+   */
+  PageLayout.prototype.onWindowResize = function()
+  {
+    this.adjustBreadcrumbsPosition();
+  };
+
+  /**
+   * @private
    * @param action
    * @returns {*}
    */
@@ -355,6 +369,21 @@ define([
 
     this.$breadcrumbs.html(html);
     this.$header.show();
+
+    this.adjustBreadcrumbsPosition();
+  };
+
+  /**
+   * @private
+   */
+  PageLayout.prototype.adjustBreadcrumbsPosition = function()
+  {
+    if (window.innerWidth < 768)
+    {
+      var top = (this.$('.navbar-header').outerHeight() - this.$breadcrumbs.outerHeight()) / 2;
+
+      this.$breadcrumbs.css('top', top + 'px');
+    }
   };
 
   /**
@@ -371,11 +400,19 @@ define([
     {
       var action = actions[i];
 
-      if (action.privileges
-        && ((_.isFunction(action.privileges) && !action.privileges())
-          || !user.isAllowedTo(action.privileges)))
+      if (action.privileges)
       {
-        continue;
+        if (_.isFunction(action.privileges))
+        {
+          if (!action.privileges())
+          {
+            continue;
+          }
+        }
+        else if (!user.isAllowedTo(action.privileges))
+        {
+          continue;
+        }
       }
 
       if (typeof action.callback === 'function')

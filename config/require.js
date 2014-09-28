@@ -22,7 +22,8 @@ exports.paths = {
   'reltime': 'vendor/reltime',
   'select2': 'vendor/select2/select2',
   'select2-lang': 'vendor/select2-lang',
-  'zeroclipboard': 'vendor/zeroclipboard/ZeroClipboard'
+  'zeroclipboard': 'vendor/zeroclipboard/ZeroClipboard',
+  'sift': 'vendor/sift'
 };
 
 exports.shim = {
@@ -41,6 +42,9 @@ exports.shim = {
   'select2': {
     deps: ['jquery'],
     exports: 'Select2'
+  },
+  'sift': {
+    exports: 'sift'
   }
 };
 

@@ -58,7 +58,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
     express.crud.editRoute.bind(null, app, Gdn)
   );
 
-  express.del('/registry/gdn/:id', canManage, express.crud.deleteRoute.bind(null, app, Gdn));
+  express.delete('/registry/gdn/:id', canManage, express.crud.deleteRoute.bind(null, app, Gdn));
 
   function prepareNewGdnModel(req, res, next)
   {

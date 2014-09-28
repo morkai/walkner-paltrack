@@ -27,5 +27,5 @@ module.exports = function setUpPartnersRoutes(app, partnersModule)
 
   express.put('/partners/:id', canManage, crud.editRoute.bind(null, app, Partner));
 
-  express.del('/partners/:id', canManage, crud.deleteRoute.bind(null, app, Partner));
+  express.delete('/partners/:id', canManage, crud.deleteRoute.bind(null, app, Partner));
 };

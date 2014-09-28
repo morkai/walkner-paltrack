@@ -94,10 +94,7 @@ function(
 
   View.prototype.cleanup = function()
   {
-    if (_.isFunction(this.destroy))
-    {
-      this.destroy();
-    }
+    this.destroy();
 
     util.cleanupSandboxedProperties(this);
 
@@ -111,9 +108,24 @@ function(
     this.cancelRequests();
   };
 
+  View.prototype.destroy = function()
+  {
+
+  };
+
+  View.prototype.beforeRender = function()
+  {
+
+  };
+
   View.prototype.serialize = function()
   {
     return {idPrefix: this.idPrefix};
+  };
+
+  View.prototype.afterRender = function()
+  {
+
   };
 
   View.prototype.isRendered = function()
