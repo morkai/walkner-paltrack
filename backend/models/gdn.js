@@ -86,7 +86,7 @@ module.exports = function setupGdnModel(app, mongoose)
 
       gdn.checkedAt = gdn.createdAt;
       gdn.checker = gdn.creator;
-      gdn.checked = deepEqual(gdn.goods, grn.goods);
+      gdn.checked = grn ? deepEqual(gdn.goods, grn.goods) : false;
 
       return done();
     });

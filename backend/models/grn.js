@@ -85,7 +85,7 @@ module.exports = function setupGrnModel(app, mongoose)
 
       grn.checkedAt = grn.createdAt;
       grn.checker = grn.creator;
-      grn.checked = deepEqual(grn.goods, gdn.goods);
+      grn.checked = gdn ? deepEqual(grn.goods, gdn.goods) : false;
 
       return done();
     });
