@@ -4,6 +4,7 @@
 
 'use strict';
 
+var deepEqual = require('deep-equal');
 var validateGoods = require('./util/validateGoods');
 var createChangeSchema = require('./util/createChangeSchema');
 var userInfoSchema = require('./userInfoSchema');
@@ -60,6 +61,36 @@ module.exports = function setupGdnModel(app, mongoose)
   gdnSchema.index({docNo: 1});
 
   gdnSchema.path('goods').validate(validateGoods, 'goods:required');
+
+  gdnSchema.methods.findRelatedGn = function(done)
+  {
+    var conditions = {
+      receiver: this.receiver,
+      supplier: this.supplier,
+      docNo: this.docNo
+    };
+
+    mongoose.model('Grn').findOne(conditions, done);
+  };
+
+  gdnSchema.methods.checkGrn = function(done)
+  {
+    var gdn = this;
+
+    this.findRelatedGn(function(err, grn)
+    {
+      if (err)
+      {
+        return done(err);
+      }
+
+      gdn.checkedAt = gdn.createdAt;
+      gdn.checker = gdn.creator;
+      gdn.checked = deepEqual(gdn.goods, grn.goods);
+
+      return done();
+    });
+  };
 
   mongoose.model('Gdn', gdnSchema);
 };

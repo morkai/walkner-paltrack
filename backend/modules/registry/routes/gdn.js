@@ -87,7 +87,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
       checker: null
     });
 
-    next();
+    req.model.checkGrn(next);
   }
 
   function prepareExistingGdnModel(req, res, next)
@@ -128,7 +128,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
 
       req.body = {};
 
-      next();
+      req.model.checkGrn(next);
     });
   }
 

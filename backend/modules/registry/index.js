@@ -6,6 +6,7 @@
 
 var setUpRoutes = require('./routes');
 var setUpDailyBalance = require('./dailyBalance');
+var setUpChecker = require('./checker');
 
 exports.DEFAULT_CONFIG = {
   mongooseId: 'mongoose',
@@ -18,25 +19,34 @@ exports.DEFAULT_CONFIG = {
   wkhtmltopdfCmd: 'wkhtmltopdf'
 };
 
-exports.start = function startRegistryModule(app, module)
+exports.start = function startRegistryModule(app, registryModule)
 {
+  var config = registryModule.config;
+
   app.onModuleReady(
     [
-      module.config.mongooseId,
-      module.config.userId,
-      module.config.expressId,
-      module.config.partnersId,
-      module.config.palletKindsId
+      config.mongooseId,
+      config.userId,
+      config.expressId,
+      config.partnersId,
+      config.palletKindsId
     ],
-    setUpRoutes.bind(null, app, module)
+    setUpRoutes.bind(null, app, registryModule)
   );
 
   app.onModuleReady(
     [
-      module.config.mongooseId,
-      module.config.partnersId,
-      module.config.palletKindsId
+      config.mongooseId,
+      config.partnersId,
+      config.palletKindsId
     ],
-    setUpDailyBalance.bind(null, app, module)
+    setUpDailyBalance.bind(null, app, registryModule)
+  );
+
+  app.onModuleReady(
+    [
+      config.mongooseId
+    ],
+    setUpChecker.bind(null, app, registryModule)
   );
 };
