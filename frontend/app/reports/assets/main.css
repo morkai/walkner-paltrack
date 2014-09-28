@@ -1,15 +1,14 @@
-.currentBalanceList th {
+.dailyBalanceList th {
   white-space: nowrap;
 }
-.currentBalanceList td {
+.dailyBalanceList td {
   width: 1%;
   white-space: nowrap;
 }
-.currentBalanceList td:last-child {
+.dailyBalanceList td:last-child {
   width: auto;
 }
-.currentBalanceList .number {
-  font-family: "Consolas", "Monaco", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
+.dailyBalanceList .is-number {
   font-size: 1.2em;
 }
 .currentBalanceBar {

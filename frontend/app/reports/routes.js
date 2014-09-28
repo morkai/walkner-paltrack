@@ -6,20 +6,24 @@ define([
   '../router',
   '../viewport',
   '../user',
-  './pages/CurrentBalanceListPage',
+  './DailyBalanceCollection',
+  './pages/DailyBalanceListPage',
   'i18n!app/nls/reports'
 ], function(
   router,
   viewport,
   user,
-  CurrentBalanceListPage
+  DailyBalanceCollection,
+  DailyBalanceListPage
 ) {
   'use strict';
 
   var canView = user.auth('REGISTRY:VIEW');
 
-  router.map('/reports/current-balance', canView, function(req)
+  router.map('/reports/daily-balance', canView, function(req)
   {
-    viewport.showPage(new CurrentBalanceListPage({rql: req.rql}));
+    viewport.showPage(new DailyBalanceListPage({
+      collection: new DailyBalanceCollection(null, {rqlQuery: req.rql})
+    }));
   });
 });

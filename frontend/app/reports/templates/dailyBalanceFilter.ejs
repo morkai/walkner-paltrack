@@ -1,0 +1,9 @@
+<form class="well filter-form">
+  <div class="form-group">
+    <label for="<%- idPrefix %>-date"><%- t('reports', 'filter:date') %></label>
+    <input id="<%- idPrefix %>-date" class="form-control" name="date" type="date" placeholder="YYYY-MM-DD">
+  </div>
+  <div class="form-group filter-actions">
+    <button type="submit" class="btn btn-default"><i class="fa fa-filter"></i><span><%= t('reports', 'filter:submit') %></span></button>
+  </div>
+</form>

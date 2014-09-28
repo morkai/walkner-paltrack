@@ -21,21 +21,14 @@ define([
 
   return ListView.extend({
 
-    className: 'currentBalanceList',
+    className: 'dailyBalanceList',
 
     localTopics: {
       'partners.synced': 'render',
       'palletKinds.synced': 'render'
     },
 
-    remoteTopics: function()
-    {
-      var topics = {};
-
-      topics['balance.current.' + (user.data.partner || '*')] = 'refreshCollection';
-
-      return topics;
-    },
+    remoteTopics: null,
 
     serializeColumns: function()
     {
@@ -50,14 +43,14 @@ define([
           id: 'goods.' + palletKind.id,
           label: palletKind.getLabel(),
           noData: 0,
-          tdAttrs: 'class="number"'
+          tdAttrs: 'class="is-number"'
         });
       });
 
       columns.push({
         id: 'total',
         label: t('reports', 'PROPERTY:total'),
-        tdAttrs: 'class="number"'
+        tdAttrs: 'class="is-number"'
       });
 
       columns.push({

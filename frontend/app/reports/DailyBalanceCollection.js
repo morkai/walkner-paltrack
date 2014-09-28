@@ -6,7 +6,7 @@ define([
   '../user',
   '../core/Collection',
   '../data/partners',
-  './CurrentBalance'
+  './dailyBalance'
 ], function(
   user,
   Collection,

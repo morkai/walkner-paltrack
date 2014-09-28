@@ -19,9 +19,9 @@ define([
 
   return Model.extend({
 
-    urlRoot: '/reports/current-balance',
+    urlRoot: '/reports/daily-balance',
 
-    clientUrlRoot: '#registry/current-balance',
+    clientUrlRoot: '#reports/daily-balance',
 
     privilegePrefix: 'REPORTS',
 

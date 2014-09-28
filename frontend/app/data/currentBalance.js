@@ -6,17 +6,17 @@ define([
   'app/broker',
   'app/pubsub',
   'app/user',
-  'app/reports/CurrentBalanceCollection'
+  'app/reports/DailyBalanceCollection'
 ], function(
   broker,
   pubsub,
   user,
-  CurrentBalanceCollection
+  DailyBalanceCollection
 ) {
   'use strict';
 
   var sub = null;
-  var currentBalances = new CurrentBalanceCollection();
+  var currentBalances = new DailyBalanceCollection();
 
   broker.subscribe('user.reloaded', function()
   {

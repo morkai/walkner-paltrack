@@ -247,7 +247,7 @@ module.exports = function setUpDailyBalance(app, registryModule)
         this.dailyBalance.save(this.next());
         this.dailyBalance = null;
       },
-      function(err)
+      function(err, dailyBalance)
       {
         if (err)
         {
@@ -261,10 +261,10 @@ module.exports = function setUpDailyBalance(app, registryModule)
         else
         {
           registryModule.debug(
-            "Recounted the balance for partner [%s] and date [%s]", partnerId, dateString
+            "Recounted the balance for partner [%s] and date [%s]", partnerId, dateString, dailyBalance._id
           );
 
-          app.broker.publish('balance.daily.' + partnerId, {
+          app.broker.publish('balance.daily.' + dateString + '.' + partnerId, {
             partner: partnerId,
             date: date
           });

@@ -57,7 +57,7 @@
   "NAVBAR:PALLET_KINDS": "Rodzaje palet",
   "NAVBAR:PARTNERS": "Partnerzy",
   "NAVBAR:REPORTS": "Raporty",
-  "NAVBAR:REPORTS:CURRENT_BALANCE": "Aktualny bilans",
+  "NAVBAR:REPORTS:DAILY_BALANCE": "Bilans dzienny",
   "NAVBAR:REGISTRY": "Rejestr",
   "NAVBAR:REGISTRY:GRN": "<code>PZ</code> Przyjęcia zewnętrzne",
   "NAVBAR:REGISTRY:GDN": "<code>WZ</code> Wydania zewnętrzne",

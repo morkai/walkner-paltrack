@@ -1,8 +1,11 @@
 {
-  "BREADCRUMBS:currentBalance": "Aktualny bilans",
+  "BREADCRUMBS:dailyBalance": "Bilans dzienny",
 
   "MSG:LOADING_FAILURE": "Nie udało się załadować danych do raportu :(",
 
   "PROPERTY:partner": "Partner",
-  "PROPERTY:total": "Suma"
+  "PROPERTY:total": "Suma",
+
+  "filter:date": "Data",
+  "filter:submit": "Filtruj raport"
 }

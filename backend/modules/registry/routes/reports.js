@@ -16,15 +16,15 @@ module.exports = function setUpGrnRoutes(app, registryModule)
 
   var canView = userModule.auth('REPORTS:VIEW');
 
-  express.get('/reports/current-balance', canView, currentBalanceRoute);
+  express.get('/reports/daily-balance', canView, dailyBalanceRoute);
 
-  function currentBalanceRoute(req, res, next)
+  function dailyBalanceRoute(req, res, next)
   {
     step(
       function()
       {
         var conditions = {
-          date: moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate()
+          date: moment(req.query.date).hours(0).minutes(0).seconds(0).milliseconds(0).toDate()
         };
 
         if (req.session.user.partner)

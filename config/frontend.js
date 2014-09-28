@@ -62,7 +62,7 @@ exports.pubsub = {
     'updater.newVersion',
     'settings.updated.**',
     'registry.*.added', 'registry.*.edited', 'registry.*.deleted', 'registry.*.checked.**',
-    'balance.daily.*', 'balance.current.*'
+    'balance.daily.**', 'balance.current.*'
   ]
 };
 
