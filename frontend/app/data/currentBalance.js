@@ -25,9 +25,13 @@ define([
     if (sub !== null)
     {
       sub.cancel();
+      sub = null;
     }
 
-    sub = pubsub.subscribe('balance.current.' + user.data.partner, reloadCurrentBalance);
+    if (user.data.partner)
+    {
+      sub = pubsub.subscribe('balance.current.' + user.data.partner, reloadCurrentBalance);
+    }
   });
 
   function reloadCurrentBalance()
