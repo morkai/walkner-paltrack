@@ -1,13 +1,13 @@
-.registryList > .table > thead > tr > th {
+.registryList .table > thead > tr > th {
   border-bottom-width: 8px;
 }
-.registryList.grn > .table > thead > tr > th {
+.registryList.grn .table > thead > tr > th {
   border-bottom-color: #fa0;
 }
-.registryList.gdn > .table > thead > tr > th {
+.registryList.gdn .table > thead > tr > th {
   border-bottom-color: #9e0;
 }
-.registryList.ob > .table > thead > tr > th {
+.registryList.ob .table > thead > tr > th {
   border-bottom-color: #0af;
 }
 .registryList .list-item > td.number {
