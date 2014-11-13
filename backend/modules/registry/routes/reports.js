@@ -18,6 +18,8 @@ module.exports = function setUpGrnRoutes(app, registryModule)
 
   express.get('/reports/daily-balance', canView, dailyBalanceRoute);
 
+  express.get('/reports/partner-balance', canView, partnerBalanceRoute);
+
   function dailyBalanceRoute(req, res, next)
   {
     step(
@@ -55,8 +57,51 @@ module.exports = function setUpGrnRoutes(app, registryModule)
           partnerToBalanceMap[dailyBalance.partner] = dailyBalance.goods.total;
         }
 
-        res.send(partnerToBalanceMap);
+        res.json(partnerToBalanceMap);
       }
     );
+  }
+
+  function partnerBalanceRoute(req, res, next)
+  {
+    var user = req.session.user;
+    var partner = req.query.partner;
+    var from = moment(req.query.from || null);
+    var to = moment(req.query.to || null);
+
+    if (!partner || user.partner)
+    {
+      partner = user.partner;
+    }
+
+    if (!partner || !from.isValid() || !to.isValid())
+    {
+      return res.json([]);
+    }
+
+    var conditions = {
+      partner: partner,
+      date: {
+        $gte: from.toDate(),
+        $lt: to.toDate()
+      }
+    };
+    var fields = {
+      _id: 0,
+      date: 1,
+      'goods.total': 1,
+      'goods.grnByPartner': 1,
+      'goods.gdnByPartner': 1
+    };
+
+    DailyBalance.find(conditions, fields).sort({partner: 1, date: 1}).exec(function(err, dailyBalances)
+    {
+      if (err)
+      {
+        return next(err);
+      }
+
+      return res.json(dailyBalances);
+    });
   }
 };

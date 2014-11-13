@@ -7,14 +7,18 @@ define([
   '../viewport',
   '../user',
   './DailyBalanceCollection',
+  './PartnerBalanceCollection',
   './pages/DailyBalanceListPage',
+  './pages/PartnerBalanceListPage',
   'i18n!app/nls/reports'
 ], function(
   router,
   viewport,
   user,
   DailyBalanceCollection,
-  DailyBalanceListPage
+  PartnerBalanceCollection,
+  DailyBalanceListPage,
+  PartnerBalanceListPage
 ) {
   'use strict';
 
@@ -24,6 +28,13 @@ define([
   {
     viewport.showPage(new DailyBalanceListPage({
       collection: new DailyBalanceCollection(null, {rqlQuery: req.rql})
+    }));
+  });
+
+  router.map('/reports/partner-balance', canView, function(req)
+  {
+    viewport.showPage(new PartnerBalanceListPage({
+      collection: new PartnerBalanceCollection(null, {rqlQuery: req.rql})
     }));
   });
 });

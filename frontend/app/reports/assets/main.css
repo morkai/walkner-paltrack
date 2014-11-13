@@ -42,3 +42,47 @@
   font-family: "Consolas", "Monaco", "Bitstream Vera Sans Mono", "Courier New", Courier, monospace;
   font-size: 1.4em;
 }
+.partnerBalanceList .table > tbody > tr > th {
+  border-bottom-width: 2px;
+}
+.partnerBalanceList .table > tbody > tr > th:first-child {
+  border-left-width: 0;
+}
+.partnerBalanceList .table > tbody > tr > th:last-child {
+  border-right-width: 0;
+}
+.partnerBalanceList .table > tbody + tbody {
+  border-top-width: 4px;
+}
+.partnerBalanceList-grn {
+  display: block;
+  color: blue;
+}
+.partnerBalanceList-gdn {
+  display: block;
+  color: red;
+}
+.partnerBalanceList-total {
+  background-color: #fbfbfb;
+}
+.partnerBalanceList-balance {
+  background-color: #f6f6f6;
+}
+.partnerBalanceList td.is-positive {
+  color: blue;
+}
+.partnerBalanceList td.is-negative {
+  color: red;
+}
+@media print {
+  .dailyBalanceList th,
+  .dailyBalanceList td,
+  .dailyBalanceList tbody,
+  .partnerBalanceList th,
+  .partnerBalanceList td,
+  .partnerBalanceList tbody {
+    border-color: #000!important;
+    padding: 0 3px!important;
+    font-size: 10px!important;
+  }
+}

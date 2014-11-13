@@ -6,18 +6,18 @@ define([
   '../user',
   '../core/Collection',
   '../data/partners',
-  './dailyBalance'
+  './DailyBalance'
 ], function(
   user,
   Collection,
   partners,
-  CurrentBalance
+  DailyBalance
 ) {
   'use strict';
 
   return Collection.extend({
 
-    model: CurrentBalance,
+    model: DailyBalance,
 
     parse: function(res)
     {

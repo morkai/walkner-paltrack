@@ -58,6 +58,7 @@
     "NAVBAR:PARTNERS": "Partners",
     "NAVBAR:REPORTS": "Reports",
     "NAVBAR:REPORTS:DAILY_BALANCE": "Daily balance",
+    "NAVBAR:REPORTS:PARTNER_BALANCE": "Partner's balance",
     "NAVBAR:REGISTRY": "Registry",
     "NAVBAR:REGISTRY:GRN": "<code>GRN</code> Goods received",
     "NAVBAR:REGISTRY:GDN": "<code>GDN</code> Goods dispatched",

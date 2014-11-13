@@ -8,7 +8,6 @@ define([
   'app/user',
   'app/i18n',
   'app/core/pages/FilteredListPage',
-  '../DailyBalanceCollection',
   '../views/DailyBalanceFilterView',
   '../views/DailyBalanceListView'
 ], function(
@@ -17,7 +16,6 @@ define([
   user,
   t,
   FilteredListPage,
-  DailyBalanceCollection,
   DailyBalanceFilterView,
   DailyBalanceListView
 ) {
@@ -34,8 +32,6 @@ define([
     breadcrumbs: [
       t.bound('reports', 'BREADCRUMBS:dailyBalance')
     ],
-
-    remoteTopics: null,
 
     initialize: function()
     {
