@@ -332,7 +332,7 @@ kbd {
   color: #e00;
 }
 
-@media (max-width: 767px) {
+@media screen and (max-width: 767px) {
   .page-actions {
     float: none;
     display: block;

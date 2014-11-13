@@ -45,3 +45,8 @@ td.is-min {
 .table-hover > tbody > tr:hover > th {
   background-color: #FFFFD6;
 }
+@media print {
+  .table-responsive {
+    overflow-x: visible;
+  }
+}

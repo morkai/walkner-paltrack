@@ -125,7 +125,7 @@ input[type=checkbox].filter-inLabel {
 .filter-inlineInputLabels .form-control {
   display: inline;
 }
-@media (max-width: 767px) {
+@media screen and (max-width: 767px) {
   .filter-container > .well {
     align-items: flex-start;
     padding: 1em;
