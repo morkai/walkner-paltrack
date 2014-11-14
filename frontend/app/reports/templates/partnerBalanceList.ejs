@@ -17,7 +17,6 @@
           <th></th>
         </tr>
         <% row.partners.forEach(function(partner) { %>
-        <% var balance = partner.grn.total - partner.gdn.total; %>
         <tr class="partnerBalanceList-partner">
           <td></td>
           <td><%= partnersMap[partner.id] || partner.id %></td>
@@ -53,6 +52,48 @@
         </tr>
       </tbody>
       <% }) %>
+      <tbody>
+         <tr>
+          <th class="is-min"><em><%- t('reports', 'PROPERTY:total') %></em></th>
+          <th class="is-min"><%- t('reports', 'PROPERTY:partner') %></th>
+          <%- palletKindColumns %>
+          <th></th>
+        </tr>
+        <% summary.partners.forEach(function(partner) { %>
+        <tr class="partnerBalanceList-partner">
+          <td></td>
+          <td><%= partnersMap[partner.id] || partner.id %></td>
+          <% palletKinds.forEach(function(palletKind) { %>
+          <td class="is-number">
+            <span class="partnerBalanceList-count <%- partner.grn[palletKind.id] > 0 ? 'is-positive' : '' %>">+<%- partner.grn[palletKind.id] || 0 %></span>
+            <span class="partnerBalanceList-count <%- partner.gdn[palletKind.id] > 0 ? 'is-negative' : '' %>">-<%- partner.gdn[palletKind.id] || 0 %></span>
+          </td>
+          <% }) %>
+          <td></td>
+        </tr>
+        <% }) %>
+        <% if (summary.partners.length > 1) { %>
+        <tr class="partnerBalanceList-total">
+          <td></td>
+          <td><em><%- t('reports', 'PROPERTY:total') %></em></td>
+          <% palletKinds.forEach(function(palletKind) { %>
+          <td class="is-number">
+            <span class="partnerBalanceList-count <%- summary.totals.grn[palletKind.id] > 0 ? 'is-positive' : '' %>">+<%- summary.totals.grn[palletKind.id] || 0 %></span>
+            <span class="partnerBalanceList-count <%- summary.totals.gdn[palletKind.id] > 0 ? 'is-negative' : '' %>">-<%- summary.totals.gdn[palletKind.id] || 0 %></span>
+          </td>
+          <% }) %>
+          <td></td>
+        </tr>
+        <% } %>
+        <tr class="partnerBalanceList-balance">
+          <td></td>
+          <td><em><%- t('reports', 'PROPERTY:balance') %></em></td>
+          <% palletKinds.forEach(function(palletKind) { %>
+          <td class="is-number <%- summary.balance[palletKind.id] > 0 ? 'is-positive' : summary.balance[palletKind.id] < 0 ? 'is-negative' : '' %>"><%- summary.balance[palletKind.id] || 0 %></td>
+          <% }) %>
+          <td></td>
+        </tr>
+      </tbody>
     </table>
   </div>
 </div>

@@ -38,11 +38,15 @@ define([
         partnersMap[partner.id] = partner.getLabel();
       });
 
+      var rows = this.collection.toJSON();
+      var summary = rows.pop();
+
       return {
         palletKindColumns: renderPalletKindColumns({palletKinds: palletKindsList}),
         palletKinds: palletKindsList,
         partnersMap: partnersMap,
-        rows: this.collection.toJSON()
+        rows: rows,
+        summary: summary
       };
     }
 

@@ -90,8 +90,8 @@ module.exports = function setUpGrnRoutes(app, registryModule)
       _id: 0,
       date: 1,
       'goods.total': 1,
-      'goods.grnByPartner': 1,
-      'goods.gdnByPartner': 1
+      'daily.grnByPartner': 1,
+      'daily.gdnByPartner': 1
     };
 
     DailyBalance.find(conditions, fields).sort({partner: 1, date: 1}).exec(function(err, dailyBalances)

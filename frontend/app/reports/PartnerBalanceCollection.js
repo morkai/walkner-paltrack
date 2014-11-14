@@ -18,16 +18,38 @@ define([
     parse: function(res)
     {
       var results = [];
+      var summaryPartners = {};
+      var summary = {
+        date: null,
+        partners: [],
+        totals: {
+          balance: 0,
+          grn: {
+            total: 0
+          },
+          gdn: {
+            total: 0
+          }
+        },
+        balance: {
+          total: 0
+        }
+      };
 
       for (var i = 0, l = res.length; i < l; ++i)
       {
         var data = res[i];
+        var goods = data.goods;
 
-        if (!data.goods)
+        if (!goods)
         {
           continue;
         }
 
+        var daily = data.daily || {
+          grnByPartner: {},
+          gdnByPartner: {}
+        };
         var partners = {};
         var result = {
           date: data.date,
@@ -46,14 +68,14 @@ define([
           }
         };
 
-        var palletKindIds = Object.keys(data.goods.total);
+        var palletKindIds = Object.keys(goods.total);
         var ii;
         var ll;
 
         for (ii = 0, ll = palletKindIds.length; ii < ll; ++ii)
         {
           var palletKindId = palletKindIds[ii];
-          var balanceCount = data.goods.total[palletKindId];
+          var balanceCount = goods.total[palletKindId];
 
           if (result.balance[palletKindId] === undefined)
           {
@@ -67,15 +89,28 @@ define([
           result.balance.total += balanceCount;
         }
 
-        var grnPartnerIds = data.goods.grnByPartner === undefined ? [] : Object.keys(data.goods.grnByPartner);
+        var grnPartnerIds = daily.grnByPartner === undefined ? [] : Object.keys(daily.grnByPartner);
         var iii;
         var lll;
 
         for (ii = 0, ll = grnPartnerIds.length; ii < ll; ++ii)
         {
           var grnPartnerId = grnPartnerIds[ii];
-          var grnByPartner = data.goods.grnByPartner[grnPartnerId];
+          var grnByPartner = daily.grnByPartner[grnPartnerId];
           var grnPalletKindIds = Object.keys(grnByPartner);
+
+          if (summaryPartners[grnPartnerId] === undefined)
+          {
+            summaryPartners[grnPartnerId] = {
+              id: grnPartnerId,
+              grn: {total: 0},
+              gdn: {total: 0}
+            };
+
+            summary.partners.push(summaryPartners[grnPartnerId]);
+          }
+
+          var grnSummaryPartner = summaryPartners[grnPartnerId];
 
           if (partners[grnPartnerId] === undefined)
           {
@@ -94,6 +129,28 @@ define([
           {
             var grnPalletKindId = grnPalletKindIds[iii];
             var grnCount = grnByPartner[grnPalletKindId];
+
+            if (summary.totals.grn[grnPalletKindId] === undefined)
+            {
+              summary.totals.grn[grnPalletKindId] = grnCount;
+            }
+            else
+            {
+              summary.totals.grn[grnPalletKindId] += grnCount;
+            }
+
+            summary.totals.grn.total += grnCount;
+
+            if (grnSummaryPartner.grn[grnPalletKindId] === undefined)
+            {
+              grnSummaryPartner.grn[grnPalletKindId] = grnCount;
+            }
+            else
+            {
+              grnSummaryPartner.grn[grnPalletKindId] += grnCount;
+            }
+
+            grnSummaryPartner.grn.total += grnCount;
 
             if (result.totals.grn[grnPalletKindId] === undefined)
             {
@@ -119,13 +176,26 @@ define([
           }
         }
 
-        var gdnPartnerIds = data.goods.gdnByPartner === undefined ? [] : Object.keys(data.goods.gdnByPartner);
+        var gdnPartnerIds = daily.gdnByPartner === undefined ? [] : Object.keys(daily.gdnByPartner);
 
         for (ii = 0, ll = gdnPartnerIds.length; ii < ll; ++ii)
         {
           var gdnPartnerId = gdnPartnerIds[ii];
-          var gdnByPartner = data.goods.gdnByPartner[gdnPartnerId];
+          var gdnByPartner = daily.gdnByPartner[gdnPartnerId];
           var gdnPalletKindIds = Object.keys(gdnByPartner);
+
+          if (summaryPartners[gdnPartnerId] === undefined)
+          {
+            summaryPartners[gdnPartnerId] = {
+              id: gdnPartnerId,
+              grn: {total: 0},
+              gdn: {total: 0}
+            };
+
+            summary.partners.push(summaryPartners[gdnPartnerId]);
+          }
+
+          var gdnSummaryPartner = summaryPartners[gdnPartnerId];
 
           if (partners[gdnPartnerId] === undefined)
           {
@@ -144,6 +214,28 @@ define([
           {
             var gdnPalletKindId = gdnPalletKindIds[iii];
             var gdnCount = gdnByPartner[gdnPalletKindId];
+
+            if (summary.totals.gdn[gdnPalletKindId] === undefined)
+            {
+              summary.totals.gdn[gdnPalletKindId] = gdnCount;
+            }
+            else
+            {
+              summary.totals.gdn[gdnPalletKindId] += gdnCount;
+            }
+
+            summary.totals.gdn.total += gdnCount;
+
+            if (gdnSummaryPartner.gdn[gdnPalletKindId] === undefined)
+            {
+              gdnSummaryPartner.gdn[gdnPalletKindId] = gdnCount;
+            }
+            else
+            {
+              gdnSummaryPartner.gdn[gdnPalletKindId] += gdnCount;
+            }
+
+            gdnSummaryPartner.gdn.total += gdnCount;
 
             if (result.totals.gdn[gdnPalletKindId] === undefined)
             {
@@ -173,6 +265,13 @@ define([
 
         results.push(result);
       }
+
+      if (results.length > 0)
+      {
+        summary.balance = results[results.length - 1].balance;
+      }
+
+      results.push(summary);
 
       return results;
     }
