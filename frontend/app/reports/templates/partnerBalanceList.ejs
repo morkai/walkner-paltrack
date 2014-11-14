@@ -30,6 +30,7 @@
           <td></td>
         </tr>
         <% }) %>
+        <% if (row.partners.length > 1) { %>
         <tr class="partnerBalanceList-total">
           <td></td>
           <td><em><%- t('reports', 'PROPERTY:total') %></em></td>
@@ -41,6 +42,7 @@
           <% }) %>
           <td></td>
         </tr>
+        <% } %>
         <tr class="partnerBalanceList-balance">
           <td></td>
           <td><em><%- t('reports', 'PROPERTY:balance') %></em></td>
