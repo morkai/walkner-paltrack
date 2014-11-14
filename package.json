@@ -1,9 +1,9 @@
 {
   "private": true,
   "name": "walkner-paltrack",
-  "version": "0.4.0",
-  "backendVersion": 6,
-  "frontendVersion": 8,
+  "version": "0.4.1",
+  "backendVersion": 7,
+  "frontendVersion": 9,
   "description": "Pallet tracking application.",
   "license": "CC BY-NC-SA 4.0",
   "homepage": "https://github.com/morkai/walkner-paltrack",
