@@ -18,7 +18,8 @@ module.exports = function setupDailyBalanceModel(app, mongoose)
       type: Date,
       required: true
     },
-    goods: {}
+    goods: {},
+    daily: {}
   }, {
     id: false
   });
@@ -30,6 +31,19 @@ module.exports = function setupDailyBalanceModel(app, mongoose)
   {
     this.goods = {
       total: {},
+      gnTotal: {},
+      gnByPartner: {},
+      grnTotal: {},
+      grnByPartner: {},
+      gdnTotal: {},
+      gdnByPartner: {}
+    };
+    this.resetDaily();
+  };
+
+  dailyBalanceSchema.methods.resetDaily = function()
+  {
+    this.daily = {
       gnTotal: {},
       gnByPartner: {},
       grnTotal: {},
@@ -51,6 +65,7 @@ module.exports = function setupDailyBalanceModel(app, mongoose)
     if (prevDailyBalance && prevDailyBalance.goods)
     {
       this.goods = lodash.cloneDeep(prevDailyBalance.goods);
+      this.resetDaily();
     }
     else
     {
@@ -75,13 +90,19 @@ module.exports = function setupDailyBalanceModel(app, mongoose)
       partnerId = partnerId.toString();
     }
 
-    if (this.goods === null)
+    if (!this.goods)
     {
       this.reset();
     }
 
+    if (!this.daily)
+    {
+      this.resetDaily();
+    }
+
     var grn = incDec === 1;
     var balanceGoods = this.goods;
+    var dailyGoods = this.daily;
 
     Object.keys(goods).forEach(function(palletKindId)
     {
@@ -98,19 +119,29 @@ module.exports = function setupDailyBalanceModel(app, mongoose)
       incPropertyValue(balanceGoods.gnTotal, palletKindId, count);
       incPropertyPropertyValue(balanceGoods.gnByPartner, partnerId, palletKindId, count);
 
+      incPropertyValue(dailyGoods.gnTotal, palletKindId, count);
+      incPropertyPropertyValue(dailyGoods.gnByPartner, partnerId, palletKindId, count);
+
       if (grn)
       {
         incPropertyValue(balanceGoods.grnTotal, palletKindId, value);
         incPropertyPropertyValue(balanceGoods.grnByPartner, partnerId, palletKindId, value);
+
+        incPropertyValue(dailyGoods.grnTotal, palletKindId, value);
+        incPropertyPropertyValue(dailyGoods.grnByPartner, partnerId, palletKindId, value);
       }
       else
       {
         incPropertyValue(balanceGoods.gdnTotal, palletKindId, value);
         incPropertyPropertyValue(balanceGoods.gdnByPartner, partnerId, palletKindId, value);
+
+        incPropertyValue(dailyGoods.gdnTotal, palletKindId, value);
+        incPropertyPropertyValue(dailyGoods.gdnByPartner, partnerId, palletKindId, value);
       }
     });
 
     this.markModified('goods');
+    this.markModified('daily');
   };
 
   mongoose.model('DailyBalance', dailyBalanceSchema);
