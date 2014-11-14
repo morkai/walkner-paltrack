@@ -32,7 +32,7 @@
         <% }) %>
         <tr class="partnerBalanceList-total">
           <td></td>
-          <td><%- t('reports', 'PROPERTY:total') %></td>
+          <td><em><%- t('reports', 'PROPERTY:total') %></em></td>
           <% palletKinds.forEach(function(palletKind) { %>
           <td class="is-number">
             <span class="partnerBalanceList-grn">+<%- row.totals.grn[palletKind.id] || 0 %></span>
@@ -43,7 +43,7 @@
         </tr>
         <tr class="partnerBalanceList-balance">
           <td></td>
-          <td><%- t('reports', 'PROPERTY:balance') %></td>
+          <td><em><%- t('reports', 'PROPERTY:balance') %></em></td>
           <% palletKinds.forEach(function(palletKind) { %>
           <td class="is-number <%- row.balance[palletKind.id] > 0 ? 'is-positive' : row.balance[palletKind.id] < 0 ? 'is-negative' : '' %>"><%- row.balance[palletKind.id] || 0 %></td>
           <% }) %>
