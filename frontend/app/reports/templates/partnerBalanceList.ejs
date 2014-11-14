@@ -14,8 +14,6 @@
           <th class="is-min"><%- time.format(row.date, 'YYYY-MM-DD') %></th>
           <th class="is-min"><%- t('reports', 'PROPERTY:partner') %></th>
           <%- palletKindColumns %>
-          <th class="is-min"><%- t('reports', 'PROPERTY:total') %></th>
-          <th class="is-min"><%- t('reports', 'PROPERTY:balance') %></th>
           <th></th>
         </tr>
         <% row.partners.forEach(function(partner) { %>
@@ -29,11 +27,6 @@
             <span class="partnerBalanceList-gdn">-<%- partner.gdn[palletKind.id] || 0 %></span>
           </td>
           <% }) %>
-          <td class="is-number partnerBalanceList-total">
-            <span class="partnerBalanceList-grn">+<%- partner.grn.total %></span>
-            <span class="partnerBalanceList-gdn">-<%- partner.gdn.total %></span>
-          </td>
-          <td class="is-number partnerBalanceList-balance <%- balance > 0 ? 'is-positive' : balance < 0 ? 'is-negative' : '' %>"><%- balance %></td>
           <td></td>
         </tr>
         <% }) %>
@@ -46,11 +39,6 @@
             <span class="partnerBalanceList-gdn">-<%- row.totals.gdn[palletKind.id] || 0 %></span>
           </td>
           <% }) %>
-          <td class="is-number">
-            <span class="partnerBalanceList-grn">+<%- row.totals.grn.total %></span>
-            <span class="partnerBalanceList-gdn">-<%- row.totals.gdn.total %></span>
-          </td>
-          <td class="is-number partnerBalanceList-balance <%- row.totals.balance > 0 ? 'is-positive' : row.totals.balance < 0 ? 'is-negative' : '' %>"><%- row.totals.balance %></td>
           <td></td>
         </tr>
         <tr class="partnerBalanceList-balance">
@@ -59,8 +47,6 @@
           <% palletKinds.forEach(function(palletKind) { %>
           <td class="is-number <%- row.balance[palletKind.id] > 0 ? 'is-positive' : row.balance[palletKind.id] < 0 ? 'is-negative' : '' %>"><%- row.balance[palletKind.id] || 0 %></td>
           <% }) %>
-          <td class="is-number <%- row.balance.total > 0 ? 'is-positive' : row.balance.total < 0 ? 'is-negative' : '' %>"><%- row.balance.total %></td>
-          <td></td>
           <td></td>
         </tr>
       </tbody>
