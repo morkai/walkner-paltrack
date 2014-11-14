@@ -54,13 +54,8 @@
 .partnerBalanceList .table > tbody + tbody {
   border-top-width: 4px;
 }
-.partnerBalanceList-grn {
+.partnerBalanceList-count {
   display: block;
-  color: blue;
-}
-.partnerBalanceList-gdn {
-  display: block;
-  color: red;
 }
 .partnerBalanceList-total {
   background-color: #fbfbfb;
@@ -68,10 +63,10 @@
 .partnerBalanceList-balance {
   background-color: #f6f6f6;
 }
-.partnerBalanceList td.is-positive {
+.partnerBalanceList .is-positive {
   color: blue;
 }
-.partnerBalanceList td.is-negative {
+.partnerBalanceList .is-negative {
   color: red;
 }
 @media print {

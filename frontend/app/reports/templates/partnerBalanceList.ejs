@@ -23,8 +23,8 @@
           <td><%= partnersMap[partner.id] || partner.id %></td>
           <% palletKinds.forEach(function(palletKind) { %>
           <td class="is-number">
-            <span class="partnerBalanceList-grn">+<%- partner.grn[palletKind.id] || 0 %></span>
-            <span class="partnerBalanceList-gdn">-<%- partner.gdn[palletKind.id] || 0 %></span>
+            <span class="partnerBalanceList-count <%- partner.grn[palletKind.id] > 0 ? 'is-positive' : '' %>">+<%- partner.grn[palletKind.id] || 0 %></span>
+            <span class="partnerBalanceList-count <%- partner.gdn[palletKind.id] > 0 ? 'is-negative' : '' %>">-<%- partner.gdn[palletKind.id] || 0 %></span>
           </td>
           <% }) %>
           <td></td>
@@ -36,8 +36,8 @@
           <td><em><%- t('reports', 'PROPERTY:total') %></em></td>
           <% palletKinds.forEach(function(palletKind) { %>
           <td class="is-number">
-            <span class="partnerBalanceList-grn">+<%- row.totals.grn[palletKind.id] || 0 %></span>
-            <span class="partnerBalanceList-gdn">-<%- row.totals.gdn[palletKind.id] || 0 %></span>
+            <span class="partnerBalanceList-count <%- row.totals.grn[palletKind.id] > 0 ? 'is-positive' : '' %>">+<%- row.totals.grn[palletKind.id] || 0 %></span>
+            <span class="partnerBalanceList-count <%- row.totals.gdn[palletKind.id] > 0 ? 'is-negative' : '' %>">-<%- row.totals.gdn[palletKind.id] || 0 %></span>
           </td>
           <% }) %>
           <td></td>
