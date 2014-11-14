@@ -31,7 +31,52 @@ define([
 
     breadcrumbs: [
       t.bound('reports', 'BREADCRUMBS:partnerBalance')
-    ]
+    ],
+
+    defineViews: function()
+    {
+      FilteredListPage.prototype.defineViews.call(this);
+
+      this.listenTo(this.filterView, 'rowsChanged', this.onRowsChanged);
+    },
+
+    createListView: function()
+    {
+      var rowsTerm = this.findRowsTerm();
+
+      return new PartnerBalanceListView({
+        collection: this.collection,
+        rows: rowsTerm ? rowsTerm.args[1] : []
+      });
+    },
+
+    onRowsChanged: function(rows)
+    {
+      var rowsTerm = this.findRowsTerm();
+
+      if (!rowsTerm)
+      {
+        rowsTerm = {
+          name: 'in',
+          args: ['rows', null]
+        };
+
+        this.collection.rqlQuery.selector.args.push(rowsTerm);
+      }
+
+      rowsTerm.args[1] = rows;
+
+      this.updateClientUrl();
+      this.listView.toggleRows(rows);
+    },
+
+    findRowsTerm: function()
+    {
+      return _.find(this.collection.rqlQuery.selector.args, function(term)
+      {
+        return term.name === 'in' && term.args[0] === 'rows';
+      });
+    }
 
   });
 });

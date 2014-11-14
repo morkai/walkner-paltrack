@@ -3,12 +3,14 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
+  'underscore',
   'app/time',
   'app/core/views/FilterView',
   'app/core/util/idAndLabel',
   'app/data/partners',
   'app/reports/templates/partnerBalanceFilter'
 ], function(
+  _,
   time,
   FilterView,
   idAndLabel,
@@ -21,12 +23,22 @@ define([
 
     template: filterTemplate,
 
+    events: _.extend({}, FilterView.prototype.events, {
+
+      'change #-rows': function()
+      {
+        this.trigger('rowsChanged', this.getButtonGroupValue('rows'));
+      }
+
+    }),
+
     defaultFormData: function()
     {
       return {
         from: time.getMoment().startOf('month').format('YYYY-MM-DD'),
         to: time.getMoment().startOf('month').add(1, 'months').format('YYYY-MM-DD'),
-        partner: null
+        partner: null,
+        rows: ['partner', 'total', 'balance', 'summary']
       };
     },
 
@@ -36,7 +48,11 @@ define([
         formData[propertyName] = term.args[1];
       },
       'to': 'from',
-      'partner': 'from'
+      'partner': 'from',
+      'rows': function(propertyName, term, formData)
+      {
+        formData.rows = term.args[1];
+      }
     },
 
     afterRender: function()
@@ -49,6 +65,8 @@ define([
         allowClear: true,
         data: partners.map(idAndLabel)
       });
+
+      this.toggleButtonGroup('rows');
     },
 
     serializeFormToQuery: function(selector)
@@ -69,6 +87,7 @@ define([
       selector.push({name: 'eq', args: ['partner', partner]});
       selector.push({name: 'eq', args: ['from', from]});
       selector.push({name: 'eq', args: ['to', to]});
+      selector.push({name: 'in', args: ['rows', this.getButtonGroupValue('rows')]});
 
       this.$id('from').val(from);
       this.$id('to').val(to);

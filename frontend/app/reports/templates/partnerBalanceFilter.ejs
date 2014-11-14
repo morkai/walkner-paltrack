@@ -15,5 +15,23 @@
   </div>
   <div class="form-group filter-actions">
     <button type="submit" class="btn btn-default"><i class="fa fa-filter"></i><span><%= t('reports', 'filter:submit') %></span></button>
+    <hr>
+  </div>
+  <div class="form-group">
+    <label><%- t('reports', 'filter:rows') %></label>
+    <div id="<%- idPrefix %>-rows" class="btn-group filter-btn-group" data-toggle="buttons">
+      <label class="btn btn-default">
+        <input type="checkbox" name="rows[]" value="partner"> <%- t('reports', 'filter:rows:partner') %>
+      </label>
+      <label class="btn btn-default">
+        <input type="checkbox" name="rows[]" value="total"> <%- t('reports', 'filter:rows:total') %>
+      </label>
+      <label class="btn btn-default">
+        <input type="checkbox" name="rows[]" value="balance"> <%- t('reports', 'filter:rows:balance') %>
+      </label>
+      <label class="btn btn-default">
+        <input type="checkbox" name="rows[]" value="summary"> <%- t('reports', 'filter:rows:summary') %>
+      </label>
+    </div>
   </div>
 </form>

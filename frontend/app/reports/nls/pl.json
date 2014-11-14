@@ -10,5 +10,10 @@
 
   "filter:date": "Data",
   "filter:partner": "Partner",
-  "filter:submit": "Filtruj raport"
+  "filter:submit": "Filtruj raport",
+  "filter:rows": "Widoczne rekordy",
+  "filter:rows:partner": "Partnerzy",
+  "filter:rows:total": "Suma",
+  "filter:rows:balance": "Bilans",
+  "filter:rows:summary": "Podsumowanie"
 }
