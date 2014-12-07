@@ -46,7 +46,7 @@ define([
 
       return new PartnerBalanceListView({
         collection: this.collection,
-        rows: rowsTerm ? rowsTerm.args[1] : []
+        rows: rowsTerm ? rowsTerm.args[1] : ['partner', 'total', 'balance', 'summary']
       });
     },
 
