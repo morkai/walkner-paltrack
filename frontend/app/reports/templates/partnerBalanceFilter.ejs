@@ -6,11 +6,11 @@
   </div>
   <% } %>
   <div class="form-group">
-    <label for="<%- idPrefix %>-from" class="control-label is-required"><%- t('core', 'filter:date:from') %></label>
+    <label for="<%- idPrefix %>-from" class="control-label is-required" title="<%- t('core', 'filter:date:from:inclusive') %>"><i class="fa fa-info-circle"></i> <%- t('core', 'filter:date:from') %></label>
     <input id="<%- idPrefix %>-from" class="form-control" name="from" type="date" required>
   </div>
   <div class="form-group">
-    <label for="<%- idPrefix %>-to" class="control-label is-required"><%- t('core', 'filter:date:to') %></label>
+    <label for="<%- idPrefix %>-to" class="control-label is-required" title="<%- t('core', 'filter:date:to:exclusive') %>"><i class="fa fa-info-circle"></i> <%- t('core', 'filter:date:to') %></label>
     <input id="<%- idPrefix %>-to" class="form-control" name="to" type="date" required>
   </div>
   <div class="form-group filter-actions">
