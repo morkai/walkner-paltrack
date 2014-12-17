@@ -59,7 +59,10 @@ define([
           colorProperty: this.secondPartnerProperty + 'Color',
           tdAttrs: createColorTdAttrs
         },
-        'date',
+        {
+          id: 'date',
+          tdAttrs: 'class="is-min"'
+        },
         'docNo'
       ];
 
@@ -97,7 +100,7 @@ define([
       columns.unshift({
         id: 'no',
         label: t('core', '#'),
-        tdAttrs: 'class="no"'
+        tdAttrs: 'class="no is-min"'
       });
 
       return columns;

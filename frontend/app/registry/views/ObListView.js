@@ -30,7 +30,13 @@ define([
 
     serializeColumns: function()
     {
-      var columns = ['partner', 'date'];
+      var columns = [
+        'partner',
+        {
+          id: 'date',
+          tdAttrs: 'class="is-min"'
+        }
+      ];
 
       if (user.data.partner)
       {
@@ -50,7 +56,7 @@ define([
       columns.unshift({
         id: 'no',
         label: t('core', '#'),
-        tdAttrs: 'class="no"'
+        tdAttrs: 'class="no is-min"'
       });
 
       return columns;

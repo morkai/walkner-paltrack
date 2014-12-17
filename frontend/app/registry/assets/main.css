@@ -13,6 +13,7 @@
 .registryList .list-item > td.number {
   font-family: Consolas, Menlo, Monaco, monospace;
   font-size: 1.4em;
+  text-align: right;
 }
 .registryList .is-checked > .actions > .action-edit,
 .registryList .is-checked > .actions > .action-delete {
