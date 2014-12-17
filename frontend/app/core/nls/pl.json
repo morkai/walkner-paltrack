@@ -97,8 +97,10 @@
 
   "filter:date:from": "Od",
   "filter:date:from:info": "Dane od godziny 06:00 wybranego dnia",
+  "filter:date:from:inclusive": "Dane od wybranego dnia (włącznie)",
   "filter:date:to": "Do",
   "filter:date:to:info": "Dane do godziny 06:00 wybranego dnia",
+  "filter:date:to:exclusive": "Dane do wybranego dnia (z wyłączeniem)",
   "filter:submit": "Filtruj",
   "filter:limit": "Limit",
   "filter:show": "Pokaż filtr",

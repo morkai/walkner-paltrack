@@ -88,7 +88,7 @@ define([
       {
         /*jshint -W015*/
 
-        if (term.name !== 'eq' && term.name !== 'le' && term.name !== 'ge')
+        if (term.name !== 'eq' && term.name !== 'lt' && term.name !== 'ge')
         {
           return;
         }
@@ -104,12 +104,7 @@ define([
           case 'date':
             var value = time.format(term.args[1], 'YYYY-MM-DD');
 
-            if (term.name === 'eq')
-            {
-              formData.from = value;
-              formData.to = value;
-            }
-            else if (term.name === 'le')
+            if (term.name === 'lt')
             {
               formData.to = value;
             }
@@ -137,6 +132,13 @@ define([
         selector.push({name: 'eq', args: ['partner', partner]});
       }
 
+      if (fromMoment.isValid() && toMoment.isValid() && fromMoment.valueOf() === toMoment.valueOf())
+      {
+        toMoment.add(1, 'days');
+
+        this.$id('to').val(toMoment.format('YYYY-MM-DD'));
+      }
+
       if (fromMoment.isValid())
       {
         selector.push({name: 'ge', args: ['date', fromMoment.valueOf()]});
@@ -144,7 +146,7 @@ define([
 
       if (toMoment.isValid())
       {
-        selector.push({name: 'le', args: ['date', toMoment.valueOf()]});
+        selector.push({name: 'lt', args: ['date', toMoment.valueOf()]});
       }
 
       rqlQuery.selector = {name: 'and', args: selector};
