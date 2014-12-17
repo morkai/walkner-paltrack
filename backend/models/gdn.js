@@ -53,6 +53,7 @@ module.exports = function setupGdnModel(app, mongoose)
   });
 
   gdnSchema.statics.TOPIC_PREFIX = 'registry.gdn';
+  gdnSchema.statics.BROWSE_LIMIT = 1000;
 
   gdnSchema.index({date: -1});
   gdnSchema.index({supplier: 1, date: -1});

@@ -53,6 +53,7 @@ module.exports = function setupGrnModel(app, mongoose)
   });
 
   grnSchema.statics.TOPIC_PREFIX = 'registry.grn';
+  grnSchema.statics.BROWSE_LIMIT = 1000;
 
   grnSchema.index({date: -1});
   grnSchema.index({receiver: 1, date: -1});

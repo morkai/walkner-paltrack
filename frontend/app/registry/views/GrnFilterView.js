@@ -96,13 +96,14 @@ define([
     serializeRqlQuery: function()
     {
       var rqlQuery = this.model.rqlQuery;
+      var maxLimit = parseInt(this.$id('limit').attr('max'), 10) || 100;
       var formData = {
         receiver: '',
         supplier: '',
         from: '',
         to: '',
         docNo: '',
-        limit: rqlQuery.limit < 5 ? 5 : (rqlQuery.limit > 100 ? 100 : rqlQuery.limit)
+        limit: rqlQuery.limit < 5 ? 5 : (rqlQuery.limit > maxLimit ? maxLimit : rqlQuery.limit)
       };
 
       rqlQuery.selector.args.forEach(function(term)
