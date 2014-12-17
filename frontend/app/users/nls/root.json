@@ -20,7 +20,7 @@
 
     "FILTER:BUTTON": "Filter users",
     "FILTER:LIMIT": "Limit",
-    "FILTER:PLACEHOLDER:personellId": "Any personell ID",
+    "FILTER:PLACEHOLDER:partner": "Any partner",
     "FILTER:PLACEHOLDER:lastName": "Any last name",
 
     "PROPERTY:login": "Login",

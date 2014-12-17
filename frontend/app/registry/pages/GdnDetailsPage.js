@@ -39,7 +39,7 @@ define([
       var page = this;
       var actions = [{
         icon: 'print',
-        label: t('registry', 'LIST:ACTION:print'),
+        label: t('registry', 'PAGE_ACTION:print'),
         callback: function()
         {
           window.open(page.model.url() + ';print');

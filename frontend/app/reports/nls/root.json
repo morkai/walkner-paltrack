@@ -1,6 +1,22 @@
 {
   "root": {
+    "BREADCRUMBS:dailyBalance": "Daily balance",
+    "BREADCRUMBS:partnerBalance": "Partner balance",
 
+    "MSG:LOADING_FAILURE": "Failed to load the report data :(",
+
+    "PROPERTY:partner": "Partner",
+    "PROPERTY:total": "Total",
+    "PROPERTY:balance": "Balance",
+
+    "filter:date": "Date",
+    "filter:partner": "Partner",
+    "filter:submit": "Filter report",
+    "filter:rows": "Visible rows",
+    "filter:rows:partner": "Partners",
+    "filter:rows:total": "Total",
+    "filter:rows:balance": "Balance",
+    "filter:rows:summary": "Summary"
   },
   "pl": true
 }

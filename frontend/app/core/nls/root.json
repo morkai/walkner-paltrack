@@ -62,7 +62,7 @@
     "NAVBAR:REGISTRY": "Registry",
     "NAVBAR:REGISTRY:GRN": "<code>GRN</code> Goods received",
     "NAVBAR:REGISTRY:GDN": "<code>GDN</code> Goods dispatched",
-    "NAVBAR:REGISTRY:OB": "<code>OB</code> Opening balances",
+    "NAVBAR:REGISTRY:OB": "<code>OBN</code> Opening balances",
 
     "ACTION_FORM:BUTTON": "Perform action",
     "ACTION_FORM:BUTTON:delete": "Delete",

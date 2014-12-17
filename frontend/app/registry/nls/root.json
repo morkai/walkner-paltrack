@@ -2,6 +2,7 @@
   "root": {
     "BREADCRUMBS:grn:browse": "Goods received notes",
     "BREADCRUMBS:gdn:browse": "Goods dispatched notes",
+    "BREADCRUMBS:ob:browse": "Opening balance notes",
     "BREADCRUMBS:addForm": "Adding",
     "BREADCRUMBS:editForm": "Editing",
     "BREADCRUMBS:ACTION_FORM:delete": "Deleting",
@@ -9,12 +10,15 @@
     "MSG:LOADING_FAILURE": "Failed to load the notes :(",
     "MSG:LOADING_SINGLE_FAILURE": "Failed to load the note :(",
     "MSG:DELETED": "Note <em>{label}</em> was deleted.",
+    "MSG:grn:added": "The new GRN was added!",
+    "MSG:gdn:added": "The new GDN was added!",
 
+    "PAGE_ACTION:add": "Add note",
     "PAGE_ACTION:edit": "Edit note",
     "PAGE_ACTION:delete": "Delete note",
+    "PAGE_ACTION:print": "Print note",
 
-    "LIST:ACTION:add": "Add note",
-    "LIST:ACTION:reset": "Reset the add note form",
+    "LIST:ACTION:print": "View a printable version",
     "list:summary": "Total for entries {from}-{to}:",
 
     "PANEL:TITLE:details": "Note details",
@@ -23,6 +27,7 @@
 
     "PROPERTY:supplier": "Supplier",
     "PROPERTY:receiver": "Receiver",
+    "PROPERTY:partner": "Partner",
     "PROPERTY:date": "Date",
     "PROPERTY:docNo": "Document no",
     "PROPERTY:createdAt": "Created at",
