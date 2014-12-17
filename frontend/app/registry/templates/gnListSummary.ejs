@@ -1,0 +1,9 @@
+<tfoot class="registryList-summary">
+  <tr>
+    <td class="registryList-summary-no" colspan="5"><%- t('registry', 'list:summary', {from: from, to: to})%></td>
+    <% goods.forEach(function(count) { %>
+    <td class="number"><%- count %></td>
+    <% }) %>
+    <td colspan="2"></td>
+  </tr>
+</tfoot>

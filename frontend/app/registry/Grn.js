@@ -70,14 +70,20 @@ define([
         creator: renderUserInfo({userInfo: this.get('creator')}),
         updater: renderUserInfo({userInfo: this.get('updater')}),
         checker: renderUserInfo({userInfo: this.get('checker')}),
-        checked: '<i class="fa fa-thumbs-' + (this.get('checked') ? 'up' : 'down') + '"></i>'
+        checked: '<i class="fa fa-thumbs-' + (this.get('checked') ? 'up' : 'down') + '"></i>',
+        goods: []
       };
 
       var goods = this.get('goods');
 
       Object.keys(goods).forEach(function(palletKind)
       {
-        obj['goods.' + palletKind] = goods[palletKind];
+        obj.goods.push({
+          palletKind: palletKind,
+          count: goods[palletKind]
+        });
+
+        obj['goods.' + palletKind] = goods[palletKind].toLocaleString();
       });
 
       return obj;

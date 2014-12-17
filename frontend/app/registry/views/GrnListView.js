@@ -9,7 +9,8 @@ define([
   'app/user',
   'app/data/palletKinds',
   'app/core/views/ListView',
-  'app/partners/util/createColorTdAttrs'
+  'app/partners/util/createColorTdAttrs',
+  'app/registry/templates/gnListSummary'
 ], function(
   $,
   _,
@@ -17,7 +18,8 @@ define([
   user,
   palletKinds,
   ListView,
-  createColorTdAttrs
+  createColorTdAttrs,
+  renderGnListSummary
 ) {
   'use strict';
 
@@ -45,6 +47,13 @@ define([
     events: _.extend({}, ListView.prototype.events, {
       'click .gn-checked.is-editable': 'toggleChecked'
     }),
+
+    initialize: function()
+    {
+      ListView.prototype.initialize.apply(this, arguments);
+
+      this.summary = {};
+    },
 
     serializeColumns: function()
     {
@@ -108,14 +117,58 @@ define([
 
     serializeRows: function()
     {
+      var view = this;
       var skip = this.collection.rqlQuery.skip;
+
+      this.summary = {};
 
       return this.collection.invoke('serialize').map(function(obj, i)
       {
         obj.no = (skip + i + 1) + '.';
 
+        var summary = view.summary;
+
+        for (var j = 0, l = obj.goods.length; j < l; ++j)
+        {
+          var palletGoods = obj.goods[j];
+
+          if (summary[palletGoods.palletKind] === undefined)
+          {
+            summary[palletGoods.palletKind] = palletGoods.count;
+          }
+          else
+          {
+            summary[palletGoods.palletKind] += palletGoods.count;
+          }
+        }
+
         return obj;
       });
+    },
+
+    afterRender: function()
+    {
+      ListView.prototype.afterRender.call(this);
+
+      this.renderSummary();
+    },
+
+    renderSummary: function()
+    {
+      var goods = [];
+      var summary = this.summary;
+
+      palletKinds.forEach(function(palletKind)
+      {
+        goods.push((summary[palletKind.id] || 0).toLocaleString());
+      });
+
+      this.$('.registryList-summary').remove();
+      this.$('thead').after(renderGnListSummary({
+        from: this.collection.rqlQuery.skip + 1,
+        to: this.collection.rqlQuery.skip + this.collection.length,
+        goods: goods
+      }));
     },
 
     onGnChecked: function(message)

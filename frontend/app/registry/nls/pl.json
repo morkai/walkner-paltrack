@@ -18,6 +18,7 @@
   "PAGE_ACTION:print": "Drukuj wpis",
 
   "LIST:ACTION:print": "Pokaż wersję do druku",
+  "list:summary": "Suma dla wpisów {from}-{to}:",
 
   "PANEL:TITLE:addForm": "Formularz dodawania wpisu",
   "PANEL:TITLE:editForm": "Formularz edycji wpisu",
