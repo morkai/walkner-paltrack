@@ -19,9 +19,8 @@
     </div><div class="form-group">
       <label for="<%- idPrefix %>-limit"><%- t('registry', 'FILTER:limit') %></label>
       <input id="<%- idPrefix %>-limit" class="form-control" name="limit" type="number" value="25" min="5" max="1000" step="1">
-    </div><div
-      class="form-group filter-actions">
-      <input type="submit" class="btn btn-default" value="<%= t('registry', 'FILTER:submit') %>">
+    </div><div class="form-group filter-actions">
+      <button type="submit" class="btn btn-default"><i class="fa fa-filter"></i><span><%= t('registry', 'FILTER:submit') %></span></button>
     </div>
   </form>
 </div>
