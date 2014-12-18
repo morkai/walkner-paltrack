@@ -319,6 +319,9 @@ kbd {
   font-family: Consolas, Menlo, Monaco, monospace;
   text-align: center;
 }
+.colorpicker.dropdown-menu {
+  z-index: 1051;
+}
 
 .select2-choices > .select2-search-choice.sortable-ghost {
   border-color: #0af;
