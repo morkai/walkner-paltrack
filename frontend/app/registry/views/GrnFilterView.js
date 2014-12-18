@@ -11,6 +11,7 @@ define([
   'app/core/Model',
   'app/core/View',
   'app/core/util/idAndLabel',
+  'app/core/util/prepareDateRange',
   'app/data/partners',
   'app/registry/templates/grnFilter'
 ], function(
@@ -22,6 +23,7 @@ define([
   Model,
   View,
   idAndLabel,
+  prepareDateRange,
   partners,
   filterTemplate
 ) {
@@ -37,6 +39,13 @@ define([
         e.preventDefault();
 
         this.changeFilter();
+      },
+      'click a[data-range]': function(e)
+      {
+        var dateRange = prepareDateRange(e.target.getAttribute('data-range'), false);
+
+        this.$id('from').val(dateRange.fromMoment.format('YYYY-MM-DD'));
+        this.$id('to').val(dateRange.toMoment.format('YYYY-MM-DD'));
       }
     },
 

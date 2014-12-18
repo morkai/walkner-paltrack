@@ -104,5 +104,15 @@
   "filter:submit": "Filtruj",
   "filter:limit": "Limit",
   "filter:show": "Pokaż filtr",
-  "filter:hide": "Ukryj filtr"
+  "filter:hide": "Ukryj filtr",
+  "filter:datePicker": "Wybierz predefiniowany okres",
+  "filter:datePicker:today": "Dzisiaj",
+  "filter:datePicker:tomorrow": "Jutro",
+  "filter:datePicker:yesterday": "Wczoraj",
+  "filter:datePicker:currentWeek": "Aktualny tydzień",
+  "filter:datePicker:nextWeek": "Następny tydzień",
+  "filter:datePicker:prevWeek": "Poprzedni tydzień",
+  "filter:datePicker:currentMonth": "Aktualny miesiąc",
+  "filter:datePicker:nextMonth": "Następny miesiąc",
+  "filter:datePicker:prevMonth": "Poprzedni miesiąc"
 }

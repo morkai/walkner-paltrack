@@ -104,7 +104,17 @@
     "filter:submit": "Filter",
     "filter:limit": "Limit",
     "filter:show": "Show filter",
-    "filter:hide": "Hide filter"
+    "filter:hide": "Hide filter",
+    "filter:datePicker": "Pick a predefined date range",
+    "filter:datePicker:today": "Today",
+    "filter:datePicker:tomorrow": "Tomorrow",
+    "filter:datePicker:yesterday": "Yesterday",
+    "filter:datePicker:currentWeek": "Current week",
+    "filter:datePicker:nextWeek": "Next week",
+    "filter:datePicker:prevWeek": "Previous week",
+    "filter:datePicker:currentMonth": "Current month",
+    "filter:datePicker:nextMonth": "Next month",
+    "filter:datePicker:prevMonth": "Previous month"
   },
   "pl": true
 }

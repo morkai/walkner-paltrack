@@ -13,6 +13,23 @@
     </div><div class="form-group">
       <label for="<%- idPrefix %>-to" title="<%- t('core', 'filter:date:to:exclusive') %>"><i class="fa fa-info-circle"></i> <%- t('registry', 'FILTER:date:to') %></label>
       <input id="<%- idPrefix %>-to" class="form-control" name="to" type="date">
+    </div><div class="form-group filter-datePicker">
+      <label>&nbsp;</label>
+      <div class="btn-group">
+        <button class="btn btn-default dropdown-toggle" type="button" title="<%- t('core', 'filter:datePicker') %>" data-toggle="dropdown">
+          <i class="fa fa-calendar"></i><span class="visible-xs-inline"><%- t('core', 'filter:datePicker') %></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-right">
+          <li><a data-range="today"><%= t('core', 'filter:datePicker:today') %></a></li>
+          <li><a data-range="yesterday"><%= t('core', 'filter:datePicker:yesterday') %></a></li>
+          <li class="divider"></li>
+          <li><a data-range="currentWeek"><%= t('core', 'filter:datePicker:currentWeek') %></a></li>
+          <li><a data-range="prevWeek"><%= t('core', 'filter:datePicker:prevWeek') %></a></li>
+          <li class="divider"></li>
+          <li><a data-range="currentMonth"><%= t('core', 'filter:datePicker:currentMonth') %></a></li>
+          <li><a data-range="prevMonth"><%= t('core', 'filter:datePicker:prevMonth') %></a></li>
+        </ul>
+      </div>
     </div><div class="form-group">
       <label for="<%- idPrefix %>-docNo"><%- t('registry', 'PROPERTY:docNo') %></label>
       <input id="<%- idPrefix %>-docNo" class="form-control" name="docNo" type="text">

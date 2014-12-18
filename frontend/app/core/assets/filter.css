@@ -125,6 +125,9 @@ input[type=checkbox].filter-inLabel {
 .filter-inlineInputLabels .form-control {
   display: inline;
 }
+.filter-datePicker > label {
+  display: block;
+}
 @media screen and (max-width: 767px) {
   .filter-container > .well {
     align-items: flex-start;

@@ -7,6 +7,7 @@ define([
   'app/time',
   'app/core/views/FilterView',
   'app/core/util/idAndLabel',
+  'app/core/util/prepareDateRange',
   'app/data/partners',
   'app/reports/templates/partnerBalanceFilter'
 ], function(
@@ -14,6 +15,7 @@ define([
   time,
   FilterView,
   idAndLabel,
+  prepareDateRange,
   partners,
   filterTemplate
 ) {
@@ -28,6 +30,13 @@ define([
       'change #-rows': function()
       {
         this.trigger('rowsChanged', this.getButtonGroupValue('rows'));
+      },
+      'click a[data-range]': function(e)
+      {
+        var dateRange = prepareDateRange(e.target.getAttribute('data-range'), false);
+
+        this.$id('from').val(dateRange.fromMoment.format('YYYY-MM-DD'));
+        this.$id('to').val(dateRange.toMoment.format('YYYY-MM-DD'));
       }
 
     }),
