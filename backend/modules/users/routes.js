@@ -30,6 +30,16 @@ module.exports = function setUpUsersRoutes(app, usersModule)
 
   express.get('/logout', logoutRoute);
 
+  function createGuestUser(req)
+  {
+    var guestUser = lodash.merge({}, userModule.guest);
+    guestUser.loggedIn = false;
+    guestUser.ipAddress = userModule.getRealIp({}, req);
+    guestUser.local = userModule.isLocalIpAddress(guestUser.ipAddress);
+
+    return guestUser;
+  }
+
   function canViewDetails(req, res, next)
   {
     if (req.session.user && req.params.id === req.session.user._id)
@@ -74,6 +84,7 @@ module.exports = function setUpUsersRoutes(app, usersModule)
       {
         app.broker.publish('users.loginFailure', {
           severity: 'warning',
+          user: createGuestUser(req),
           login: credentials.login
         });
 
@@ -100,6 +111,7 @@ module.exports = function setUpUsersRoutes(app, usersModule)
       {
         app.broker.publish('users.loginFailure', {
           severity: 'warning',
+          user: createGuestUser(req),
           login: credentials.login
         });
 
@@ -159,12 +171,7 @@ module.exports = function setUpUsersRoutes(app, usersModule)
         return next(err);
       }
 
-      var guestUser = lodash.merge({}, userModule.guest);
-      guestUser.loggedIn = false;
-      guestUser.ipAddress = userModule.getRealIp({}, req);
-      guestUser.local = userModule.isLocalIpAddress(guestUser.ipAddress);
-
-      req.session.user = guestUser;
+      req.session.user = createGuestUser(req);
 
       res.format({
         json: function()
@@ -179,7 +186,7 @@ module.exports = function setUpUsersRoutes(app, usersModule)
 
       if (user !== null)
       {
-        user.ipAddress = req.socket.remoteAddress;
+        user.ipAddress = req.session.user.ipAddress;
 
         app.broker.publish('users.logout', {
           user: user,
