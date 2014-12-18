@@ -17,3 +17,7 @@
 .partners-form .checkbox + .select2-container {
   margin-top: 5px;
 }
+.partners-form input + label {
+  margin-top: 5px;
+  font-weight: normal;
+}

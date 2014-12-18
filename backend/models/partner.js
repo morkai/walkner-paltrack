@@ -32,7 +32,16 @@ module.exports = function setupPartnerModel(app, mongoose)
       type: Boolean,
       default: false
     },
-    autoGdnPartners: [mongoose.Schema.Types.ObjectId]
+    autoGdnPartners: [mongoose.Schema.Types.ObjectId],
+    autoGrn: {
+      type: Boolean,
+      default: false
+    },
+    autoGrnPartner: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null
+    },
+    autoGrnPartners: [mongoose.Schema.Types.ObjectId]
   }, {
     id: false
   });

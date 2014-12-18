@@ -39,6 +39,11 @@ define([
         id: 'autoGdnText',
         noData: t('core', 'BOOL:false'),
         label: t('partners', 'PROPERTY:autoGdn')
+      },
+      {
+        id: 'autoGrnText',
+        noData: t('core', 'BOOL:false'),
+        label: t('partners', 'PROPERTY:autoGrn')
       }
     ],
 

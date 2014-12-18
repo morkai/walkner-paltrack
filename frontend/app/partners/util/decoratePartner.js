@@ -11,16 +11,41 @@ define([
 ) {
   'use strict';
 
+  function getPartnerLabel(partnerId)
+  {
+    var partner = partners.get(partnerId);
+
+    return partner ? partner.getLabel() : partnerId;
+  }
+
+  function formatPartnerLabel(partnerIds)
+  {
+    if (!Array.isArray(partnerIds) || partnerIds.length === 0)
+    {
+      return t('partners', 'form:autoGn:allReceivers');
+    }
+
+    return partnerIds.map(getPartnerLabel).join('; ');
+  }
+
   return function decoratePartner(partner)
   {
     var obj = partner.toJSON();
 
-    obj.autoGdnText = !obj.autoGdn ? t('core', 'BOOL:false') : obj.autoGdnPartners.map(function(partnerId)
-    {
-      var partner = partners.get(partnerId);
+    obj.autoGdnText = !obj.autoGdn
+      ? t('core', 'BOOL:false')
+      : formatPartnerLabel(obj.autoGdnPartners);
 
-      return partner ? partner.getLabel() : partnerId;
-    }).join('; ');
+    if (!obj.autoGrn)
+    {
+      obj.autoGrnText = t('core', 'BOOL:false');
+    }
+    else
+    {
+      obj.autoGrnText = formatPartnerLabel([obj.autoGrnPartner], null)
+        + ' <- '
+        + formatPartnerLabel(obj.autoGrnPartners);
+    }
 
     return obj;
   };

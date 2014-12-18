@@ -32,7 +32,10 @@ define([
         supplierColor: null,
         receiverColor: null,
         autoGdn: false,
-        autoGdnPartners: []
+        autoGdnPartners: [],
+        autoGrn: false,
+        autoGrnPartner: null,
+        autoGrnPartners: []
       };
     }
 

@@ -60,11 +60,26 @@ define([
       this.$supplierColorPicker = this.$id('supplierColorPicker').colorpicker();
       this.$receiverColorPicker = this.$id('receiverColorPicker').colorpicker();
 
+      var autoGnPartners = partners.map(idAndLabel);
+
       this.$id('autoGdnPartners').select2({
         allowClear: true,
         multiple: true,
-        placeholder: t('partners', 'form:autoGdn:placeholder'),
-        data: partners.map(idAndLabel)
+        placeholder: t('partners', 'form:autoGn:allReceivers'),
+        data: autoGnPartners
+      });
+
+      this.$id('autoGrnPartner').select2({
+        allowClear: true,
+        placeholder: t('partners', 'form:autoGrnPartner:placeholder'),
+        data: autoGnPartners
+      });
+
+      this.$id('autoGrnPartners').select2({
+        allowClear: true,
+        multiple: true,
+        placeholder: t('partners', 'form:autoGn:allReceivers'),
+        data: autoGnPartners
       });
     },
 
@@ -73,6 +88,7 @@ define([
       var formData = FormView.prototype.serializeToForm.apply(this, arguments);
 
       formData.autoGdnPartners = formData.autoGdnPartners.join(',');
+      formData.autoGrnPartners = formData.autoGrnPartners.join(',');
 
       return formData;
     },
@@ -92,7 +108,25 @@ define([
         ? formData.autoGdnPartners.split(',')
         : [];
 
+      formData.autoGrn = !!formData.autoGrn;
+      formData.autoGrnPartner = formData.autoGrn && formData.autoGrnPartner ? formData.autoGrnPartner : null;
+      formData.autoGrnPartners = formData.autoGrn && formData.autoGrnPartners
+        ? formData.autoGrnPartners.split(',')
+        : [];
+
       return formData;
+    },
+
+    checkValidity: function(formData)
+    {
+      if (formData.autoGrn && !formData.autoGrnPartner)
+      {
+        this.$id('autoGrnPartner').select2('focus');
+
+        return this.showErrorMessage(t('partners', 'form:error:requiredGrnSupplier'));
+      }
+
+      return false;
     }
 
   });
