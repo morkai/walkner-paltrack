@@ -4,86 +4,28 @@
 
 define([
   'app/i18n',
-  'app/core/util/bindLoadingMessage',
-  'app/core/util/pageActions',
-  'app/core/View',
   '../GdnCollection',
   '../views/GdnFilterView',
   '../views/GdnListView',
-  'app/core/templates/listPage'
+  './GrnListPage'
 ], function(
   t,
-  bindLoadingMessage,
-  pageActions,
-  View,
   GdnCollection,
   GdnFilterView,
   GdnListView,
-  listPageTemplate
+  GrnListPage
 ) {
   'use strict';
 
-  return View.extend({
+  return GrnListPage.extend({
 
-    template: listPageTemplate,
-
-    layoutName: 'page',
+    Collection: GdnCollection,
+    FilterView: GdnFilterView,
+    ListView: GdnListView,
 
     breadcrumbs: [
       t.bound('registry', 'BREADCRUMBS:gdn:browse')
-    ],
-
-    actions: function()
-    {
-      return [pageActions.add(this.collection)];
-    },
-
-    initialize: function()
-    {
-      this.defineModels();
-      this.defineViews();
-
-      this.setView('.filter-container', this.filterView);
-      this.setView('.list-container', this.listView);
-    },
-
-    defineModels: function()
-    {
-      this.collection = bindLoadingMessage(
-        new GdnCollection(null, {rqlQuery: this.options.rql}), this
-      );
-    },
-
-    defineViews: function()
-    {
-      this.filterView = new GdnFilterView({
-        model: {
-          rqlQuery: this.collection.rqlQuery
-        }
-      });
-
-      this.listView = new GdnListView({collection: this.collection});
-
-      this.listenTo(this.filterView, 'filterChanged', this.refreshList);
-    },
-
-    load: function(when)
-    {
-      return when(this.collection.fetch({reset: true}));
-    },
-
-    refreshList: function(newRqlQuery)
-    {
-      this.collection.rqlQuery = newRqlQuery;
-
-      this.listView.refreshCollectionNow();
-
-      this.broker.publish('router.navigate', {
-        url: this.collection.genClientUrl() + '?' + newRqlQuery,
-        trigger: false,
-        replace: true
-      });
-    }
+    ]
 
   });
 });

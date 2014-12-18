@@ -13,6 +13,7 @@ var moment = require('moment');
 var limitToPartner = require('./limitToPartner');
 var recordChanges = require('./recordChanges');
 var checkGnRoute = require('./checkGnRoute');
+var printGnListRoute = require('./printGnListRoute');
 
 module.exports = function setUpGdnRoutes(app, registryModule)
 {
@@ -30,6 +31,13 @@ module.exports = function setUpGdnRoutes(app, registryModule)
     canView,
     limitToPartner.bind(null, 'supplier'),
     express.crud.browseRoute.bind(null, app, Gdn)
+  );
+
+  express.get(
+    '/registry/gdn;print',
+    canView,
+    limitToPartner.bind(null, 'supplier'),
+    printGnListRoute.bind(null, app, registryModule, Gdn)
   );
 
   express.post(

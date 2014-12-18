@@ -31,6 +31,10 @@ define([
 
   return View.extend({
 
+    Collection: GrnCollection,
+    FilterView: GrnFilterView,
+    ListView: GrnListView,
+
     template: listPageTemplate,
 
     layoutName: 'page',
@@ -71,19 +75,19 @@ define([
     defineModels: function()
     {
       this.collection = bindLoadingMessage(
-        new GrnCollection(null, {rqlQuery: this.options.rql}), this
+        new this.Collection(null, {rqlQuery: this.options.rql}), this
       );
     },
 
     defineViews: function()
     {
-      this.filterView = new GrnFilterView({
+      this.filterView = new this.FilterView({
         model: {
           rqlQuery: this.collection.rqlQuery
         }
       });
 
-      this.listView = new GrnListView({collection: this.collection});
+      this.listView = new this.ListView({collection: this.collection});
     },
 
     defineBindings: function()
