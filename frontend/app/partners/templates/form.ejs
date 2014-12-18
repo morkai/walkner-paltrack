@@ -29,6 +29,15 @@
           <span class="input-group-addon"><i style="background-color: <%- model.receiverColor %>"></i></span>
         </div>
       </div>
+      <div class="form-group">
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" name="autoGdn" value="1">
+            <%- t('partners', 'form:autoGdn:label') %>
+          </label>
+        </div>
+        <input id="<%- idPrefix %>-autoGdnPartners" name="autoGdnPartners">
+      </div>
     </div>
     <div class="panel-footer">
       <button type="submit" class="btn btn-primary"><%- formActionText %></button>

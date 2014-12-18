@@ -14,3 +14,6 @@
 .partners-list .partners-color {
   text-transform: uppercase;
 }
+.partners-form .checkbox + .select2-container {
+  margin-top: 5px;
+}

@@ -3,11 +3,15 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
+  'app/i18n',
   'app/core/views/ListView',
-  '../util/createColorTdAttrs'
+  '../util/createColorTdAttrs',
+  '../util/decoratePartner'
 ], function(
+  t,
   ListView,
-  createColorTdAttrs
+  createColorTdAttrs,
+  decoratePartner
 ) {
   'use strict';
 
@@ -30,8 +34,15 @@ define([
         id: 'receiverColor',
         noData: '',
         tdAttrs: createColorTdAttrs
+      },
+      {
+        id: 'autoGdnText',
+        noData: t('core', 'BOOL:false'),
+        label: t('partners', 'PROPERTY:autoGdn')
       }
-    ]
+    ],
+
+    serializeRow: decoratePartner
 
   });
 });

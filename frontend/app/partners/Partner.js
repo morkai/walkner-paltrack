@@ -23,12 +23,17 @@ define([
 
     labelAttribute: 'name',
 
-    defaults: {
-      name: '',
-      address: null,
-      clientNo: null,
-      supplierColor: null,
-      receiverColor: null
+    defaults: function()
+    {
+      return {
+        name: '',
+        address: null,
+        clientNo: null,
+        supplierColor: null,
+        receiverColor: null,
+        autoGdn: false,
+        autoGdnPartners: []
+      };
     }
 
   });

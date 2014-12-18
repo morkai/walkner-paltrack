@@ -21,11 +21,14 @@
   "PROPERTY:address": "Adres",
   "PROPERTY:supplierColor": "Kolor dostawcy",
   "PROPERTY:receiverColor": "Kolor odbiorcy",
+  "PROPERTY:autoGdn": "Automatyczna WZ",
 
   "FORM:ACTION:add": "Dodaj partnera",
   "FORM:ACTION:edit": "Edytuj partnera",
   "FORM:ERROR:addFailure": "Nie udało się dodać partnera :-(",
   "FORM:ERROR:editFailure": "Nie udało się zmodyfikować partnera :-(",
+  "form:autoGdn:label": "Automatycznie dodaj WZ po dodaniu PZ z następującym Odbiorcą:",
+  "form:autoGdn:placeholder": "Wszyscy odbiorcy",
 
   "ACTION_FORM:DIALOG_TITLE:delete": "Potwierdzenie usunięcia partnera",
   "ACTION_FORM:BUTTON:delete": "Usuń partnera",

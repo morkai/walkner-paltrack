@@ -27,7 +27,12 @@ module.exports = function setupPartnerModel(app, mongoose)
     receiverColor: {
       type: String,
       trim: true
-    }
+    },
+    autoGdn: {
+      type: Boolean,
+      default: false
+    },
+    autoGdnPartners: [mongoose.Schema.Types.ObjectId]
   }, {
     id: false
   });

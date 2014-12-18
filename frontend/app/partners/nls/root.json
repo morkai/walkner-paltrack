@@ -22,11 +22,14 @@
     "PROPERTY:address": "Address",
     "PROPERTY:supplierColor": "Supplier color",
     "PROPERTY:receiverColor": "Receiver color",
+    "PROPERTY:autoGdn": "Auto GDN",
 
     "FORM:ACTION:add": "Add partner",
     "FORM:ACTION:edit": "Edit partner",
     "FORM:ERROR:addFailure": "Failed to add the new partner :-(",
     "FORM:ERROR:editFailure": "Failed to edit the partner :-(",
+    "form:autoGdn:label": "Automatically add a GDN after adding a GRN with the following Receiver:",
+    "form:autoGdn:placeholder": "All receivers",
 
     "ACTION_FORM:DIALOG_TITLE:delete": "Partner deletion confirmation",
     "ACTION_FORM:BUTTON:delete": "Delete partner",

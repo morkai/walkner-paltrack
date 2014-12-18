@@ -42,12 +42,13 @@ define([
   router.map('/partners/:id', function(req)
   {
     viewport.loadPage(
-      ['app/core/pages/DetailsPage', 'app/partners/templates/details'],
-      function(DetailsPage, detailsTemplate)
+      ['app/core/pages/DetailsPage', 'app/partners/templates/details', 'app/partners/util/decoratePartner'],
+      function(DetailsPage, detailsTemplate, decoratePartner)
       {
         return new DetailsPage({
           model: new Partner({_id: req.params.id}),
-          detailsTemplate: detailsTemplate
+          detailsTemplate: detailsTemplate,
+          serializeDetails: decoratePartner
         });
       }
     );

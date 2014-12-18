@@ -4,12 +4,18 @@
 
 define([
   'underscore',
+  'app/i18n',
+  'app/core/util/idAndLabel',
   'app/core/views/FormView',
+  'app/data/partners',
   'app/partners/templates/form',
   'bootstrap-colorpicker'
 ], function(
   _,
+  t,
+  idAndLabel,
   FormView,
+  partners,
   formTemplate
 ) {
   'use strict';
@@ -53,6 +59,22 @@ define([
 
       this.$supplierColorPicker = this.$id('supplierColorPicker').colorpicker();
       this.$receiverColorPicker = this.$id('receiverColorPicker').colorpicker();
+
+      this.$id('autoGdnPartners').select2({
+        allowClear: true,
+        multiple: true,
+        placeholder: t('partners', 'form:autoGdn:placeholder'),
+        data: partners.map(idAndLabel)
+      });
+    },
+
+    serializeToForm: function()
+    {
+      var formData = FormView.prototype.serializeToForm.apply(this, arguments);
+
+      formData.autoGdnPartners = formData.autoGdnPartners.join(',');
+
+      return formData;
     },
 
     serializeForm: function(formData)
@@ -64,6 +86,11 @@ define([
           formData[property] = null;
         }
       });
+
+      formData.autoGdn = !!formData.autoGdn;
+      formData.autoGdnPartners = formData.autoGdn && formData.autoGdnPartners
+        ? formData.autoGdnPartners.split(',')
+        : [];
 
       return formData;
     }
