@@ -17,6 +17,7 @@
     "PAGE_ACTION:edit": "Edit note",
     "PAGE_ACTION:delete": "Delete note",
     "PAGE_ACTION:print": "Print note",
+    "PAGE_ACTION:printList": "Print list",
 
     "LIST:ACTION:print": "View a printable version",
     "list:summary": "Total for entries {from}-{to}:",

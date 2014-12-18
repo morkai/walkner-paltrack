@@ -392,7 +392,7 @@ define([
   PageLayout.prototype.renderActions = function()
   {
     var actions = this.model.actions;
-    var callbacks = {};
+    var callbacks = [];
     var afterRender = {};
     var html = '';
 
@@ -417,7 +417,7 @@ define([
 
       if (typeof action.callback === 'function')
       {
-        callbacks[i] = action.callback.bind(this);
+        callbacks.push(i);
       }
 
       if (typeof action.afterRender === 'function')
@@ -455,9 +455,29 @@ define([
 
     var $actions = this.$actions.find('li');
 
-    Object.keys(callbacks).forEach(function(i)
+    callbacks.forEach(function(i)
     {
-      $actions.filter('li[data-index="' + i + '"]').click(actions[i].callback);
+      var callback = actions[i].callback;
+
+      $actions.filter('li[data-index="' + i + '"]')
+        .mousedown(function(e) { e.preventDefault(); })
+        .mouseup(function()
+        {
+          callback.mouseUp = true;
+
+          callback.apply(this, arguments);
+        })
+        .click(function()
+        {
+          if (!callback.mouseUp)
+          {
+            callback.apply(this, arguments);
+          }
+          else
+          {
+            callback.mouseUp = false;
+          }
+        });
     });
 
     Object.keys(afterRender).forEach(function(i)

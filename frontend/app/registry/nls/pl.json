@@ -16,6 +16,7 @@
   "PAGE_ACTION:edit": "Edytuj wpis",
   "PAGE_ACTION:delete": "Usuń wpis",
   "PAGE_ACTION:print": "Drukuj wpis",
+  "PAGE_ACTION:printList": "Drukuj listę",
 
   "LIST:ACTION:print": "Pokaż wersję do druku",
   "list:summary": "Suma dla wpisów {from}-{to}:",
@@ -62,5 +63,9 @@
   "lastAdded:details": "nr <em>{docNo}</em> od <em>{supplier}</em> do <em>{receiver}</em>",
 
   "addPartner": "(dodaj partnera)",
-  "loadFromGdn": "Pobierz ilości z WZ"
+  "loadFromGdn": "Pobierz ilości z WZ",
+
+  "printList:msg:empty": "Brak danych dla wybranego filtra.",
+  "printList:msg:partner": "Wybierz Odbiorcę lub Dostawcę.",
+  "printList:msg:date": "Wybierz okres czasu."
 }

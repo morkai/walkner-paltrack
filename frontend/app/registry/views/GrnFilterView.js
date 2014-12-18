@@ -83,6 +83,27 @@ define([
       });
     },
 
+    focusFirstPartner: function()
+    {
+      this.$id(this.firstPartnerProperty).select2('focus');
+    },
+
+    focusEmptyDate: function()
+    {
+      if (!this.$id('from').val().trim().length)
+      {
+        this.$id('from').focus();
+      }
+      else if (!this.$id('to').val().trim().length)
+      {
+        this.$id('to').focus();
+      }
+      else
+      {
+        this.$('[type=submit]').focus();
+      }
+    },
+
     getSuppliers: function()
     {
       return partners.withoutUsersPartner().map(idAndLabel);

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>PZ - <%= receiver || supplier %> - <%- from %> - <%- to %></title>
+  <style>
+  * {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+  }
+  body {
+    margin: 0;
+    font-family: "Open Sans", Verdana, Arial, sans-serif;
+  }
+  h1 {
+    margin-bottom: 20px;
+    font-size: 24px;
+  }
+  table {
+    border: 0;
+    border-collapse: collapse;
+  }
+  #info {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  #info th {
+    font-weight: bold;
+    text-align: right;
+    padding: 0 5px 10px 0;
+  }
+  #info td {
+    padding: 0 5px 10px 0;
+  }
+  .notes + h2 {
+    margin-top: 20px;
+  }
+  h2 {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .notes {
+    width: auto;
+    font-size: 10px;
+  }
+  .notes th {
+    text-align: left;
+    padding: 0 10px 0 0;
+  }
+  .notes td,
+  .notes tfoot th {
+    padding: 5px 10px 0 0;
+  }
+  .notes .count {
+    text-align: right;
+  }
+  .notes tfoot td {
+    font-weight: bold;
+  }
+  </style>
+</head>
+<body>
+<h1>Przyjęcia zewnętrzne</h1>
+<table id=info>
+  <tbody>
+    <tr>
+      <th><%- receiver ? 'Odbiorca:' : 'Dostawca:'%></th>
+      <td><%= receiver || supplier %></td>
+    </tr>
+    <tr>
+      <th>Data:</th>
+      <td><%- from %> - <%- to %> (włącznie)</td>
+    </tr>
+  </tbody>
+</table>
+<% partnersNotes.forEach(function(partnerNotes) { %>
+<h2><%- receiver ? 'Dostawca:' : 'Odbiorca:' %> <%= partnerNotes.partner %></h2>
+<table class="notes">
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Nr dokumentu</th>
+      <% palletKinds.forEach(function(palletKind) { %>
+      <% if (partnerNotes.totals[palletKind._id]) { %>
+      <th class="count"><%= palletKind.name %></th>
+      <% } %>
+      <% }) %>
+    </tr>
+  </thead>
+  <tfoot>
+    <tr>
+      <th class="count" colspan="2">Suma:</th>
+      <% palletKinds.forEach(function(palletKind) { %>
+      <% if (partnerNotes.totals[palletKind._id]) { %>
+      <td class="count"><%= partnerNotes.totals[palletKind._id] %></td>
+      <% } %>
+      <% }) %>
+    </tr>
+  </tfoot>
+  <tbody>
+    <% partnerNotes.notes.forEach(function(partnerNote) { %>
+    <tr>
+      <td><%- partnerNote.date %></td>
+      <td><%= partnerNote.docNo %></td>
+      <% palletKinds.forEach(function(palletKind) { %>
+      <% if (partnerNotes.totals[palletKind._id]) { %>
+      <td class="count"><%= partnerNote.goods[palletKind._id] || 0 %></td>
+      <% } %>
+      <% }) %>
+    </tr>
+    <% }) %>
+  </tbody>
+</table>
+<% }) %>
+</body>
+</html>
