@@ -261,7 +261,7 @@ module.exports = function setUpDailyBalance(app, registryModule)
         else
         {
           registryModule.debug(
-            "Recounted the balance for partner [%s] and date [%s]", partnerId, dateString, dailyBalance._id
+            "Recounted the balance for partner [%s] and date [%s]: %s", partnerId, dateString, dailyBalance._id
           );
 
           app.broker.publish('balance.daily.' + dateString + '.' + partnerId, {
