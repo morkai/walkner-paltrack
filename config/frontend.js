@@ -116,5 +116,6 @@ exports.updater = {
 };
 
 exports.registry = {
-  gdnStoragePath: __dirname + '/../data/gdn'
+  gdnStoragePath: __dirname + '/../data/gdn',
+  automate: true
 };

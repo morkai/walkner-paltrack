@@ -47,7 +47,11 @@ module.exports = function setupGrnModel(app, mongoose)
     creator: userInfoSchema,
     updatedAt: Date,
     updater: {},
-    changes: [grnChangeSchema]
+    changes: [grnChangeSchema],
+    autoNote: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null
+    }
   }, {
     id: false
   });

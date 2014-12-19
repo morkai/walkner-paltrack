@@ -7,6 +7,7 @@
 var setUpRoutes = require('./routes');
 var setUpDailyBalance = require('./dailyBalance');
 var setUpChecker = require('./checker');
+var setUpAutomater = require('./automater');
 
 exports.DEFAULT_CONFIG = {
   mongooseId: 'mongoose',
@@ -16,7 +17,8 @@ exports.DEFAULT_CONFIG = {
   palletKindsId: 'palletKinds',
   gdnStoragePath: './gdn',
   wkhtmltopdfUrl: 'http://127.0.0.1/',
-  wkhtmltopdfCmd: 'wkhtmltopdf'
+  wkhtmltopdfCmd: 'wkhtmltopdf',
+  automate: false
 };
 
 exports.start = function startRegistryModule(app, registryModule)
@@ -48,5 +50,13 @@ exports.start = function startRegistryModule(app, registryModule)
       config.mongooseId
     ],
     setUpChecker.bind(null, app, registryModule)
+  );
+
+  app.onModuleReady(
+    [
+      config.mongooseId,
+      config.partnersId
+    ],
+    setUpAutomater.bind(null, app, registryModule)
   );
 };

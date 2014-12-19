@@ -47,7 +47,11 @@ module.exports = function setupGdnModel(app, mongoose)
     creator: userInfoSchema,
     updatedAt: Date,
     updater: {},
-    changes: [gdnChangeSchema]
+    changes: [gdnChangeSchema],
+    autoNote: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null
+    }
   }, {
     id: false
   });
