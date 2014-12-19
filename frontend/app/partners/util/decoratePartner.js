@@ -18,11 +18,11 @@ define([
     return partner ? partner.getLabel() : partnerId;
   }
 
-  function formatPartnerLabel(partnerIds)
+  function formatPartnerLabel(partnerIds, allPartnersKey)
   {
     if (!Array.isArray(partnerIds) || partnerIds.length === 0)
     {
-      return t('partners', 'form:autoGn:allReceivers');
+      return t('partners', 'form:autoGn:' + allPartnersKey);
     }
 
     return partnerIds.map(getPartnerLabel).join('; ');
@@ -32,19 +32,21 @@ define([
   {
     var obj = partner.toJSON();
 
-    obj.autoGdnText = !obj.autoGdn
-      ? t('core', 'BOOL:false')
-      : formatPartnerLabel(obj.autoGdnPartners);
+    obj.autoGdnText = !obj.autoGdn ? t('core', 'BOOL:false') : formatPartnerLabel(obj.autoGdnPartners, 'allReceivers');
 
-    if (!obj.autoGrn)
+    obj.autoGrn1Text = !obj.autoGrn1
+      ? t('core', 'BOOL:false')
+      : formatPartnerLabel(obj.autoGrn1Partners, 'allSuppliers');
+
+    if (!obj.autoGrn2)
     {
-      obj.autoGrnText = t('core', 'BOOL:false');
+      obj.autoGrn2Text = t('core', 'BOOL:false');
     }
     else
     {
-      obj.autoGrnText = formatPartnerLabel([obj.autoGrnPartner], null)
+      obj.autoGrn2Text = formatPartnerLabel([obj.autoGrn2Partner], null)
         + ' <- '
-        + formatPartnerLabel(obj.autoGrnPartners);
+        + formatPartnerLabel(obj.autoGrn2Partners, 'allReceivers');
     }
 
     return obj;

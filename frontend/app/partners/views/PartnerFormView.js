@@ -69,13 +69,20 @@ define([
         data: autoGnPartners
       });
 
-      this.$id('autoGrnPartner').select2({
+      this.$id('autoGrn1Partners').select2({
         allowClear: true,
-        placeholder: t('partners', 'form:autoGrnPartner:placeholder'),
+        multiple: true,
+        placeholder: t('partners', 'form:autoGn:allSuppliers'),
         data: autoGnPartners
       });
 
-      this.$id('autoGrnPartners').select2({
+      this.$id('autoGrn2Partner').select2({
+        allowClear: true,
+        placeholder: t('partners', 'form:autoGrn2Partner:placeholder'),
+        data: autoGnPartners
+      });
+
+      this.$id('autoGrn2Partners').select2({
         allowClear: true,
         multiple: true,
         placeholder: t('partners', 'form:autoGn:allReceivers'),
@@ -88,7 +95,8 @@ define([
       var formData = FormView.prototype.serializeToForm.apply(this, arguments);
 
       formData.autoGdnPartners = formData.autoGdnPartners.join(',');
-      formData.autoGrnPartners = formData.autoGrnPartners.join(',');
+      formData.autoGrn1Partners = formData.autoGrn1Partners.join(',');
+      formData.autoGrn2Partners = formData.autoGrn2Partners.join(',');
 
       return formData;
     },
@@ -108,10 +116,15 @@ define([
         ? formData.autoGdnPartners.split(',')
         : [];
 
-      formData.autoGrn = !!formData.autoGrn;
-      formData.autoGrnPartner = formData.autoGrn && formData.autoGrnPartner ? formData.autoGrnPartner : null;
-      formData.autoGrnPartners = formData.autoGrn && formData.autoGrnPartners
-        ? formData.autoGrnPartners.split(',')
+      formData.autoGrn1 = !!formData.autoGrn1;
+      formData.autoGrn1Partners = formData.autoGrn1 && formData.autoGrn1Partners
+        ? formData.autoGrn1Partners.split(',')
+        : [];
+
+      formData.autoGrn2 = !!formData.autoGrn2;
+      formData.autoGrn2Partner = formData.autoGrn2 && formData.autoGrn2Partner ? formData.autoGrn2Partner : null;
+      formData.autoGrn2Partners = formData.autoGrn2 && formData.autoGrn2Partners
+        ? formData.autoGrn2Partners.split(',')
         : [];
 
       return formData;
@@ -119,14 +132,14 @@ define([
 
     checkValidity: function(formData)
     {
-      if (formData.autoGrn && !formData.autoGrnPartner)
+      if (formData.autoGrn2 && !formData.autoGrn2Partner)
       {
         this.$id('autoGrnPartner').select2('focus');
 
         return this.showErrorMessage(t('partners', 'form:error:requiredGrnSupplier'));
       }
 
-      return false;
+      return true;
     }
 
   });

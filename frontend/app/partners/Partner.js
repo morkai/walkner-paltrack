@@ -33,9 +33,11 @@ define([
         receiverColor: null,
         autoGdn: false,
         autoGdnPartners: [],
-        autoGrn: false,
-        autoGrnPartner: null,
-        autoGrnPartners: []
+        autoGrn1: false,
+        autoGrn1Partners: [],
+        autoGrn2: false,
+        autoGrn2Partner: null,
+        autoGrn2Partners: []
       };
     }
 
