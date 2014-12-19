@@ -461,13 +461,13 @@ define([
 
       $actions.filter('li[data-index="' + i + '"]')
         .mousedown(function(e) { e.preventDefault(); })
-        .mouseup(function()
+        .mouseup(function(e)
         {
-          callback.mouseUp = true;
+          callback.mouseUp = e;
 
           callback.apply(this, arguments);
         })
-        .click(function()
+        .click(function(e)
         {
           if (!callback.mouseUp)
           {
@@ -475,7 +475,17 @@ define([
           }
           else
           {
-            callback.mouseUp = false;
+            if (callback.mouseUp.isDefaultPrevented())
+            {
+              e.preventDefault();
+            }
+
+            if (callback.mouseUp.isPropagationStopped())
+            {
+              e.stopPropagation();
+            }
+
+            callback.mouseUp = null;
           }
         });
     });
