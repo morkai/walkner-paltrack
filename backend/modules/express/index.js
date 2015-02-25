@@ -28,7 +28,10 @@ exports.DEFAULT_CONFIG = {
   },
   cookieSecret: null,
   ejsAmdHelpers: {},
-  title: 'express'
+  title: 'express',
+  jsonBody: {},
+  textBody: {},
+  urlencodedBody: {}
 };
 
 exports.start = function startExpressModule(app, module, done)
@@ -36,6 +39,14 @@ exports.start = function startExpressModule(app, module, done)
   var mongoose = app[module.config.mongooseId];
 
   module = app[module.name] = lodash.merge(express(), module);
+
+  module.createHttpError = function(message, statusCode)
+  {
+    var httpError = new Error(message);
+    httpError.status = statusCode || 400;
+
+    return httpError;
+  };
 
   module.crud = crud;
 
@@ -74,10 +85,16 @@ exports.start = function startExpressModule(app, module, done)
     }));
   }
 
-  module.use(bodyParser.json());
-  module.use(bodyParser.urlencoded({extended: false}));
-  module.use(bodyParser.text({type: 'text/*'}));
+  module.use(bodyParser.json(module.config.jsonBody));
+  module.use(bodyParser.urlencoded(lodash.extend({extended: false}, module.config.urlencodedBody)));
+  module.use(bodyParser.text(lodash.defaults({type: 'text/*'}, module.config.textBody)));
   module.use(rqlMiddleware());
+
+  app.broker.publish('express.beforeRouter', {
+    module: module,
+    express: express
+  });
+
   module.use(module.router);
   module.use(express.static(staticPath));
 
