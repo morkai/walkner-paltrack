@@ -1,5 +1,13 @@
 'use strict';
 
+try
+{
+  require('pmx').init({
+    ignore_routes: [/socket\.io/]
+  });
+}
+catch (err) {}
+
 exports.id = 'paltrack-frontend';
 
 exports.modules = [
