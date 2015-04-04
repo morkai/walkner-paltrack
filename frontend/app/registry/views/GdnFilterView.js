@@ -28,7 +28,7 @@ define([
       return partners.withoutUsersPartner().map(idAndLabel);
     },
 
-    beforeFilterChanged: function(rqlQuery)
+    onFilterChanged: function(rqlQuery)
     {
       localStorage.GDN_LIMIT = rqlQuery.limit;
     }

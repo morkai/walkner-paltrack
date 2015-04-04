@@ -8,8 +8,7 @@ define([
   'app/i18n',
   'app/user',
   'app/time',
-  'app/core/Model',
-  'app/core/View',
+  'app/core/views/FilterView',
   'app/core/util/idAndLabel',
   'app/core/util/prepareDateRange',
   'app/data/partners',
@@ -20,8 +19,7 @@ define([
   t,
   user,
   time,
-  Model,
-  View,
+  FilterView,
   idAndLabel,
   prepareDateRange,
   partners,
@@ -29,17 +27,11 @@ define([
 ) {
   'use strict';
 
-  return View.extend({
+  return FilterView.extend({
 
     template: filterTemplate,
 
-    events: {
-      'submit .filter-form': function(e)
-      {
-        e.preventDefault();
-
-        this.changeFilter();
-      },
+    events: _.extend({}, FilterView.prototype.events, {
       'click a[data-range]': function(e)
       {
         var dateRange = prepareDateRange(e.target.getAttribute('data-range'), false);
@@ -47,19 +39,46 @@ define([
         this.$id('from').val(dateRange.fromMoment.format('YYYY-MM-DD'));
         this.$id('to').val(dateRange.toMoment.format('YYYY-MM-DD'));
       }
-    },
+    }),
 
     firstPartnerProperty: 'receiver',
     secondPartnerProperty: 'supplier',
 
-    initialize: function()
-    {
-      this.idPrefix = _.uniqueId();
+    defaultFormData: {
+      receiver: '',
+      supplier: '',
+      from: '',
+      to: '',
+      docNo: ''
     },
 
-    destroy: function()
+    termToForm: {
+      'receiver': function(propertyName, term, formData)
+      {
+        formData[propertyName] = term.args[1];
+      },
+      'supplier': 'receiver',
+      'docNo': 'receiver',
+      'date': function(propertyName, term, formData)
+      {
+        var value = time.format(term.args[1], 'YYYY-MM-DD');
+
+        if (term.name === 'lt')
+        {
+          formData.to = value;
+        }
+        else if (term.name === 'ge')
+        {
+          formData.from = value;
+        }
+      }
+    },
+
+    initialize: function()
     {
-      this.$('.select2-offscreen[tabindex="-1"]').select2('destroy');
+      FilterView.prototype.initialize.apply(this, arguments);
+
+      this.on('filterChanged', this.onFilterChanged);
     },
 
     serialize: function()
@@ -73,9 +92,7 @@ define([
 
     afterRender: function()
     {
-      var formData = this.serializeRqlQuery();
-
-      js2form(this.el.querySelector('.filter-form'), formData);
+      FilterView.prototype.afterRender.call(this);
 
       this.$id('receiver').select2({
         width: '150px',
@@ -123,64 +140,12 @@ define([
       return partners.map(idAndLabel);
     },
 
-    serializeRqlQuery: function()
+    serializeFormToQuery: function(selector)
     {
-      var rqlQuery = this.model.rqlQuery;
-      var maxLimit = parseInt(this.$id('limit').attr('max'), 10) || 100;
-      var formData = {
-        receiver: '',
-        supplier: '',
-        from: '',
-        to: '',
-        docNo: '',
-        limit: rqlQuery.limit < 5 ? 5 : (rqlQuery.limit > maxLimit ? maxLimit : rqlQuery.limit)
-      };
-
-      rqlQuery.selector.args.forEach(function(term)
-      {
-        /*jshint -W015*/
-
-        if (term.name !== 'eq' && term.name !== 'lt' && term.name !== 'ge')
-        {
-          return;
-        }
-
-        var property = term.args[0];
-
-        switch (property)
-        {
-          case 'receiver':
-          case 'supplier':
-          case 'docNo':
-            formData[property] = term.args[1];
-            break;
-
-          case 'date':
-            var value = time.format(term.args[1], 'YYYY-MM-DD');
-
-            if (term.name === 'lt')
-            {
-              formData.to = value;
-            }
-            else if (term.name === 'ge')
-            {
-              formData.from = value;
-            }
-            break;
-        }
-      });
-
-      return formData;
-    },
-
-    changeFilter: function()
-    {
-      var rqlQuery = this.model.rqlQuery;
-      var selector = [];
       var receiver = this.$id('receiver').val();
       var supplier = this.$id('supplier').val();
-      var fromMoment = time.getMoment(this.$id('from').val());
-      var toMoment = time.getMoment(this.$id('to').val());
+      var fromMoment = time.getMoment(this.$id('from').val(), 'YYYY-MM-DD');
+      var toMoment = time.getMoment(this.$id('to').val(), 'YYYY-MM-DD');
       var docNo = this.$id('docNo').val();
 
       if (receiver)
@@ -214,16 +179,9 @@ define([
       {
         selector.push({name: 'eq', args: ['docNo', docNo]});
       }
-
-      rqlQuery.selector = {name: 'and', args: selector};
-      rqlQuery.limit = parseInt(this.$id('limit').val(), 10) || 15;
-      rqlQuery.skip = 0;
-
-      this.beforeFilterChanged(rqlQuery);
-      this.trigger('filterChanged', rqlQuery);
     },
 
-    beforeFilterChanged: function(rqlQuery)
+    onFilterChanged: function(rqlQuery)
     {
       localStorage.GRN_LIMIT = rqlQuery.limit;
     }

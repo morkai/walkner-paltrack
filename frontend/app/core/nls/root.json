@@ -1,6 +1,6 @@
 {
   "root": {
-    "TITLE": "Walkner PalTrack",
+    "TITLE": "PalTrack",
 
     "MSG:LOADING": "Loading...",
     "MSG:LOADING_FAILURE": "Loading failed :(",
@@ -30,10 +30,12 @@
     "PAGINATION:NEXT_PAGE": "Next page",
     "PAGINATION:LAST_PAGE": "Last page",
 
-    "LOG_IN_FORM:DIALOG_TITLE": "Log in form",
+    "LOG_IN_FORM:TITLE:LOG_IN": "Log in form",
+    "LOG_IN_FORM:TITLE:RESET": "Password reset form",
     "LOG_IN_FORM:LABEL:LOGIN": "Login",
     "LOG_IN_FORM:LABEL:PASSWORD": "Password",
-    "LOG_IN_FORM:LABEL:SUBMIT": "Log in",
+    "LOG_IN_FORM:SUBMIT:LOG_IN": "Log in",
+    "LOG_IN_FORM:SUBMIT:RESET": "Reset password",
 
     "BOOL:true": "Yes",
     "BOOL:false": "No",
@@ -114,7 +116,10 @@
     "filter:datePicker:prevWeek": "Previous week",
     "filter:datePicker:currentMonth": "Current month",
     "filter:datePicker:nextMonth": "Next month",
-    "filter:datePicker:prevMonth": "Previous month"
+    "filter:datePicker:prevMonth": "Previous month",
+
+    "placeholder:date": "yyyy-mm-dd",
+    "placeholder:time": "--:--"
   },
   "pl": true
 }

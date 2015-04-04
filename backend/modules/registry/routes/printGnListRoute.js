@@ -17,12 +17,12 @@ module.exports = function checkGnRoute(app, registryModule, Gn, req, res, next)
 
   if (!receiver && !supplier)
   {
-    return res.json(new Error('INVALID_PARTNER'), 400);
+    return res.status(400).json(new Error('INVALID_PARTNER'));
   }
 
   if (!conditions.date || !conditions.date.$gte || !conditions.date.$lt)
   {
-    return res.json(new Error('INVALID_DATE'), 400);
+    return res.status(400).json(new Error('INVALID_DATE'));
   }
 
   var mongoose = app[registryModule.config.mongooseId];

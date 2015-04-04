@@ -21,7 +21,7 @@ define([
 
   return ListView.extend({
 
-    className: 'registryList ob',
+    className: 'registryList ob is-clickable',
 
     localTopics: {
       'partners.synced': 'render',
@@ -48,7 +48,7 @@ define([
         columns.push({
           id: 'goods.' + palletKind.id,
           label: palletKind.getLabel(),
-          tdAttrs: 'class="number"',
+          tdAttrs: 'class="number is-min"',
           noData: 0
         });
       });

@@ -27,6 +27,9 @@ exports.modules = [
   'sio'
 ];
 
+exports.mainJsFile = 'paltrack-main.js';
+exports.mainCssFile = 'assets/paltrack-main.css';
+
 exports.dashboardUrlAfterLogIn = '/';
 
 exports.dictionaryModules = {
@@ -77,7 +80,7 @@ exports.pubsub = {
 exports.mongoose = {
   maxConnectTries: 10,
   connectAttemptDelay: 500,
-  uri: require('./mongodb').uri,
+  uri: require('./paltrack-mongodb').uri,
   options: {},
   models: [
     'setting', 'event', 'user', 'feedback',
@@ -113,14 +116,15 @@ exports.user = {
 };
 
 exports.updater = {
-  manifestPath: __dirname + '/manifest.appcache',
+  manifestPath: __dirname + '/paltrack-manifest.appcache',
   packageJsonPath: __dirname + '/../package.json',
-  restartDelay: 10000,
+  restartDelay: 5000,
   pull: {
     exe: 'git.exe',
     cwd: __dirname + '/../',
     timeout: 30000
-  }
+  },
+  versionsKey: 'paltrack'
 };
 
 exports.registry = {

@@ -16,29 +16,19 @@ module.exports = function setUpUsersRoutes(app, usersModule)
   var canView = userModule.auth('USERS:VIEW');
   var canManage = userModule.auth('USERS:MANAGE');
 
-  express.get('/users', userModule.auth(), express.crud.browseRoute.bind(null, app, User));
+  express.get('/users', express.crud.browseRoute.bind(null, app, User));
 
   express.post('/users', canManage, hashPassword, express.crud.addRoute.bind(null, app, User));
 
   express.get('/users/:id', canViewDetails, express.crud.readRoute.bind(null, app, User));
 
-  express.put('/users/:id', canManage, restrictSpecial, hashPassword, express.crud.editRoute.bind(null, app, User));
+  express.put('/users/:id', canEdit, restrictSpecial, hashPassword, express.crud.editRoute.bind(null, app, User));
 
   express.delete('/users/:id', canManage, restrictSpecial, express.crud.deleteRoute.bind(null, app, User));
 
   express.post('/login', loginRoute);
 
   express.get('/logout', logoutRoute);
-
-  function createGuestUser(req)
-  {
-    var guestUser = lodash.merge({}, userModule.guest);
-    guestUser.loggedIn = false;
-    guestUser.ipAddress = userModule.getRealIp({}, req);
-    guestUser.local = userModule.isLocalIpAddress(guestUser.ipAddress);
-
-    return guestUser;
-  }
 
   function canViewDetails(req, res, next)
   {
@@ -52,11 +42,30 @@ module.exports = function setUpUsersRoutes(app, usersModule)
     }
   }
 
+  function canEdit(req, res, next)
+  {
+    var user = req.session.user;
+
+    if (user && req.params.id === user._id)
+    {
+      if (req.body.privileges && user.privileges.indexOf('USERS:MANAGE') === -1)
+      {
+        delete req.body.privileges;
+      }
+
+      next();
+    }
+    else
+    {
+      canManage(req, res, next);
+    }
+  }
+
   function restrictSpecial(req, res, next)
   {
     if (req.params.id === userModule.root._id || req.params.id === userModule.guest._id)
     {
-      return res.send(400);
+      return res.sendStatus(400);
     }
 
     return next();
@@ -64,63 +73,25 @@ module.exports = function setUpUsersRoutes(app, usersModule)
 
   function loginRoute(req, res, next)
   {
-    var credentials = req.body;
-
-    if (credentials.login === userModule.root.login)
-    {
-      return authUser(
-        credentials, lodash.merge({}, userModule.root), req, res, next
-      );
-    }
-
-    User.findOne({login: credentials.login}, function(err, user)
+    userModule.authenticate(req.body, function(err, user)
     {
       if (err)
       {
+        if (err.status < 500)
+        {
+          app.broker.publish('users.loginFailure', {
+            severity: 'warning',
+            user: req.session.user,
+            login: String(req.body.login)
+          });
+        }
+
         return next(err);
-      }
-
-      if (!user)
-      {
-        app.broker.publish('users.loginFailure', {
-          severity: 'warning',
-          user: createGuestUser(req),
-          login: credentials.login
-        });
-
-        return setTimeout(res.send.bind(res, 401), 1000);
-      }
-
-      authUser(credentials, user.toObject(), req, res, next);
-    });
-  }
-
-  function authUser(credentials, user, req, res, next)
-  {
-    var password = String(credentials.password);
-    var hash = user.password;
-
-    bcrypt.compare(password, hash, function(err, result)
-    {
-      if (err)
-      {
-        return next(err);
-      }
-
-      if (!result)
-      {
-        app.broker.publish('users.loginFailure', {
-          severity: 'warning',
-          user: createGuestUser(req),
-          login: credentials.login
-        });
-
-        return setTimeout(res.send.bind(res, 401), 1000);
       }
 
       var oldSessionId = req.sessionID;
 
-      req.session.regenerate(function(err)
+      req.session.regenerate(function (err)
       {
         if (err)
         {
@@ -136,11 +107,11 @@ module.exports = function setUpUsersRoutes(app, usersModule)
         req.session.user = user;
 
         res.format({
-          json: function()
+          json: function ()
           {
             res.send(req.session.user);
           },
-          default: function()
+          default: function ()
           {
             res.redirect('/');
           }
@@ -171,12 +142,17 @@ module.exports = function setUpUsersRoutes(app, usersModule)
         return next(err);
       }
 
-      req.session.user = createGuestUser(req);
+      var guestUser = lodash.merge({}, userModule.guest);
+      guestUser.loggedIn = false;
+      guestUser.ipAddress = userModule.getRealIp({}, req);
+      guestUser.local = userModule.isLocalIpAddress(guestUser.ipAddress);
+
+      req.session.user = guestUser;
 
       res.format({
         json: function()
         {
-          res.send(204);
+          res.sendStatus(204);
         },
         default: function()
         {
@@ -186,7 +162,7 @@ module.exports = function setUpUsersRoutes(app, usersModule)
 
       if (user !== null)
       {
-        user.ipAddress = req.session.user.ipAddress;
+        user.ipAddress = guestUser.ipAddress;
 
         app.broker.publish('users.logout', {
           user: user,

@@ -57,10 +57,7 @@ define([
      */
     this.rql = {};
 
-    if (this.queryString !== '')
-    {
-      this.defineGetters();
-    }
+    this.defineGetters();
   }
 
   Request.prototype.defineGetters = function()

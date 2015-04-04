@@ -183,7 +183,7 @@ module.exports = function setUpGrnRoutes(app, registryModule)
 
       if (!gdn)
       {
-        return res.send(404);
+        return res.sendStatus(404);
       }
 
       res.send(gdn.goods);

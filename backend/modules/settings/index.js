@@ -115,7 +115,7 @@ exports.start = function startSettingsModule(app, module)
           return next(err);
         }
 
-        return res.send(204);
+        return res.sendStatus(204);
       }
     );
   };

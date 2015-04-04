@@ -11,7 +11,6 @@ exports.paths = {
   'moment': 'vendor/moment/moment',
   'moment-lang': 'vendor/moment/lang',
   'moment-timezone': 'vendor/moment/moment-timezone',
-  'moment-timezone-data': 'vendor/moment/moment-timezone-data',
   'bootstrap': 'vendor/bootstrap/js/bootstrap',
   'bootstrap-colorpicker': 'vendor/bootstrap-colorpicker/js/bootstrap-colorpicker',
   'socket.io': 'vendor/socket.io',
@@ -19,7 +18,6 @@ exports.paths = {
   'h5.rql': 'vendor/h5.rql',
   'form2js': 'vendor/form2js',
   'js2form': 'vendor/js2form',
-  'reltime': 'vendor/reltime',
   'select2': 'vendor/select2/select2',
   'select2-lang': 'vendor/select2-lang',
   'zeroclipboard': 'vendor/zeroclipboard/ZeroClipboard',
@@ -36,9 +34,6 @@ exports.shim = {
   },
   'bootstrap': ['jquery'],
   'bootstrap-colorpicker': ['bootstrap'],
-  'reltime': {
-    exports: 'reltime'
-  },
   'select2': {
     deps: ['jquery'],
     exports: 'Select2'

@@ -1,8 +1,4 @@
-define(function (require, exports, module) {// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-// Part of the h5.rql project <http://lukasz.walukiewicz.eu/p/h5.rql>
-
-'use strict';
+define(function (require, exports, module) {'use strict';
 
 var Term = require('./Term');
 var Query = require('./Query');
@@ -11,17 +7,17 @@ var specialTerms = require('./specialTerms');
 var valueConverters = require('./valueConverters');
 
 /**
- * @type {Term}
+ * @type {h5.rql.Term}
  */
 exports.Term = Term;
 
 /**
- * @type {Query}
+ * @type {h5.rql.Query}
  */
 exports.Query = Query;
 
 /**
- * @type {Parser}
+ * @type {h5.rql.Parser}
  */
 exports.Parser = Parser;
 
@@ -36,13 +32,13 @@ exports.specialTerms = specialTerms;
 exports.valueConverters = valueConverters;
 
 /**
- * @type {Parser|null}
+ * @type {h5.rql.Parser|null}
  */
 exports.parser = null;
 
 /**
  * @param {string} queryString
- * @returns {Query}
+ * @returns {h5.rql.Query}
  */
 exports.parse = function parseQueryStringToRqlQuery(queryString)
 {
@@ -64,9 +60,12 @@ exports.parse = function parseQueryStringToRqlQuery(queryString)
 
   for (var specialTerm in cachedSpecialTerms)
   {
-    if (cachedSpecialTerms.hasOwnProperty(specialTerm) && specialTerms.hasOwnProperty(specialTerm))
+    if (cachedSpecialTerms.hasOwnProperty(specialTerm)
+      && specialTerms.hasOwnProperty(specialTerm))
     {
-      specialTerms[specialTerm](query, specialTerm, cachedSpecialTerms[specialTerm]);
+      specialTerms[specialTerm](
+        query, specialTerm, cachedSpecialTerms[specialTerm]
+      );
     }
   }
 

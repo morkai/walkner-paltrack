@@ -15,11 +15,19 @@ define([
 
   return ListView.extend({
 
+    className: 'is-clickable',
+
     localTopics: {
       'partners.synced': 'render'
     },
 
-    columns: ['lastName', 'firstName', 'partner', 'login', 'email'],
+    columns: [
+      {id: 'login', className: 'is-min'},
+      {id: 'lastName', className: 'is-min'},
+      {id: 'firstName', className: 'is-min'},
+      {id: 'email', className: 'is-min'},
+      'partner'
+    ],
 
     serializeRows: function()
     {

@@ -18,10 +18,9 @@
     "PANEL:TITLE:addForm": "Add user form",
     "PANEL:TITLE:editForm": "Edit user form",
 
-    "FILTER:BUTTON": "Filter users",
-    "FILTER:LIMIT": "Limit",
-    "FILTER:PLACEHOLDER:partner": "Any partner",
-    "FILTER:PLACEHOLDER:lastName": "Any last name",
+    "filter:submit": "Filter users",
+    "filter:placeholder:partner": "Any partner",
+    "filter:placeholder:lastName": "Any last name",
 
     "PROPERTY:login": "Login",
     "PROPERTY:password": "Password",

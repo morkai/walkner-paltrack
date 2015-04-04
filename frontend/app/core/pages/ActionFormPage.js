@@ -21,13 +21,11 @@ define([
 
     layoutName: 'page',
 
-    breadcrumbsBrowseKey: 'BREADCRUMBS:browse',
-
     breadcrumbs: function()
     {
       return [
         {
-          label: t.bound(this.model.getNlsDomain(), this.breadcrumbsBrowseKey),
+          label: t.bound(this.model.getNlsDomain(), 'BREADCRUMBS:browse'),
           href: this.model.genClientUrl('base')
         },
         {

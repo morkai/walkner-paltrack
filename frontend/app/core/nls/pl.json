@@ -1,5 +1,5 @@
 {
-  "TITLE": "Walkner PalTrack",
+  "TITLE": "PalTrack",
 
   "MSG:LOADING": "Ładowanie...",
   "MSG:LOADING_FAILURE": "Ładowanie nie powiodło się :(",
@@ -29,11 +29,21 @@
   "PAGINATION:NEXT_PAGE": "Następna strona",
   "PAGINATION:LAST_PAGE": "Ostatnia strona",
 
-  "LOG_IN_FORM:DIALOG_TITLE": "Logowanie do systemu",
+  "LOG_IN_FORM:TITLE:LOG_IN": "Logowanie do systemu",
+  "LOG_IN_FORM:TITLE:RESET": "Resetowanie hasła",
   "LOG_IN_FORM:LABEL:LOGIN": "Login",
   "LOG_IN_FORM:LABEL:PASSWORD": "Hasło",
-  "LOG_IN_FORM:LABEL:SUBMIT": "Zaloguj się",
-  "LOG_IN_FORM:PROXY_MESSAGE": "Kolor przycisku <em>Zaloguj się</em> zmienia się na zielony, a ikonka <i class='fa fa-user navbar-status-offline'></i> w prawym górnym rogu ma kolor czerwony? <a href='http://walkner.pl/projects/'>Spróbuj wejść tutaj</a>, aby wymusić autoryzację proxy, a następnie wrócić do aplikacji Walkner PalTrack!",
+  "LOG_IN_FORM:LABEL:NEW_PASSWORD": "Nowe hasło",
+  "LOG_IN_FORM:SUBMIT:LOG_IN": "Zaloguj się",
+  "LOG_IN_FORM:SUBMIT:RESET": "Resetuj hasło",
+  "LOG_IN_FORM:LINK:LOG_IN": "Zaloguj się",
+  "LOG_IN_FORM:LINK:RESET": "Zapomniałeś hasła?",
+  "LOG_IN_FORM:RESET:SUBJECT": "Resetowanie hasła w aplikacji Travelka",
+  "LOG_IN_FORM:RESET:TEXT": "Witaj, \\{LOGIN\\}!\n\nNajprawdopodobniej skorzystałeś z opcji resetowania hasła w aplikacji Travelka dostępnej pod adresem http://transport.walkner.pl/. Jeżeli nic o tym nie wiesz, zignoruj tego e-maila.\n\nTwój login: \\{LOGIN\\}\nNowe hasło: \\{PASSWORD\\}\n\nW celu aktywacji powyższego, nowego hasła, kliknij odnośnik:\n{url}\n\nW razie jakichkolwiek problemów możesz się z nami skontaktować odpowiadając na ten e-mail.\n\nPozdrawiamy,\nAdministracja Travelki!",
+  "LOG_IN_FORM:RESET:MSG:NOT_FOUND": "Użytkownik o podanym loginie nie istnieje :-(",
+  "LOG_IN_FORM:RESET:MSG:INVALID_EMAIL": "Użytkownik nie ma ustawionego adresu e-mail :-(",
+  "LOG_IN_FORM:RESET:MSG:FAILURE": "Nie udało się zresetować hasła :-(",
+  "LOG_IN_FORM:RESET:MSG:SUCCESS": "Sprawdź swojego e-maila!",
 
   "BOOL:true": "Tak",
   "BOOL:false": "Nie",
@@ -86,10 +96,6 @@
   "highcharts:shortMonths": "Sty_Lut_Mar_Kwi_Maj_Cze_Lip_Sie_Wrz_Paź_Lis_Gru",
   "highcharts:weekdays": "Niedziela_Poniedziałek_Wtorek_Środa_Czwartek_Piątek_Sobota",
 
-  "dataTables:emptyTable": "Brak danych.",
-  "dataTables:loadingRecords": "Ładowanie danych...",
-  "dataTables:loadingFailed": "Ładowanie danych nie powiodło się :(",
-
   "feedback:button:text": "Feedback",
   "feedback:button:tooltip": "Zgłoś błędy, uwagi, opinie lub pomysły!",
 
@@ -114,5 +120,8 @@
   "filter:datePicker:prevWeek": "Poprzedni tydzień",
   "filter:datePicker:currentMonth": "Aktualny miesiąc",
   "filter:datePicker:nextMonth": "Następny miesiąc",
-  "filter:datePicker:prevMonth": "Poprzedni miesiąc"
+  "filter:datePicker:prevMonth": "Poprzedni miesiąc",
+
+  "placeholder:date": "rrrr-mm-dd",
+  "placeholder:time": "--:--"
 }

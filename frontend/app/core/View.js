@@ -95,6 +95,7 @@ function(
   View.prototype.cleanup = function()
   {
     this.destroy();
+    this.cleanupSelect2();
 
     util.cleanupSandboxedProperties(this);
 
@@ -108,25 +109,26 @@ function(
     this.cancelRequests();
   };
 
-  View.prototype.destroy = function()
-  {
+  View.prototype.destroy = function() {};
 
+  View.prototype.cleanupSelect2 = function()
+  {
+    var view = this;
+
+    this.$('.select2-container').each(function()
+    {
+      view.$('#' + this.id.replace('s2id_', '')).select2('destroy');
+    });
   };
 
-  View.prototype.beforeRender = function()
-  {
-
-  };
+  View.prototype.beforeRender = function() {};
 
   View.prototype.serialize = function()
   {
     return {idPrefix: this.idPrefix};
   };
 
-  View.prototype.afterRender = function()
-  {
-
-  };
+  View.prototype.afterRender = function() {};
 
   View.prototype.isRendered = function()
   {

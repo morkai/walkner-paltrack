@@ -1,7 +1,7 @@
 .filter-container {
   margin-bottom: 1em;
 }
-.filter-container > .well {
+.filter-container > .filter-form {
   padding: 1em 1em 0 0;
   display: flex;
   flex-wrap: wrap;
@@ -125,10 +125,7 @@ input[type=checkbox].filter-inLabel {
 .filter-inlineInputLabels .form-control {
   display: inline;
 }
-.filter-datePicker > label {
-  display: block;
-}
-@media screen and (max-width: 767px) {
+@media (max-width: 767px) {
   .filter-container > .well {
     align-items: flex-start;
     padding: 1em;
@@ -137,7 +134,8 @@ input[type=checkbox].filter-inLabel {
     flex-direction: column;
     align-items: flex-start;
   }
-  .filter-form .filter-actions {
+  .filter-form .filter-actions,
+  .filter-form.is-vertical .filter-actions {
     padding-left: 0;
     margin-left: 0;
     border-left: 0;
@@ -146,6 +144,9 @@ input[type=checkbox].filter-inLabel {
     display: block;
     width: 100%;
     margin-left: 0;
+  }
+  .filter-form .no-label {
+    padding-top: 0;
   }
   .filter-actions .btn {
     display: block;

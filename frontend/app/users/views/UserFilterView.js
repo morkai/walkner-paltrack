@@ -3,54 +3,60 @@
 // Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
 
 define([
-  'underscore',
-  'js2form',
-  'app/i18n',
-  'app/core/View',
+  'app/core/views/FilterView',
   'app/data/partners',
   'app/users/templates/filter',
   'select2'
 ], function(
-  _,
-  js2form,
-  t,
-  View,
+  FilterView,
   partners,
   filterTemplate
 ) {
   'use strict';
 
-  return View.extend({
+  return FilterView.extend({
 
     template: filterTemplate,
 
-    events: {
-      'submit .filter-form': function(e)
-      {
-        e.preventDefault();
+    defaultFormData: {
+      lastName: '',
+      partner: ''
+    },
 
-        this.changeFilter();
+    termToForm: {
+      'lastName': function(propertyName, term, formData)
+      {
+        if (term.name === 'regex')
+        {
+          formData[propertyName] = term.args[1].replace('^', '');
+        }
+      },
+      'partner': function(propertyName, term, formData)
+      {
+        formData[propertyName] = term.args[1];
       }
     },
 
-    initialize: function()
+    serializeFormToQuery: function(selector)
     {
-      this.idPrefix = _.uniqueId('userFilter');
-    },
+      var lastName = this.$id('lastName').val().trim();
+      var partner = this.$id('partner').val();
 
-    serialize: function()
-    {
-      return {
-        idPrefix: this.idPrefix
-      };
-    },
+      if (lastName.length)
+      {
+        selector.push({name: 'regex', args: ['lastName', '^' + lastName, 'i']});
+      }
 
+      if (partner.length)
+      {
+        selector.push({name: 'eq', args: ['partner', partner]});
+      }
+    },
+    
     afterRender: function()
     {
-      var formData = this.serializeRqlQuery();
-
-      js2form(this.el.querySelector('.filter-form'), formData);
-
+      FilterView.prototype.afterRender.call(this);
+      
       this.$id('partner').select2({
         width: 'resolve',
         allowClear: true,
@@ -62,63 +68,6 @@ define([
           };
         })
       });
-    },
-
-    serializeRqlQuery: function()
-    {
-      var rqlQuery = this.model.rqlQuery;
-      var formData = {
-        partner: '',
-        lastName: '',
-        limit: rqlQuery.limit < 5 ? 5 : (rqlQuery.limit > 100 ? 100 : rqlQuery.limit)
-      };
-
-      rqlQuery.selector.args.forEach(function(term)
-      {
-        /*jshint -W015*/
-
-        var property = term.args[0];
-
-        switch (property)
-        {
-          case 'partner':
-            formData[property] = term.args[1];
-            break;
-
-          case 'lastName':
-            if (term.name === 'regex')
-            {
-              formData[property] = term.args[1].replace('^', '');
-            }
-            break;
-        }
-      });
-
-      return formData;
-    },
-
-    changeFilter: function()
-    {
-      var rqlQuery = this.model.rqlQuery;
-      var selector = [];
-      var partner = this.$id('partner').val();
-      var lastName = this.$id('lastName').val().trim();
-
-      if (partner.length)
-      {
-        selector.push({name: 'eq', args: ['partner', partner]});
-      }
-
-      if (lastName.length)
-      {
-        selector.push({name: 'regex', args: ['lastName', '^' + lastName, 'i']});
-      }
-
-      rqlQuery.selector = {name: 'and', args: selector};
-      rqlQuery.limit = parseInt(this.$id('limit').val(), 10) || 15;
-      rqlQuery.skip = 0;
-
-      this.trigger('filterChanged', rqlQuery);
     }
 
   });

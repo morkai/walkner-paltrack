@@ -27,12 +27,12 @@ define([
 
     breadcrumbs: function()
     {
-      return [t.bound(this.collection.getNlsDomain(), 'BREADCRUMBS:browse')];
+      return [t.bound((this.collection || this.model).getNlsDomain(), 'BREADCRUMBS:browse')];
     },
 
     actions: function()
     {
-      return [pageActions.add(this.collection)];
+      return [pageActions.add(this.collection || this.model)];
     },
 
     initialize: function()
@@ -46,7 +46,7 @@ define([
 
     defineModels: function()
     {
-      this.collection = bindLoadingMessage(this.collection, this);
+      this[this.collection ? 'collection' : 'model'] = bindLoadingMessage(this.collection || this.model, this);
     },
 
     defineViews: function()
@@ -60,28 +60,33 @@ define([
 
     createListView: function()
     {
-      return new (this.ListView || this.options.ListView || ListView)({
-        collection: this.collection
+      var ListViewClass = this.ListView || this.options.ListView || ListView;
+
+      return new ListViewClass({
+        collection: this.collection,
+        model: this.model
       });
     },
 
     createFilterView: function()
     {
-      return new (this.FilterView || this.options.FilterView)({
+      var FilterViewClass = this.FilterView || this.options.FilterView;
+
+      return new FilterViewClass({
         model: {
-          rqlQuery: this.collection.rqlQuery
+          rqlQuery: (this.collection || this.model).rqlQuery
         }
       });
     },
 
     load: function(when)
     {
-      return when(this.collection.fetch({reset: true}));
+      return when((this.collection || this.model).fetch({reset: true}));
     },
 
     onFilterChanged: function(newRqlQuery)
     {
-      this.collection.rqlQuery = newRqlQuery;
+      (this.collection || this.model).rqlQuery = newRqlQuery;
 
       this.refreshCollection();
     },

@@ -164,7 +164,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
 
       if (!gdn)
       {
-        return res.send(404);
+        return res.sendStatus(404);
       }
 
       if (req.wkhtmltopdf)

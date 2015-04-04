@@ -43,6 +43,34 @@ define([
     },
 
     events: {
+      'click .list-item[data-id]': function(e)
+      {
+        if (!this.el.classList.contains('is-clickable')
+          || e.target.tagName === 'A'
+          || e.target.tagName === 'INPUT'
+          || e.target.tagName === 'BUTTON'
+          || e.target.classList.contains('actions')
+          || window.getSelection().toString() !== ''
+          || (e.target.tagName !== 'TD' && this.$(e.target).closest('a, input, button').length))
+        {
+          return;
+        }
+
+        var url = this.collection.get(e.currentTarget.dataset.id).genClientUrl();
+
+        if (e.ctrlKey)
+        {
+          window.open(url);
+        }
+        else if (!e.altKey)
+        {
+          this.broker.publish('router.navigate', {
+            url: url,
+            trigger: true,
+            replace: false
+          });
+        }
+      },
       'click .action-delete': function(e)
       {
         e.preventDefault();
@@ -123,6 +151,22 @@ define([
           column.label = t(nlsDomain, 'PROPERTY:' + column.id);
         }
 
+        if (!column.thAttrs)
+        {
+          column.thAttrs = '';
+        }
+
+        if (!column.tdAttrs)
+        {
+          column.tdAttrs = '';
+        }
+
+        if (column.className || column.thClassName || column.tdClassName)
+        {
+          column.thAttrs += ' class="' + (column.className || '') + ' ' + (column.thClassName || '') + '"';
+          column.tdAttrs += ' class="' + (column.className || '') + ' ' + (column.tdClassName || '') + '"';
+        }
+
         return column;
       });
     },
@@ -200,6 +244,11 @@ define([
 
     refreshCollectionNow: function(options)
     {
+      if (!this.timers)
+      {
+        return;
+      }
+
       if (this.timers.refreshCollection)
       {
         clearTimeout(this.timers.refreshCollection);

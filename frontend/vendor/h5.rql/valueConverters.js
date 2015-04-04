@@ -1,8 +1,4 @@
-define(function (require, exports, module) {// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-// Part of the h5.rql project <http://lukasz.walukiewicz.eu/p/h5.rql>
-
-'use strict';
+define(function (require, exports, module) {'use strict';
 
 var autoConvertedMap = require('./autoConvertedMap');
 
@@ -21,7 +17,7 @@ module.exports = {
 
 /**
  * @param {string} str
- * @param {Parser} parser
+ * @param {h5.rql.Parser} parser
  * @returns {*}
  */
 function autoConverter(str, parser)
@@ -108,7 +104,8 @@ function dateConverter(str)
 {
   str = decodeURIComponent(str);
 
-  var isoDate = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(str);
+  var isoDate =
+    /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(str);
   var date;
 
   if (isoDate !== null)
@@ -187,7 +184,10 @@ function globConverter(str)
     .replace(/\\\?/g, '.?');
 
   str = str.substr(0, 2) === '.*' ? str.substr(2) : ('^' + str);
-  str = str.substr(str.length - 2) === '.*' ? str.substr(0, str.length - 2) : (str + '$');
+
+  str = str.substr(str.length - 2) === '.*'
+    ? str.substr(0, str.length - 2)
+    : (str + '$');
 
   return new RegExp(str, 'i');
 }

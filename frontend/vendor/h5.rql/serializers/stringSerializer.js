@@ -1,6 +1,4 @@
-define(function (require, exports, module) {// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-// Part of the h5.rql project <http://lukasz.walukiewicz.eu/p/h5.rql>
+define(function (require, exports, module) {/*jshint maxparams:5*/
 
 'use strict';
 
@@ -25,15 +23,15 @@ var cmpOperatorMap = {
 };
 
 /**
- * @param {Query} query
+ * @param {h5.rql.Query} query
  * @param {object} [options]
- * @param {boolean} [options.doubleEncode]
  * @returns {string}
  */
 function serializeRqlToString(query, options)
 {
   var rqlString = [];
-  var encode = options && options.doubleEncode ? doubleEncodeString : encodeString;
+  var encode =
+    options && options.doubleEncode ? doubleEncodeString : encodeString;
 
   pushFields(rqlString, query.fields);
   pushSort(rqlString, query.sort);
@@ -165,7 +163,7 @@ function pushSelector(rqlString, encode, selector)
  * @param {function} encode
  * @param {*} term
  * @param {number} parentArgCount
- * @param {boolean} [root]
+ * @param {boolean=} root
  */
 function pushTerm(rqlString, encode, term, parentArgCount, root)
 {
@@ -239,7 +237,7 @@ function pushTermWithArgs(rqlString, encode, conjunction, term, parentArgCount)
     }
   }
 
-  if (conjunction === ',' || parentArgCount !== 1)
+  if (conjunction === ',' || parentArgCount !== -1)
   {
     rqlString.push(')');
   }
@@ -274,7 +272,7 @@ function pushArray(rqlString, encode, array)
  */
 function pushValue(rqlString, encode, value)
 {
-/*jshint -W015*/
+  /*jshint -W015*/
 
   switch (typeof value)
   {

@@ -25,7 +25,7 @@ define([
 
   return ListView.extend({
 
-    className: 'registryList grn',
+    className: 'registryList grn is-clickable',
 
     firstPartnerProperty: 'receiver',
     secondPartnerProperty: 'supplier',
@@ -70,9 +70,12 @@ define([
         },
         {
           id: 'date',
-          tdAttrs: 'class="is-min"'
+          className: 'is-min'
         },
-        'docNo'
+        {
+          id: 'docNo',
+          className: 'is-min'
+        }
       ];
 
       if (user.data.partner)
@@ -85,7 +88,7 @@ define([
         columns.push({
           id: 'goods.' + palletKind.id,
           label: palletKind.getLabel(),
-          tdAttrs: 'class="number"',
+          tdAttrs: 'class="number is-min"',
           noData: 0
         });
       });
@@ -216,6 +219,8 @@ define([
       {
         view.renderCheckedIndicator(model);
       });
+
+      return false;
     },
 
     renderCheckedIndicator: function(model)

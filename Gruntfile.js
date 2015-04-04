@@ -57,7 +57,7 @@ module.exports = function(grunt)
         dest: './build/frontend',
         ext: '.js',
         options: {
-          helpers: require('./config/frontend').express.ejsAmdHelpers
+          helpers: require('./config/paltrack-frontend').express.ejsAmdHelpers
         }
       }
     },
@@ -107,7 +107,9 @@ module.exports = function(grunt)
             }
           },
           optimizeCss: 'standard',
-          modules: [{name: 'main'}],
+          modules: [
+            {name: 'paltrack-main'}
+          ],
           paths: requirejsConfig.buildPaths,
           shim: requirejsConfig.buildShim,
           locale: 'pl'

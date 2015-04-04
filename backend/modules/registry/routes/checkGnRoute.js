@@ -30,7 +30,7 @@ module.exports = function checkGnRoute(app, registryModule, Gn, req, res, next)
       return next(err);
     }
 
-    res.send(204);
+    res.sendStatus(204);
 
     app.broker.publish(Gn.TOPIC_PREFIX + '.checked.' + req.params.id, {
       id: req.params.id,

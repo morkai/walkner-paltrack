@@ -7,10 +7,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <base href="/">
   <title>walkner-paltrack</title>
-  <link rel="stylesheet" href="assets/main.css">
-  <script src="config.js"></script>
-  <script src="vendor/require/require.js"></script>
-  <script src="main.js"></script>
+  <link rel="stylesheet" href="<%- mainCssFile %>">
 </head>
 <body>
 <div id="app-loading"><i class="fa fa-spinner fa-spin"></i></div>
@@ -20,5 +17,9 @@
 window.<%- key %> = <%- appData[key] %>;
 <% }) %>
 </script>
+<script src="config.js"></script>
+<script src="vendor/require/require.js"></script>
+<script src="<%- mainJsFile %>"></script>
+<script src="main.js"></script>
 </body>
 </html>

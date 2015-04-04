@@ -1,8 +1,4 @@
-define(function (require, exports, module) {// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under the MIT License <http://opensource.org/licenses/MIT>.
-// Part of the h5.rql project <http://lukasz.walukiewicz.eu/p/h5.rql>
-
-'use strict';
+define(function (require, exports, module) {'use strict';
 
 var Term = require('./Term');
 var stringSerializer = require('./serializers/stringSerializer');
@@ -10,12 +6,13 @@ var stringSerializer = require('./serializers/stringSerializer');
 module.exports = Query;
 
 /**
+ * @name h5.rql.Query
  * @constructor
  */
 function Query()
 {
   /**
-   * @type {Term}
+   * @type {h5.rql.Term}
    */
   this.selector = new Term('and');
 
@@ -47,7 +44,7 @@ function Query()
  * @param {number} [obj.skip]
  * @param {number} [obj.limit]
  * @param {object.<string, number>} [obj.sort]
- * @returns {Query}
+ * @returns {h5.rql.Query}
  */
 Query.fromObject = function(obj)
 {

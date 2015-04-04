@@ -89,9 +89,7 @@ define([
 
       var $submitEl = this.$('[type="submit"]').attr('disabled', true);
 
-      var req = this.promised(this.model.save(formData, {
-        wait: true
-      }));
+      var req = this.promised(this.model.save(formData, this.getSaveOptions()));
 
       var view = this;
 
@@ -151,6 +149,13 @@ define([
 
         this.$errorMessage = null;
       }
+    },
+
+    getSaveOptions: function()
+    {
+      return {
+        wait: true
+      };
     }
 
   });

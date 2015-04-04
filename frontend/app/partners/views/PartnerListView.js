@@ -17,9 +17,7 @@ define([
 
   return ListView.extend({
 
-    className: 'partners-list',
-
-    idPrefix: 'partnerList',
+    className: 'partners-list is-clickable',
 
     columns: [
       'name',

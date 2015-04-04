@@ -45,8 +45,8 @@ define([
       collection: palletKinds,
       columns: [
         'name',
-        'no',
-        'position'
+        {id: 'no', className: 'is-min'},
+        {id: 'position', className: 'is-min'}
       ],
       serializeRow: decoratePalletKind
     }));
