@@ -4,21 +4,21 @@
 
 'use strict';
 
-var lodash = require('lodash');
+var _ = require('lodash');
 var mongoose = require('mongoose');
 var autoIncrement = require('mongoose-auto-increment');
 
 exports.DEFAULT_CONFIG = {
   maxConnectTries: 10,
   connectAttemptDelay: 500,
-  uri: 'mongodb://localhost/walkner-hydro',
+  uri: 'mongodb://localhost/test',
   options: {},
   models: null
 };
 
 exports.start = function startDbModule(app, module, done)
 {
-  module = app[module.name] = lodash.merge(mongoose, module);
+  module = app[module.name] = _.merge(mongoose, module);
 
   tryToConnect(0);
 

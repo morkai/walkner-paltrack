@@ -5,6 +5,7 @@
 'use strict';
 
 var EventEmitter = require('events').EventEmitter;
+var _ = require('lodash');
 var step = require('h5.step');
 var mongoSerializer = require('h5.rql/lib/serializers/mongoSerializer');
 
@@ -181,7 +182,8 @@ exports.readRoute = function(app, options, req, res, next)
     options = {};
   }
 
-  var query = Model.findById(req.params.id);
+  var queryOptions = mongoSerializer.fromQuery(req.rql);
+  var query = Model.findById(req.params.id, queryOptions.fields).lean();
 
   try
   {
@@ -202,6 +204,11 @@ exports.readRoute = function(app, options, req, res, next)
     if (model === null)
     {
       return res.sendStatus(404);
+    }
+
+    if (typeof Model.customizeLeanObject === 'function')
+    {
+      model = Model.customizeLeanObject(model);
     }
 
     if (typeof options.prepareResult === 'function')
@@ -424,7 +431,7 @@ exports.exportRoute = function(options, req, res, next)
 
       if (multiple)
       {
-        row.forEach(writeRow);
+        _.forEach(row, writeRow);
       }
       else
       {
@@ -477,7 +484,7 @@ exports.exportRoute = function(options, req, res, next)
 
 function populateQuery(query, rql)
 {
-  rql.selector.args.forEach(function(term)
+  _.forEach(rql.selector.args, function(term)
   {
     if (term.name === 'populate' && term.args.length > 0)
     {

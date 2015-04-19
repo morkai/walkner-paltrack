@@ -1,7 +1,7 @@
 .filter-container {
   margin-bottom: 1em;
 }
-.filter-container > .filter-form {
+.filter-container > .well {
   padding: 1em 1em 0 0;
   display: flex;
   flex-wrap: wrap;
@@ -33,7 +33,7 @@
   margin-left: 1em;
   border-left: 0;
 }
-.filter-form .dropdown-menu a {
+.filter-actions .dropdown-menu a {
   cursor: pointer;
 }
 .filter-actions > hr {

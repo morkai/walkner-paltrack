@@ -4,8 +4,7 @@
 
 'use strict';
 
-var lodash = require('lodash');
-var mongoose = require('mongoose');
+var _ = require('lodash');
 var setUpEventsRoutes = require('./routes');
 
 exports.DEFAULT_CONFIG = {
@@ -15,6 +14,7 @@ exports.DEFAULT_CONFIG = {
   collection: function(app) { return app.mongodb.db.collection('events'); },
   insertDelay: 1000,
   topics: ['events.**'],
+  blacklist: [],
   print: []
 };
 
@@ -81,7 +81,7 @@ exports.start = function startEventsModule(app, module)
       }
       else
       {
-        types.forEach(function(type)
+        _.forEach(types, function(type)
         {
           module.types[type] = 1;
         });
@@ -98,25 +98,25 @@ exports.start = function startEventsModule(app, module)
     {
       var queueInfoEvent = queueEvent.bind(null, 'info');
 
-      module.config.topics.forEach(function(topic)
+      _.forEach(module.config.topics, function(topic)
       {
         app.broker.subscribe(topic, queueInfoEvent);
       });
     }
     else
     {
-      lodash.each(module.config.topics, function(topics, severity)
+      _.forEach(module.config.topics, function(topics, severity)
       {
         var queueCustomSeverityEvent = queueEvent.bind(null, severity);
 
-        topics.forEach(function(topic)
+        _.forEach(topics, function(topic)
         {
           app.broker.subscribe(topic, queueCustomSeverityEvent);
         });
       });
     }
 
-    module.config.print.forEach(function(topic)
+    _.forEach(module.config.print, function(topic)
     {
       app.broker.subscribe(topic, printMessage);
     });
@@ -134,12 +134,17 @@ exports.start = function startEventsModule(app, module)
       return fetchAllTypes();
     }
 
+    if (module.config.blacklist.indexOf(topic) !== -1)
+    {
+      return;
+    }
+
     var user = null;
 
-    if (lodash.isObject(data.user))
+    if (_.isObject(data.user))
     {
       user = {
-        _id: new mongoose.Types.ObjectId(data.user._id),
+        _id: String(data.user._id),
         name: data.user.lastName && data.user.firstName
           ? (data.user.lastName + ' ' + data.user.firstName)
           : data.user.login,
@@ -148,7 +153,7 @@ exports.start = function startEventsModule(app, module)
       };
     }
 
-    if (!lodash.isObject(data))
+    if (!_.isObject(data))
     {
       data = {};
     }
@@ -159,7 +164,7 @@ exports.start = function startEventsModule(app, module)
 
     var type = topic.replace(/^events\./, '');
 
-    if (lodash.isString(data.severity))
+    if (_.isString(data.severity))
     {
       severity = data.severity;
 

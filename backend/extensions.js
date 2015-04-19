@@ -6,6 +6,16 @@
 
 var util = require('util');
 
+Object.defineProperty(Object.prototype, 'toJSON', {
+  configurable: false,
+  enumerable: false,
+  writable: true,
+  value: function()
+  {
+    return this;
+  }
+});
+
 Object.defineProperty(Error.prototype, 'toJSON', {
   configurable: false,
   enumerable: false,
@@ -17,11 +27,14 @@ Object.defineProperty(Error.prototype, 'toJSON', {
       message: error.message,
       stack: error.stack
     };
+    var keys = Object.keys(error);
 
-    Object.keys(error).forEach(function(property)
+    for (var i = 0; i < keys.length; ++i)
     {
-      result[property] = error[property];
-    });
+      var key = keys[i];
+
+      result[key] = error[key];
+    }
 
     return result;
   }
@@ -30,4 +43,15 @@ Object.defineProperty(Error.prototype, 'toJSON', {
 console.inspect = function(value, depth, colors)
 {
   console.log(util.inspect(value, {depth: depth || null, colors: colors !== false}));
+};
+
+console.bench = function(label, context, func)
+{
+  var time = process.hrtime();
+  var result = func.call(context);
+  var diff = process.hrtime(time);
+
+  console.log('[bench] %s %d ms', label, (diff[0] * 1e9 + diff[1]) / 1e6);
+
+  return result;
 };
