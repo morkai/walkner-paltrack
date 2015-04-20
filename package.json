@@ -59,6 +59,6 @@
     "grunt-contrib-jshint": "~0.10.0",
     "grunt-contrib-requirejs": "~0.4.4",
     "grunt-ejs-amd": "git+http://github.com/morkai/grunt-ejs-amd.git#a09723eabe",
-    "grunt-messageformat-amd": "git+http://github.com/morkai/grunt-messageformat-amd.git#925ad3d218"
+    "grunt-messageformat-amd": "git+http://github.com/morkai/grunt-messageformat-amd.git#7c47f564a5"
   }
 }
