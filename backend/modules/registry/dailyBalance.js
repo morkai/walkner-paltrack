@@ -179,7 +179,7 @@ module.exports = function setUpDailyBalance(app, registryModule)
       {
         var reduced = {};
 
-        lodash.last(keys.map(Number).sort(), 7).forEach(function(key)
+        lodash.takeRight(keys.map(Number).sort(), 7).forEach(function(key)
         {
           reduced[key] = cachedDailyBalances[partnerId][key];
         });
