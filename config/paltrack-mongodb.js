@@ -2,6 +2,8 @@
 
 module.exports = {
   uri: 'mongodb://127.0.0.1:27017/walkner-paltrack',
+  user: process.env.PALTRACK_MONGODB_USER || '',
+  pass: process.env.PALTRACK_MONGODB_PASS || '',
   server: {
     poolSize: 7
   },
