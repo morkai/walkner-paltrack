@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -13,7 +11,7 @@ define([
   $,
   user,
   View,
-  pageLayoutTemplate
+  template
 ) {
   'use strict';
 
@@ -21,7 +19,7 @@ define([
 
     pageContainerSelector: '.bd',
 
-    template: pageLayoutTemplate
+    template: template
 
   });
 
@@ -73,7 +71,8 @@ define([
   PageLayout.prototype.serialize = function()
   {
     return _.extend(View.prototype.serialize.call(this), {
-      version: this.options.version
+      version: this.options.version,
+      changelogUrl: this.options.changelogUrl
     });
   };
 
@@ -334,8 +333,7 @@ define([
       action.className = '';
     }
 
-    action.className = 'btn btn-' + (action.type || 'default')
-      + ' ' + action.className;
+    action.className = 'btn btn-' + (action.type || 'default') + ' ' + action.className;
 
     action.prepared = true;
 
@@ -362,8 +360,7 @@ define([
       }
       else
       {
-        html += '<a href="' + breadcrumb.href + '">'
-          + breadcrumb.label + '</a>';
+        html += '<a href="' + breadcrumb.href + '">' + breadcrumb.label + '</a>';
       }
     }
 
@@ -392,24 +389,25 @@ define([
   PageLayout.prototype.renderActions = function()
   {
     var actions = this.model.actions;
-    var callbacks = [];
+    var callbacks = {};
     var afterRender = {};
     var html = '';
 
     for (var i = 0, l = actions.length; i < l; ++i)
     {
       var action = actions[i];
+      var privileges = action.privileges;
 
-      if (action.privileges)
+      if (privileges)
       {
-        if (_.isFunction(action.privileges))
+        if (_.isFunction(privileges))
         {
-          if (!action.privileges())
+          if (!privileges())
           {
             continue;
           }
         }
-        else if (!user.isAllowedTo(action.privileges))
+        else if (!user.isAllowedTo(privileges))
         {
           continue;
         }
@@ -417,7 +415,7 @@ define([
 
       if (typeof action.callback === 'function')
       {
-        callbacks.push(i);
+        callbacks[i] = action.callback.bind(this);
       }
 
       if (typeof action.afterRender === 'function')
@@ -455,39 +453,9 @@ define([
 
     var $actions = this.$actions.find('li');
 
-    callbacks.forEach(function(i)
+    Object.keys(callbacks).forEach(function(i)
     {
-      var callback = actions[i].callback;
-
-      $actions.filter('li[data-index="' + i + '"]')
-        .mousedown(function(e) { e.preventDefault(); })
-        .mouseup(function(e)
-        {
-          callback.mouseUp = e;
-
-          callback.apply(this, arguments);
-        })
-        .click(function(e)
-        {
-          if (!callback.mouseUp)
-          {
-            callback.apply(this, arguments);
-          }
-          else
-          {
-            if (callback.mouseUp.isDefaultPrevented())
-            {
-              e.preventDefault();
-            }
-
-            if (callback.mouseUp.isPropagationStopped())
-            {
-              e.stopPropagation();
-            }
-
-            callback.mouseUp = null;
-          }
-        });
+      $actions.filter('li[data-index="' + i + '"]').click(actions[i].callback);
     });
 
     Object.keys(afterRender).forEach(function(i)

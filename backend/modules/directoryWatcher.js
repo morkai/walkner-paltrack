@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -31,34 +29,43 @@ exports.start = function startDirectoryWatcherModule(app, module)
 
   function watchDir()
   {
-    fs.watch(module.config.path, function(event, fileName)
+    try
     {
-      if (fileName === null)
-      {
-        return;
-      }
+      fs.watch(module.config.path, onChange);
+    }
+    catch (err)
+    {
+      module.error("Failed to watch dir: %s", err.message);
+    }
+  }
 
-      if (readingDir)
-      {
-        readDirAgain = true;
+  function onChange(event, fileName)
+  {
+    if (fileName === null)
+    {
+      return;
+    }
 
-        return;
-      }
+    if (readingDir)
+    {
+      readDirAgain = true;
 
-      if (timerStartedAt === -1)
-      {
-        timerStartedAt = Date.now();
-      }
+      return;
+    }
 
-      clearTimeout(timer);
+    if (timerStartedAt === -1)
+    {
+      timerStartedAt = Date.now();
+    }
 
-      if (Date.now() - timerStartedAt >= module.config.maxDelay)
-      {
-        return setImmediate(readDir);
-      }
+    clearTimeout(timer);
 
-      timer = setTimeout(readDir, module.config.delay);
-    });
+    if (Date.now() - timerStartedAt >= module.config.maxDelay)
+    {
+      return setImmediate(readDir);
+    }
+
+    timer = setTimeout(readDir, module.config.delay);
   }
 
   function readDir()
@@ -94,6 +101,7 @@ exports.start = function startDirectoryWatcherModule(app, module)
   function createFileInfo(fileName)
   {
     var fileInfo = {
+      moduleId: module.name,
       timestamp: -1,
       fileName: fileName,
       filePath: path.resolve(module.config.path, fileName)

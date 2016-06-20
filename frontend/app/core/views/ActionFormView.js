@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -196,25 +194,31 @@ define([
           ? options.model.get(options.labelAttribute)
           : options.model.getLabel();
 
-        if (modelLabel)
+        if (!options.messageText)
         {
-          options.messageText = t.bound(
-            options.nlsDomain,
-            'ACTION_FORM:MESSAGE_SPECIFIC:' + options.actionKey,
-            {label: modelLabel}
-          );
-        }
-        else
-        {
-          options.messageText =
-            t.bound(options.nlsDomain, 'ACTION_FORM:MESSAGE:' + options.actionKey);
+          if (modelLabel)
+          {
+            options.messageText = t.bound(
+              options.nlsDomain,
+              'ACTION_FORM:MESSAGE_SPECIFIC:' + options.actionKey,
+              {label: modelLabel}
+            );
+          }
+          else
+          {
+            options.messageText = t.bound(options.nlsDomain, 'ACTION_FORM:MESSAGE:' + options.actionKey);
+          }
         }
 
-        options.formActionText =
-          t.bound(options.nlsDomain, 'ACTION_FORM:BUTTON:' + options.actionKey);
+        if (!options.formActionText)
+        {
+          options.formActionText = t.bound(options.nlsDomain, 'ACTION_FORM:BUTTON:' + options.actionKey);
+        }
 
-        options.failureText =
-          t.bound(options.nlsDomain, 'ACTION_FORM:MESSAGE_FAILURE:' + options.actionKey);
+        if (!options.failureText)
+        {
+          options.failureText = t.bound(options.nlsDomain, 'ACTION_FORM:MESSAGE_FAILURE:' + options.actionKey);
+        }
       }
 
       if (!options.formAction && _.isFunction(options.model.url))

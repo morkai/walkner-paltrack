@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -42,8 +40,19 @@ function MongoStore(db, options)
    * @private
    * @type {number}
    */
-  this.defaultExpirationTime =
-    (options.defaultExpirationTime || MongoStore.Options.defaultExpirationTime) * 1000;
+  this.defaultExpirationTime = (options.defaultExpirationTime || MongoStore.Options.defaultExpirationTime) * 1000;
+
+  /**
+   * @private
+   * @type {number}
+   */
+  this.touchChance = options.touchChance || MongoStore.Options.touchChance;
+
+  /**
+   * @private
+   * @type {number}
+   */
+  this.touchInterval = options.touchInterval || MongoStore.Options.touchInterval;
 
   /**
    * @private
@@ -69,13 +78,10 @@ function MongoStore(db, options)
    */
   this.onClose = this.onClose.bind(this);
 
-  this.db.on('open', this.onOpen);
+  this.db.on('reconnect', this.onOpen);
   this.db.on('close', this.onClose);
 
-  if (this.db.state === 'connected')
-  {
-    this.scheduleGc();
-  }
+  this.scheduleGc();
 }
 
 /**
@@ -100,10 +106,36 @@ MongoStore.Options = {
   /**
    * @type {number}
    */
-  defaultExpirationTime: 3600 * 24 * 14
+  defaultExpirationTime: 3600 * 24 * 14,
+
+  /**
+   * @type {number}
+   */
+  touchChance: 0.25,
+
+  /**
+   * @type {number}
+   */
+  touchInterval: 0
 };
 
 util.inherits(MongoStore, Store);
+
+MongoStore.prototype.touch = function(sid, session, done)
+{
+  var now = Date.now();
+
+  if ((this.touchInterval > 0 && (now - session.updatedAt) < this.touchInterval)
+    || (this.touchChance > 0 && Math.random() > this.touchChance))
+  {
+    return done(null);
+  }
+
+  var sessions = this.collection();
+  var expires = Date.parse(session.cookie.expires) || (Date.now() + this.defaultExpirationTime);
+
+  sessions.update({_id: sid}, {$set: {expires, updatedAt: now}}, done);
+};
 
 /**
  * @param {string} sid
@@ -113,29 +145,31 @@ MongoStore.prototype.get = function(sid, done)
 {
   var store = this;
 
-  this.collection().findOne({_id: sid}, {_id: 0, data: 1}, function(err, doc)
+  this.collection().findOne({_id: sid}, {_id: 0, data: 1, updatedAt: 1}, function(err, doc)
   {
     if (err)
     {
       return done(err);
     }
 
-    if (doc !== null)
+    if (doc === null)
     {
-      var session = JSON.parse(doc.data);
-      var expires = typeof session.cookie.expires === 'string'
-        ? new Date(session.cookie.expires)
-        : session.cookie.expires;
-
-      if (!expires || new Date() < expires)
-      {
-        return done(null, session);
-      }
-
-      return store.destroy(sid, done);
+      return done();
     }
 
-    return done();
+    var session = typeof doc.data === 'string' ? JSON.parse(doc.data) : doc.data;
+    var expires = typeof session.cookie.expires === 'string'
+      ? new Date(session.cookie.expires)
+      : session.cookie.expires;
+
+    if (!expires || Date.now() < expires)
+    {
+      session.updatedAt = doc.updatedAt;
+
+      return done(null, session);
+    }
+
+    return store.destroy(sid, done);
   });
 };
 
@@ -147,16 +181,17 @@ MongoStore.prototype.get = function(sid, done)
 MongoStore.prototype.set = function(sid, session, done)
 {
   var sessions = this.collection();
-
+  var now = Date.now();
   var doc = {
     _id: sid,
+    updatedAt: now,
     expires: Date.parse(session.cookie.expires),
-    data: JSON.stringify(session)
+    data: session
   };
 
   if (isNaN(doc.expires))
   {
-    doc.expires = Date.now() + this.defaultExpirationTime;
+    doc.expires = now + this.defaultExpirationTime;
   }
 
   var opts = {
@@ -217,6 +252,7 @@ MongoStore.prototype.destruct = function()
 
 /**
  * @private
+ * @returns {Collection}
  */
 MongoStore.prototype.collection = function()
 {

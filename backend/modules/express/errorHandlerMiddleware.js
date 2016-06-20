@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -18,6 +16,11 @@ module.exports = function createErrorHandlerMiddleware(expressModule, options)
   {
     /*jshint unused:false*/
 
+    if (_.includes(expressModule.config.ignoredErrorCodes, err.code))
+    {
+      return;
+    }
+
     if (err.status)
     {
       res.statusCode = err.status;
@@ -31,6 +34,13 @@ module.exports = function createErrorHandlerMiddleware(expressModule, options)
     if (typeof err === 'string')
     {
       err = {message: err, stack: null};
+    }
+    else if (err && err.name === 'ValidationError')
+    {
+      _.forEach(err.errors, function(validationError)
+      {
+        err.message += '\n  - ' + validationError;
+      });
     }
 
     var login = req.session && req.session.user
@@ -70,6 +80,11 @@ module.exports = function createErrorHandlerMiddleware(expressModule, options)
       );
     }
 
+    if (!res.connection || !res.connection.writable)
+    {
+      return;
+    }
+
     var accept = req.headers.accept || '';
 
     if (accept.indexOf('html') !== -1)
@@ -78,7 +93,7 @@ module.exports = function createErrorHandlerMiddleware(expressModule, options)
         title: options.title || 'express',
         statusCode: res.statusCode,
         stack: prepareStack(options.basePath, err).reverse(),
-        error: err.message.replace(/\n/g, '<br>').replace(/^Error: /, '')
+        error: err.message.replace(/^Error: /, '')
       });
 
       return;

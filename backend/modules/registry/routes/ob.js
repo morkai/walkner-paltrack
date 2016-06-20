@@ -1,10 +1,8 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var lodash = require('lodash');
+var _ = require('lodash');
 var limitToPartner = require('./limitToPartner');
 var recordChanges = require('./recordChanges');
 
@@ -92,7 +90,7 @@ module.exports = function setUpObRoutes(app, registryModule)
 
       var changeCount = recordChanges(
         ob,
-        lodash.pick(req.body, ['goods']),
+        _.pick(req.body, ['goods']),
         userModule.createUserInfo(req.session.user, req)
       );
 

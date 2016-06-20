@@ -1,10 +1,8 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var lodash = require('lodash');
+var _ = require('lodash');
 
 module.exports = function createDictionaryModule(modelName, setUpRoutes, customSetUp)
 {
@@ -40,20 +38,29 @@ module.exports = function createDictionaryModule(modelName, setUpRoutes, customS
         );
       }
 
-      app.broker.subscribe(Model.TOPIC_PREFIX + '.added', function(message)
+      app.broker.subscribe(Model.TOPIC_PREFIX + '.added', function(message, topic, meta)
       {
         module.models.push(message.model);
         module.modelsById[message.model._id] = message.model;
+
+        publishDictionaryUpdate(topic, message, meta);
       });
 
-      app.broker.subscribe(Model.TOPIC_PREFIX + '.deleted', function(message)
+      app.broker.subscribe(Model.TOPIC_PREFIX + '.edited', function(message, topic, meta)
       {
-        module.models = lodash.filter(module.models, function(model)
+        publishDictionaryUpdate(topic, message, meta);
+      });
+
+      app.broker.subscribe(Model.TOPIC_PREFIX + '.deleted', function(message, topic, meta)
+      {
+        module.models = _.filter(module.models, function(model)
         {
           return model._id !== message.model._id;
         });
 
         delete module.modelsById[message.model._id];
+
+        publishDictionaryUpdate(topic, message, meta);
       });
 
       if (typeof customSetUp === 'function')
@@ -74,11 +81,12 @@ module.exports = function createDictionaryModule(modelName, setUpRoutes, customS
             return done(err);
           }
 
-          module.models = models;
+          module.models = new Array(models.length);
           module.modelsById = {};
 
-          lodash.forEach(models, function(model)
+          _.forEach(models, function(model, i)
           {
+            module.models[i] = model;
             module.modelsById[model._id] = model;
           });
 
@@ -91,6 +99,15 @@ module.exports = function createDictionaryModule(modelName, setUpRoutes, customS
         req.model = module.modelsById[req.params.id] || null;
 
         next();
+      }
+
+      function publishDictionaryUpdate(topic, message, meta)
+      {
+        app.broker.publish('dictionaries.updated', {
+          topic: topic,
+          message: message,
+          meta: meta
+        });
       }
     }
   };

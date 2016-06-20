@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -8,7 +6,7 @@ var crypto = require('crypto');
 var fs = require('fs');
 var path = require('path');
 var exec = require('child_process').exec;
-var lodash = require('lodash');
+var _ = require('lodash');
 var moment = require('moment');
 var limitToPartner = require('./limitToPartner');
 var recordChanges = require('./recordChanges');
@@ -123,7 +121,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
 
       var changeCount = recordChanges(
         gdn,
-        lodash.pick(req.body, ['date', 'docNo', 'goods']),
+        _.pick(req.body, ['date', 'docNo', 'goods']),
         userModule.createUserInfo(req.session.user, req)
       );
 
@@ -259,7 +257,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
         ));
       }
 
-      res.sendfile(outputFile, function(err)
+      res.sendFile(outputFile, function(err)
       {
         if (!res.headersSent)
         {

@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -24,7 +22,9 @@ exports.DEFAULT_CONFIG = {
     exe: 'git',
     cwd: process.cwd(),
     timeout: 60000
-  }
+  },
+  manifests: [],
+  captureSigint: true
 };
 
 exports.start = function startUpdaterModule(app, module)
@@ -102,6 +102,11 @@ exports.start = function startUpdaterModule(app, module)
     reloadTimer = setTimeout(compareVersions, 1000);
   });
 
+  if (module.config.captureSigint)
+  {
+    process.on('SIGINT', handleSigint);
+  }
+
   function reloadPackageJson()
   {
     delete require.cache[module.config.packageJsonPath];
@@ -149,14 +154,14 @@ exports.start = function startUpdaterModule(app, module)
   {
     if (restartTimer !== null)
     {
-      return;
+      return false;
     }
 
     module.restarting = Date.now();
 
     module.info("Restarting in %d seconds...", module.config.restartDelay / 1000);
 
-    restartTimer = setTimeout(restart, module.config.restartDelay);
+    restartTimer = setTimeout(shutdown, module.config.restartDelay);
 
     app.broker.publish('updater.newVersion', {
       service: 'backend',
@@ -166,6 +171,8 @@ exports.start = function startUpdaterModule(app, module)
     });
 
     app.broker.publish('updater.restarting');
+
+    return true;
   }
 
   function handleFrontendUpdate(oldFrontendVersion, newFrontendVersion)
@@ -177,7 +184,19 @@ exports.start = function startUpdaterModule(app, module)
     });
   }
 
-  function restart()
+  function handleSigint()
+  {
+    const backendVersion = module.getBackendVersion();
+
+    if (!handleBackendUpdate(backendVersion, backendVersion))
+    {
+      module.info("Forcing shutdown...");
+
+      shutdown();
+    }
+  }
+
+  function shutdown()
   {
     module.info("Exiting the process...");
 

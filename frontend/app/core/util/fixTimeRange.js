@@ -1,12 +1,12 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
+  'moment',
   'app/time'
 ], function(
   _,
+  moment,
   time
 ) {
   'use strict';
@@ -15,7 +15,7 @@ define([
   datetimeSupported.setAttribute('type', 'datetime-local');
   datetimeSupported = datetimeSupported.type !== 'text';
 
-  function fixEl($el, defaultTime)
+  function fixEl($el, defaultTime, utc)
   {
     /*jshint -W015*/
 
@@ -33,11 +33,28 @@ define([
         elTime = defaultTime;
       }
 
-      elMoment = time.getMoment(elDate + ' ' + elTime);
+      if (elTime.split(':').length === 2)
+      {
+        elTime += ':00';
+      }
+
+      elMoment = (utc ? moment.utc : time.getMoment)(elDate + ' ' + elTime, 'YYYY-MM-DD HH:mm:ss');
     }
     else
     {
-      elMoment = time.getMoment($el.val());
+      var elValue = $el.val();
+
+      if (!/ [0-9]+:[0-9]+(:[0-9]+)?/.test(elValue))
+      {
+        elValue += ' ' + (defaultTime || '00:00:00');
+      }
+
+      if (elValue.split(':').length === 2)
+      {
+        elValue += ':00';
+      }
+
+      elMoment = (utc ? moment.utc : time.getMoment)(elValue, 'YYYY-MM-DD HH:mm:ss');
     }
 
     var valid = elMoment.isValid();
@@ -88,7 +105,8 @@ define([
     options = _.defaults(options || {}, {
       fromId: 'from',
       toId: 'to',
-      defaultTime: '00:00'
+      defaultTime: '00:00',
+      utc: false
     });
 
     var timeRange = {
@@ -96,8 +114,8 @@ define([
       to: null
     };
 
-    var fromMoment = fixEl(view.$id(options.fromId), options.defaultTime);
-    var toMoment = fixEl(view.$id(options.toId), options.defaultTime);
+    var fromMoment = fixEl(view.$id(options.fromId), options.defaultTime, options.utc);
+    var toMoment = fixEl(view.$id(options.toId), options.defaultTime, options.utc);
 
     if (fromMoment.isValid())
     {
@@ -112,34 +130,38 @@ define([
     return timeRange;
   };
 
-  fixTimeRange.toFormData = function(formData, rqlQueryTerm, type)
+  fixTimeRange.toFormData = function(formData, rqlQueryTerm, type, options)
   {
     if (rqlQueryTerm.name === 'select' || rqlQueryTerm.name === 'sort')
     {
       return;
     }
 
+    options = _.defaults(options || {}, {
+      utc: false
+    });
+
     var property = rqlQueryTerm.name === 'ge' ? 'from': 'to';
-    var moment = time.getMoment(rqlQueryTerm.args[1]);
+    var formMoment = (options.utc ? moment.utc : time.getMoment)(rqlQueryTerm.args[1]);
 
     if (type === 'date+time')
     {
-      formData[property + '-date'] = moment.format('YYYY-MM-DD');
-      formData[property + '-time'] = moment.format('HH:mm');
+      formData[property + '-date'] = formMoment.format('YYYY-MM-DD');
+      formData[property + '-time'] = formMoment.format('HH:mm');
     }
     else if (type === 'datetime')
     {
       formData[property] = datetimeSupported
-        ? moment.toISOString()
-        : moment.format('YYYY-MM-DD HH:mm:ss');
+        ? formMoment.toISOString()
+        : formMoment.format('YYYY-MM-DD HH:mm:ss');
     }
     else if (type === 'time')
     {
-      formData[property] = moment.format('HH:mm:ss');
+      formData[property] = formMoment.format('HH:mm:ss');
     }
     else
     {
-      formData[property] = moment.format('YYYY-MM-DD');
+      formData[property] = formMoment.format('YYYY-MM-DD');
     }
   };
 

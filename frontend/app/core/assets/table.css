@@ -1,10 +1,13 @@
 .table {
-  margin-bottom: 1em;
+  margin-bottom: 15px;
 }
 .table-responsive {
-  margin-bottom: 1em;
+  margin-bottom: 15px;
   border-left: 1px solid #ddd;
   border-right: 1px solid #ddd;
+}
+.panel > .list > .table-responsive {
+  margin-bottom: 0;
 }
 .table-responsive > .table-bordered {
   border-left: 0;
@@ -32,9 +35,56 @@ td.is-number {
   white-space: nowrap;
   width: 1%;
 }
-.table .actions .btn {
+.table td.actions {
+  padding: 0;
+  height: 34px;
+  background: #ccc!important;
+  vertical-align: top;
+}
+.is-colored td.actions {
+  background: #bbb!important;
+}
+.table .actions-group {
+  display: inline-flex;
+  width: 100%;
+  height: 100%;
+}
+.table .actions-group .btn {
   min-width: 40px;
-  box-sizing: border-box;
+  border-top-width: 0;
+  border-bottom-width: 0;
+  border-right-width: 0;
+  line-height: 1;
+  padding: 0;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+.table-bordered .actions-group .btn:first-child {
+  border-left-width: 0;
+}
+.table .actions-group .btn:last-child {
+  border-right-width: 1px;
+}
+.table-bordered .actions-group .btn:last-child {
+  border-right-width: 0;
+}
+.table tr:last-child .actions-group .btn {
+  border-bottom-width: 1px;
+}
+.table-bordered tr:last-child .actions-group .btn,
+.table-with-tfoot tr:last-child .actions-group .btn {
+  border-bottom-width: 0;
+}
+.table .actions-group .btn:only-child {
+  width: 100%;
+}
+.table .actions-group .btn:hover {
+  border-color: #ccc;
+}
+.is-colored .actions-group .btn:hover {
+  border-color: #bbb;
 }
 .table-hover > tbody > tr:hover > td,
 .table-hover > tbody > tr:hover > th,
@@ -59,4 +109,15 @@ td.is-min {
 .is-colored > .table-responsive,
 .is-colored .actions .btn {
   border-color: #bbb;
+}
+@media print {
+  th.actions,
+  td.actions {
+    display: none;
+  }
+  th.is-min,
+  td.is-min {
+    width: auto;
+    white-space: normal;
+  }
 }

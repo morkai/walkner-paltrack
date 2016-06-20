@@ -1,5 +1,7 @@
 'use strict';
 
+const mongodb = require('./paltrack-mongodb');
+
 try
 {
   require('pmx').init({
@@ -78,12 +80,12 @@ exports.pubsub = {
 };
 
 exports.mongoose = {
+  uri: mongodb.uri,
+  options: mongodb,
   maxConnectTries: 10,
   connectAttemptDelay: 500,
-  uri: require('./paltrack-mongodb').uri,
-  options: {},
   models: [
-    'setting', 'event', 'user', 'feedback',
+    'setting', 'event', 'user', 'passwordResetRequest', 'feedback',
     'partner', 'palletKind',
     'grn', 'gdn', 'ob', 'dailyBalance'
   ]
@@ -96,13 +98,18 @@ exports.express = {
   sessionCookie: {
     httpOnly: true,
     path: '/',
-    maxAge: null
+    maxAge: 3600 * 24 * 30 * 1000
+  },
+  sessionStore: {
+    touchInterval: 3600 * 8 * 1000,
+    touchChance: 0
   },
   cookieSecret: '1ee7\\/\\/alkner-paltrack',
   ejsAmdHelpers: {
     t: 'app/i18n'
   },
-  title: 'PalTrack'
+  title: 'PalTrack',
+  jsonBody: {limit: '1mb'}
 };
 
 exports.user = {
@@ -124,7 +131,14 @@ exports.updater = {
     cwd: __dirname + '/../',
     timeout: 30000
   },
-  versionsKey: 'paltrack'
+  versionsKey: 'paltrack',
+  manifests: [
+    {
+      path: '/manifest.appcache',
+      mainJsFile: exports.mainJsFile,
+      mainCssFile: exports.mainCssFile
+    }
+  ]
 };
 
 exports.registry = {

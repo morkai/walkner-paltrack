@@ -1,26 +1,22 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var lodash = require('lodash');
+var path = require('path');
+var _ = require('lodash');
 
 module.exports = function startCoreRoutes(app, express)
 {
-  var appCache = app.options.env === 'production';
+  var dev = app.options.env === 'development';
   var updaterModule = app[app.options.updaterId || 'updater'];
   var userModule = app[app.options.userId || 'user'];
   var requirejsPaths;
   var requirejsShim;
 
-  var ROOT_USER = JSON.stringify(lodash.omit(userModule.root, 'password'));
+  var ROOT_USER = JSON.stringify(_.omit(userModule.root, 'password'));
   var GUEST_USER = JSON.stringify(userModule.guest);
   var PRIVILEGES = JSON.stringify(userModule.config.privileges);
-  var MODULES = JSON.stringify(app.options.modules.map(function(module)
-  {
-    return module.id || module;
-  }));
+  var MODULES = JSON.stringify(app.options.modules.map(m => m.id || m));
   var DASHBOARD_URL_AFTER_LOG_IN = JSON.stringify(app.options.dashboardUrlAfterLogIn || '/');
 
   app.broker.subscribe('updater.newVersion', reloadRequirejsConfig).setFilter(function(message)
@@ -32,7 +28,7 @@ module.exports = function startCoreRoutes(app, express)
 
   if (updaterModule && app.options.dictionaryModules)
   {
-    Object.keys(app.options.dictionaryModules).forEach(setUpFrontendVersionUpdater);
+    _.forEach(Object.keys(app.options.dictionaryModules), setUpFrontendVersionUpdater);
   }
 
   express.get('/', showIndex);
@@ -52,6 +48,8 @@ module.exports = function startCoreRoutes(app, express)
 
   express.get('/config.js', sendRequireJsConfig);
 
+  express.get('/favicon.ico', sendFavicon);
+
   function showIndex(req, res)
   {
     var sessionUser = req.session.user;
@@ -68,7 +66,7 @@ module.exports = function startCoreRoutes(app, express)
       DASHBOARD_URL_AFTER_LOG_IN: DASHBOARD_URL_AFTER_LOG_IN
     };
 
-    lodash.forEach(app.options.dictionaryModules, function(appDataKey, moduleName)
+    _.forEach(app.options.dictionaryModules, function(appDataKey, moduleName)
     {
       var models = app[moduleName].models;
 
@@ -86,11 +84,16 @@ module.exports = function startCoreRoutes(app, express)
         return;
       }
 
-      appData[appDataKey] = JSON.stringify(lodash.invoke(models, 'toDictionaryObject'));
+      appData[appDataKey] = JSON.stringify(_.invokeMap(models, 'toDictionaryObject'));
+    });
+
+    _.forEach(app.options.frontendAppData, function(appDataValue, appDataKey)
+    {
+      appData[appDataKey] = JSON.stringify(appDataValue);
     });
 
     res.render('index', {
-      appCache: appCache,
+      appCacheManifest: !dev ? '/manifest.appcache' : '',
       appData: appData,
       mainJsFile: app.options.mainJsFile || 'main.js',
       mainCssFile: app.options.mainCssFile || 'assets/main.css'
@@ -111,6 +114,17 @@ module.exports = function startCoreRoutes(app, express)
     });
   }
 
+  function sendFavicon(req, res)
+  {
+    var faviconPath = path.join(
+      express.config[dev ? 'staticPath' : 'staticBuildPath'],
+      app.options.faviconFile || 'favicon.ico'
+    );
+
+    res.type('image/x-icon');
+    res.sendFile(faviconPath);
+  }
+
   function reloadRequirejsConfig()
   {
     var configPath = require.resolve('../../config/require');
@@ -125,8 +139,8 @@ module.exports = function startCoreRoutes(app, express)
 
   function setUpFrontendVersionUpdater(topicPrefix)
   {
-    app.broker.subscribe(topicPrefix + '.added', app.updater.updateFrontendVersion);
-    app.broker.subscribe(topicPrefix + '.edited', app.updater.updateFrontendVersion);
-    app.broker.subscribe(topicPrefix + '.deleted', app.updater.updateFrontendVersion);
+    app.broker.subscribe(topicPrefix + '.added', updaterModule.updateFrontendVersion);
+    app.broker.subscribe(topicPrefix + '.edited', updaterModule.updateFrontendVersion);
+    app.broker.subscribe(topicPrefix + '.deleted', updaterModule.updateFrontendVersion);
   }
 };

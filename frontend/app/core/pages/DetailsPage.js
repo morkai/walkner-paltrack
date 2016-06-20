@@ -1,19 +1,19 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'app/i18n',
   '../util/bindLoadingMessage',
   '../util/pageActions',
   '../View',
-  '../views/DetailsView'
+  '../views/DetailsView',
+  './createPageBreadcrumbs'
 ], function(
   t,
   bindLoadingMessage,
   pageActions,
   View,
-  DetailsView
+  DetailsView,
+  createPageBreadcrumbs
 ) {
   'use strict';
 
@@ -25,17 +25,15 @@ define([
 
     modelProperty: 'model',
 
+    baseBreadcrumb: false,
+
     breadcrumbs: function()
     {
       var model = this[this.modelProperty];
 
-      return [
-        {
-          label: t.bound(model.nlsDomain, 'BREADCRUMBS:browse'),
-          href: model.genClientUrl('base')
-        },
-        model.getLabel()
-      ];
+      return createPageBreadcrumbs(this, [
+        model.getLabel() || t.bound(model.getNlsDomain(), 'BREADCRUMBS:details')
+      ]);
     },
 
     actions: function()

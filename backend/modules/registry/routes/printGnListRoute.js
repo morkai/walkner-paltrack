@@ -1,10 +1,8 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var lodash = require('lodash');
+var _ = require('lodash');
 var step = require('h5.step');
 var moment = require('moment');
 var mongoSerializer = require('h5.rql/lib/serializers/mongoSerializer');
@@ -81,19 +79,19 @@ module.exports = function checkGnRoute(app, registryModule, Gn, req, res, next)
 
       this.partners = {};
 
-      lodash.forEach(partners, function(partner)
+      _.forEach(partners, (partner) =>
       {
         this.partners[partner._id] = partner;
 
         partner._id = undefined;
-      }, this);
+      });
 
       this.palletKinds = {};
 
-      lodash.forEach(palletKinds, function(palletKind)
+      _.forEach(palletKinds, (palletKind) =>
       {
         this.palletKinds[palletKind._id] = palletKind.name;
-      }, this);
+      });
     },
     function sendResultsStep(err)
     {
@@ -105,7 +103,7 @@ module.exports = function checkGnRoute(app, registryModule, Gn, req, res, next)
       var partners = this.partners;
       var partnersNotes = [];
 
-      lodash.forEach(this.partnersNotes, function(partnerNotes, partner)
+      _.forEach(this.partnersNotes, function(partnerNotes, partner)
       {
         partnersNotes.push({
           partner: formatPartner(partners[partner]),
@@ -119,7 +117,7 @@ module.exports = function checkGnRoute(app, registryModule, Gn, req, res, next)
         to: moment(conditions.date.$lt).subtract(1, 'days').format('DD.MM.YYYY'),
         receiver: formatPartner(partners[receiver]),
         supplier: formatPartner(partners[supplier]),
-        palletKinds: lodash.map(this.palletKinds, function(v, k) { return {_id: k, name: v}; }),
+        palletKinds: _.map(this.palletKinds, function(v, k) { return {_id: k, name: v}; }),
         partnersNotes: partnersNotes
       });
     }
@@ -145,7 +143,7 @@ function handleGnForPrint(partnersNotes, hasReceiver, grn)
 
   var partnerNotes = partnersNotes[partnerId];
 
-  lodash.forEach(grn.goods, function(count, palletKind)
+  _.forEach(grn.goods, function(count, palletKind)
   {
     if (partnerNotes.totals[palletKind] === undefined)
     {

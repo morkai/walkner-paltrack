@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
 
@@ -16,11 +14,17 @@ define([
       colorProperty = this.colorProperty || this.id;
     }
 
+    var className = [this.colorClassName || ''];
+
     if (!row[colorProperty])
     {
-      return '';
+      return 'class="' + className.join(' ') + '"';
     }
 
-    return 'class="partners-color" style="background-color: ' + row[colorProperty] + '"';
+    className.push('partners-color');
+
+    var backgroundColor = row[colorProperty];
+
+    return 'class="' + className.join(' ') + '" style="background-color: ' + backgroundColor + '"';
   };
 });

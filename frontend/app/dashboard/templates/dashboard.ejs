@@ -1,3 +1,28 @@
-<div>
-  <h1>WIP</h1>
+<div class="dashboard">
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="btn-group btn-group-justified">
+        <a href="#registry/grn" class="btn btn-warning"><%- t('dashboard', 'grn') %></a>
+        <% if (user.isAllowedTo('REGISTRY:MANAGE')) { %>
+        <a href="#registry/grn;add" class="btn btn-warning"><i class="fa fa-plus"></i></a>
+        <% } %>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="btn-group btn-group-justified">
+        <a href="#registry/gdn" class="btn btn-success"><%- t('dashboard', 'gdn') %></a>
+        <% if (user.isAllowedTo('REGISTRY:MANAGE')) { %>
+        <a href="#registry/gdn;add" class="btn btn-success"><i class="fa fa-plus"></i></a>
+        <% } %>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="btn-group btn-group-justified">
+        <a href="#registry/ob" class="btn btn-info"><%- t('dashboard', 'ob') %></a>
+        <% if (user.isAllowedTo('REGISTRY:MANAGE')) { %>
+        <a href="#registry/ob;add" class="btn btn-info"><i class="fa fa-plus"></i></a>
+        <% } %>
+      </div>
+    </div>
+  </div>
 </div>

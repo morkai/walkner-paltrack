@@ -1,21 +1,38 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
+  'underscore',
   'app/viewport'
 ], function(
+  _,
   viewport
 ) {
   'use strict';
 
-  return function(Model, req, referer)
+  return function(Model, req, referer, options)
   {
-    var model = new Model({_id: req.params.id});
+    var model;
+    var deps = ['app/core/pages/ActionFormPage'];
 
-    viewport.loadPage('app/core/pages/ActionFormPage', function(ActionFormPage)
+    if (typeof Model === 'string')
     {
-      return new ActionFormPage({
+      deps.push('i18n!app/nls/' + Model.split('/')[1], Model);
+    }
+    else
+    {
+      model = new Model({_id: req.params.id});
+
+      deps.push('i18n!app/nls/' + model.getNlsDomain());
+    }
+
+    viewport.loadPage(deps, function(ActionFormPage, nls, LoadedModel)
+    {
+      if (LoadedModel)
+      {
+        model = new LoadedModel({_id: req.params.id});
+      }
+
+      return new ActionFormPage(_.extend({
         model: model,
         actionKey: 'delete',
         successUrl: model.genClientUrl('base'),
@@ -23,7 +40,7 @@ define([
         formMethod: 'DELETE',
         formAction: model.url(),
         formActionSeverity: 'danger'
-      });
+      }, options));
     });
   };
 });

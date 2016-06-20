@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -44,7 +42,20 @@ exports.start = function startEventsModule(app, module)
    */
   var nextFetchAllTypesTimer = null;
 
+  /**
+   * @private
+   * @type {number}
+   */
+  var lastInsertDelayTime = 0;
+
   module.types = {};
+
+  module.getPendingEvents = function()
+  {
+    return pendingEvents || [];
+  };
+
+  module.insertEvents = insertEvents;
 
   app.onModuleReady(
     [
@@ -55,8 +66,13 @@ exports.start = function startEventsModule(app, module)
     setUpEventsRoutes.bind(null, app, module)
   );
 
-  fetchAllTypes();
   subscribe();
+
+  app.broker.subscribe('app.started').setLimit(1).on('message', function()
+  {
+    fetchAllTypes();
+    setInterval(checkBlockedInsert, 5000);
+  });
 
   function fetchAllTypes()
   {
@@ -140,16 +156,17 @@ exports.start = function startEventsModule(app, module)
     }
 
     var user = null;
+    var userData = data.user;
 
-    if (_.isObject(data.user))
+    if (_.isObject(userData))
     {
       user = {
-        _id: String(data.user._id),
-        name: data.user.lastName && data.user.firstName
-          ? (data.user.lastName + ' ' + data.user.firstName)
-          : data.user.login,
-        login: data.user.login,
-        ipAddress: data.user.ipAddress
+        _id: String(userData._id || userData.id),
+        name: userData.lastName && userData.firstName
+          ? (userData.lastName + ' ' + userData.firstName)
+          : (userData.login || userData.label),
+        login: userData.login || userData.label,
+        ipAddress: userData.ipAddress || userData.ip
       };
     }
 
@@ -189,6 +206,8 @@ exports.start = function startEventsModule(app, module)
       pendingEvents = [];
 
       setTimeout(insertEvents, module.config.insertDelay);
+
+      lastInsertDelayTime = event.time;
     }
 
     pendingEvents.push(event);
@@ -198,6 +217,11 @@ exports.start = function startEventsModule(app, module)
 
   function insertEvents()
   {
+    if (pendingEvents === null)
+    {
+      return;
+    }
+
     var eventsToSave = pendingEvents;
 
     pendingEvents = null;
@@ -215,5 +239,20 @@ exports.start = function startEventsModule(app, module)
         app.broker.publish('events.saved', eventsToSave);
       }
     });
+  }
+
+  function checkBlockedInsert()
+  {
+    if (pendingEvents === null)
+    {
+      return;
+    }
+
+    if (Date.now() - lastInsertDelayTime > 3333)
+    {
+      module.warn("Blocked! Forcing insert of %d pending events!", pendingEvents.length);
+
+      insertEvents();
+    }
   }
 };

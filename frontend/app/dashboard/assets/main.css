@@ -5,3 +5,44 @@
   max-width: 600px;
   margin: 0 auto;
 }
+.dashboard h1 {
+  margin: 14px 0;
+  font-size: 34px;
+  line-height: 1;
+  color: #a0f;
+  text-shadow: 1px 1px 2px #999;
+  font-style: oblique;
+  font-weight: bold;
+}
+.dashboard .btn {
+  font-size: 98px;
+}
+.dashboard .btn + .btn {
+  border-left: none;
+}
+.dashboard .btn-warning {
+  background-image: linear-gradient(to bottom, #fa0 0%, #E69100 100%);
+  border-color: #CC7700;
+}
+.dashboard .btn-warning:hover {
+  background-color: #E69100;
+}
+.dashboard .btn-success {
+  background-image: linear-gradient(to bottom, #9e0 0%, #80D500 100%);
+  border-color: #66BB00;
+}
+.dashboard .btn-success:hover {
+  background-color: #80D500;
+}
+.dashboard .btn-info {
+  background-image: linear-gradient(to bottom, #0af 0%, #0091E6 100%);
+  border-color: #0077CC;
+}
+.dashboard .btn-info:hover {
+  background-color: #0091E6;
+}
+/*
+#fa0
+#9e0
+#0af
+*/

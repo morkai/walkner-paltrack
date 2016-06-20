@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -63,12 +61,19 @@ define([
 
     serializeToForm: function(partial)
     {
+      /*jshint unused:false*/
+
       return this.model.toJSON();
     },
 
     serializeForm: function(formData)
     {
       return formData;
+    },
+
+    getFormData: function()
+    {
+      return this.serializeForm(form2js(this.el));
     },
 
     submitForm: function()
@@ -80,7 +85,7 @@ define([
         return false;
       }
 
-      var formData = this.serializeForm(form2js(this.el));
+      var formData = this.getFormData();
 
       if (!this.checkValidity(formData))
       {
@@ -89,38 +94,43 @@ define([
 
       var $submitEl = this.$('[type="submit"]').attr('disabled', true);
 
-      var req = this.promised(this.model.save(formData, this.getSaveOptions()));
-
-      var view = this;
-
-      req.done(function()
-      {
-        if (typeof view.options.done === 'function')
-        {
-          view.options.done(true);
-        }
-        else
-        {
-          view.broker.publish('router.navigate', {
-            url: view.model.genClientUrl(),
-            trigger: true
-          });
-        }
-      });
-
-      req.fail(this.handleFailure.bind(this));
-
-      req.always(function()
-      {
-        $submitEl.attr('disabled', false);
-      });
+      this.submitRequest($submitEl, formData);
 
       return false;
+    },
+
+    submitRequest: function($submitEl, formData)
+    {
+      var req = this.request(formData);
+
+      req.done(this.handleSuccess.bind(this));
+      req.fail(this.handleFailure.bind(this));
+      req.always(function() { $submitEl.attr('disabled', false); });
+    },
+
+    request: function(formData)
+    {
+      return this.promised(this.model.save(formData, this.getSaveOptions()));
     },
 
     checkValidity: function(formData)
     {
       return !!formData;
+    },
+
+    handleSuccess: function()
+    {
+      if (typeof this.options.done === 'function')
+      {
+        this.options.done(true);
+      }
+      else
+      {
+        this.broker.publish('router.navigate', {
+          url: this.model.genClientUrl(),
+          trigger: true
+        });
+      }
     },
 
     handleFailure: function()

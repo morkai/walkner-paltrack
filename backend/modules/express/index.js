@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -8,6 +6,7 @@ var path = require('path');
 var _ = require('lodash');
 var step = require('h5.step');
 var express = require('express');
+var ExpressView = require('express/lib/view');
 var methods = require('methods');
 var ejsAmd = require('ejs-amd');
 var messageFormatAmd = require('messageformat-amd');
@@ -15,6 +14,7 @@ var wrapAmd = require('./wrapAmd');
 var rqlMiddleware = require('./rqlMiddleware');
 var errorHandlerMiddleware = require('./errorHandlerMiddleware');
 var crud = require('./crud');
+var monkeyPatch = require('./monkeyPatch');
 var cookieParser = null;
 var bodyParser = null;
 var session = null;
@@ -37,26 +37,32 @@ exports.DEFAULT_CONFIG = {
     path: '/',
     httpOnly: true
   },
+  sessionStore: {},
   cookieSecret: null,
   ejsAmdHelpers: {},
   title: 'express',
   jsonBody: {},
   textBody: {},
-  urlencodedBody: {}
+  urlencodedBody: {},
+  ignoredErrorCodes: ['ECONNRESET', 'ECONNABORTED']
 };
 
 exports.start = function startExpressModule(app, expressModule, done)
 {
   var config = expressModule.config;
   var mongoose = app[config.mongooseId];
+  var development = app.options.env === 'development';
+  var staticPath = config[development ? 'staticPath' : 'staticBuildPath'];
   var expressApp = express();
+
+  expressModule.staticPath = staticPath;
 
   expressModule.app = expressApp;
 
   expressModule.crud = crud;
 
   expressModule.sessionStore = mongoose
-    ? new MongoStore(mongoose.connection.db)
+    ? new MongoStore(mongoose.connection.db, config.sessionStore)
     : session ? new session.MemoryStore() : null;
 
   expressModule.router = express.Router();
@@ -77,14 +83,11 @@ exports.start = function startExpressModule(app, expressModule, done)
     };
   });
 
-  var production = app.options.env === 'production';
-  var staticPath = config[production ? 'staticBuildPath' : 'staticPath'];
-
   expressApp.set('trust proxy', true);
   expressApp.set('view engine', 'ejs');
   expressApp.set('views', app.pathTo('templates'));
 
-  if (!production)
+  if (development)
   {
     expressApp.set('json spaces', 2);
   }
@@ -93,7 +96,7 @@ exports.start = function startExpressModule(app, expressModule, done)
     module: expressModule
   });
 
-  if (!production)
+  if (development)
   {
     setUpDevMiddleware(staticPath);
   }
@@ -106,7 +109,7 @@ exports.start = function startExpressModule(app, expressModule, done)
   if (bodyParser)
   {
     expressApp.use(bodyParser.json(config.jsonBody));
-    expressApp.use(bodyParser.urlencoded(_.extend({extended: false}, config.urlencodedBody)));
+    expressApp.use(bodyParser.urlencoded(_.assign({extended: false}, config.urlencodedBody)));
     expressApp.use(bodyParser.text(_.defaults({type: 'text/*'}, config.textBody)));
   }
 
@@ -168,6 +171,10 @@ exports.start = function startExpressModule(app, expressModule, done)
       };
 
       expressApp.use(errorHandlerMiddleware(expressModule, errorHandlerOptions));
+
+      monkeyPatch(app, expressModule, {
+        View: ExpressView
+      });
     },
     done
   );

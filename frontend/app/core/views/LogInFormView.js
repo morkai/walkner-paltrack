@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'app/user',
@@ -54,7 +52,7 @@ define([
         this.onModeSwitch();
       }
     },
-    
+
     initialize: function()
     {
       this.resetting = false;
@@ -102,7 +100,8 @@ define([
       {
         data.subject = t('core', 'LOG_IN_FORM:RESET:SUBJECT');
         data.text = t('core', 'LOG_IN_FORM:RESET:TEXT', {
-          url: window.location.origin + '/resetPassword/{REQUEST_ID}'
+          appUrl: window.location.origin,
+          resetUrl: window.location.origin + '/resetPassword/{REQUEST_ID}'
         });
       }
 
@@ -120,6 +119,11 @@ define([
 
       req.done(function(userData)
       {
+        if (!view.$submit)
+        {
+          return;
+        }
+
         if (view.resetting)
         {
           viewport.msg.show({
@@ -138,15 +142,20 @@ define([
 
       req.fail(function(res)
       {
-        view.$submit.removeClass('btn-primary').addClass('btn-danger');
+        if (view.$submit)
+        {
+          view.$submit.removeClass('btn-primary').addClass('btn-danger');
+        }
 
         if (view.resetting)
         {
+          var error = res.responseJSON && res.responseJSON.error ? res.responseJSON.error : {};
+
           viewport.msg.show({
             type: 'error',
             time: 5000,
-            text: t.has('core', 'LOG_IN_FORM:RESET:MSG:' + res.responseJSON.error.message)
-              ? t('core', 'LOG_IN_FORM:RESET:MSG:' + res.responseJSON.error.message)
+            text: t.has('core', 'LOG_IN_FORM:RESET:MSG:' + error.message)
+              ? t('core', 'LOG_IN_FORM:RESET:MSG:' + error.message)
               : t('core', 'LOG_IN_FORM:RESET:MSG:FAILURE')
           });
         }

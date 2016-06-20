@@ -1,10 +1,8 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var lodash = require('lodash');
+var _ = require('lodash');
 var moment = require('moment');
 var step = require('h5.step');
 
@@ -179,7 +177,7 @@ module.exports = function setUpDailyBalance(app, registryModule)
       {
         var reduced = {};
 
-        lodash.takeRight(keys.map(Number).sort(), 7).forEach(function(key)
+        _.takeRight(keys.map(Number).sort(), 7).forEach(function(key)
         {
           reduced[key] = cachedDailyBalances[partnerId][key];
         });
@@ -403,13 +401,13 @@ module.exports = function setUpDailyBalance(app, registryModule)
 
         if (userPartnerId)
         {
-          steps.push(lodash.partial(recountPartnerStep, userPartnerId));
+          steps.push(_.partial(recountPartnerStep, userPartnerId));
         }
         else
         {
           for (var i = 0, l = partnersModule.models.length; i < l; ++i)
           {
-            steps.push(lodash.partial(recountPartnerStep, partnersModule.models[i]._id.toString()));
+            steps.push(_.partial(recountPartnerStep, partnersModule.models[i]._id.toString()));
           }
         }
 

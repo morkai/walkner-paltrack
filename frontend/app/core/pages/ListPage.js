@@ -1,19 +1,19 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'app/i18n',
   '../util/bindLoadingMessage',
   '../util/pageActions',
   '../View',
-  '../views/ListView'
+  '../views/ListView',
+  './createPageBreadcrumbs'
 ], function(
   t,
   bindLoadingMessage,
   pageActions,
   View,
-  ListView
+  ListView,
+  createPageBreadcrumbs
 ) {
   'use strict';
 
@@ -23,11 +23,11 @@ define([
 
     pageId: 'list',
 
+    baseBreadcrumb: false,
+
     breadcrumbs: function()
     {
-      return [
-        t.bound(this.collection.getNlsDomain(), 'BREADCRUMBS:browse')
-      ];
+      return createPageBreadcrumbs(this);
     },
 
     actions: function()
@@ -41,7 +41,7 @@ define([
     {
       this.collection = bindLoadingMessage(this.options.collection, this);
 
-      var ListViewClass = this.options.ListView || ListView;
+      var ListViewClass = this.ListView || ListView;
 
       this.view = new ListViewClass({
         collection: this.collection,

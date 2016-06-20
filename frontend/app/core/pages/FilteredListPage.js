@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'app/i18n',
@@ -8,6 +6,7 @@ define([
   '../util/pageActions',
   '../View',
   '../views/ListView',
+  './createPageBreadcrumbs',
   'app/core/templates/listPage'
 ], function(
   t,
@@ -15,6 +14,7 @@ define([
   pageActions,
   View,
   ListView,
+  createPageBreadcrumbs,
   template
 ) {
   'use strict';
@@ -25,9 +25,11 @@ define([
 
     layoutName: 'page',
 
+    baseBreadcrumb: false,
+
     breadcrumbs: function()
     {
-      return [t.bound((this.collection || this.model).getNlsDomain(), 'BREADCRUMBS:browse')];
+      return createPageBreadcrumbs(this);
     },
 
     actions: function()
@@ -99,8 +101,10 @@ define([
 
     updateClientUrl: function()
     {
+      var model = this.collection || this.model;
+
       this.broker.publish('router.navigate', {
-        url: this.collection.genClientUrl() + '?' + this.collection.rqlQuery,
+        url: model.genClientUrl() + '?' + model.rqlQuery,
         trigger: false,
         replace: true
       });

@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -16,21 +14,16 @@ try
 catch (err) {}
 
 exports.DEFAULT_CONFIG = {
-  httpServerId: 'httpServer',
-  httpsServerId: 'httpsServer',
-  path: '/sio'
+  httpServerIds: ['httpServer'],
+  path: '/sio',
+  socketIo: {
+    pathInterval: 30000,
+    pingTimeout: 10000
+  }
 };
 
 exports.start = function startIoModule(app, sioModule)
 {
-  var httpServer = app[sioModule.config.httpServerId];
-  var httpsServer = app[sioModule.config.httpsServerId];
-
-  if (!httpServer && !httpsServer)
-  {
-    throw new Error("sio module requires the httpServer(s) module");
-  }
-
   var probes = {
     currentUsersCounter: null,
     totalConnectionTime: null,
@@ -48,23 +41,25 @@ exports.start = function startIoModule(app, sioModule)
 
   var multiServer = new SocketIoMultiServer();
 
-  if (httpServer)
+  app.onModuleReady(sioModule.config.httpServerIds, function()
   {
-    multiServer.addServer(httpServer.server);
-  }
+    _.forEach(sioModule.config.httpServerIds, function(httpServerId)
+    {
+      multiServer.addServer(app[httpServerId].server);
+    });
+  });
 
-  if (httpsServer)
-  {
-    multiServer.addServer(httpsServer.server);
-  }
-
-  var sio = socketIo(multiServer, {
+  sioModule.config.socketIo = _.assign({}, sioModule.config.socketIo, {
     path: sioModule.config.path,
     transports: ['websocket', 'xhr-polling'],
     serveClient: true
   });
 
-  sioModule = app[sioModule.name] = _.merge(sio, sioModule);
+  var sio = socketIo(multiServer, sioModule.config.socketIo);
+
+  sioModule = app[sioModule.name] = _.assign(sio, sioModule);
+
+  sio.sockets.setMaxListeners(25);
 
   sioModule.on('connection', function(socket)
   {
@@ -89,10 +84,50 @@ exports.start = function startIoModule(app, sioModule)
 
     socket.on('time', function(reply)
     {
-      if (typeof reply === 'function')
+      if (_.isFunction(reply))
       {
         reply(Date.now(), 'Europe/Warsaw');
       }
+    });
+
+    socket.on('sio.getConnections', function(reply)
+    {
+      if (!_.isFunction(reply) || !socket.handshake.user || !socket.handshake.user.super)
+      {
+        return;
+      }
+
+      var res = {
+        socketCount: 0,
+        userCount: 0,
+        users: {}
+      };
+
+      _.forEach(sioModule.sockets.connected, function(socket)
+      {
+        ++res.socketCount;
+
+        var user = socket.handshake.user || {};
+
+        if (res.users[user._id] === undefined)
+        {
+          res.users[user._id] = {
+            _id: user._id,
+            login: user.login,
+            name: ((user.lastName || '') + ' ' + (user.firstName || '')).trim(),
+            sockets: []
+          };
+
+          ++res.userCount;
+        }
+
+        res.users[user._id].sockets.push({
+          _id: socket.id,
+          ipAddress: user.ipAddress
+        });
+      });
+
+      reply(res);
     });
   });
 };

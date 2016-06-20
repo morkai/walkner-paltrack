@@ -1,16 +1,16 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
+var _ = require('lodash');
 var step = require('h5.step');
 var setUpRoutes = require('./routes');
 
 exports.DEFAULT_CONFIG = {
   mongooseId: 'mongoose',
   expressId: 'express',
-  sioId: 'sio'
+  sioId: 'sio',
+  userId: 'user'
 };
 
 exports.start = function startSettingsModule(app, module)
@@ -19,7 +19,7 @@ exports.start = function startSettingsModule(app, module)
 
   if (!mongoose)
   {
-    throw new Error("mongoosem module is required!");
+    throw new Error("mongoose module is required!");
   }
 
   var Setting = mongoose.model('Setting');
@@ -39,6 +39,28 @@ exports.start = function startSettingsModule(app, module)
   module.find = function(conditions, done)
   {
     Setting.find(conditions, {value: 1}).lean().exec(done);
+  };
+
+  module.findValues = function(conditions, ns, done)
+  {
+    module.find(conditions, function(err, settings)
+    {
+      if (err)
+      {
+        return done(err, null);
+      }
+
+      var result = {};
+
+      for (var i = 0, l = settings.length; i < l; ++i)
+      {
+        var setting = settings[i];
+
+        result[setting._id.replace(ns, '')] = setting.value;
+      }
+
+      done(null, result);
+    });
   };
 
   module.update = function(_id, newValue, updater, done)
@@ -81,7 +103,7 @@ exports.start = function startSettingsModule(app, module)
       {
         var step = this;
 
-        settings.forEach(function(_id)
+        _.forEach(settings, function(_id)
         {
           module.update(_id, settings[_id], updater, step.parallel());
         });

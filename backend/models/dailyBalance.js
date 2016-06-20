@@ -1,10 +1,8 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var lodash = require('lodash');
+var _ = require('lodash');
 
 module.exports = function setupDailyBalanceModel(app, mongoose)
 {
@@ -57,14 +55,14 @@ module.exports = function setupDailyBalanceModel(app, mongoose)
   {
     this.reset();
 
-    this.goods.total = ob && ob.goods ? lodash.cloneDeep(ob.goods) : {};
+    this.goods.total = ob && ob.goods ? _.cloneDeep(ob.goods) : {};
   };
 
   dailyBalanceSchema.methods.applyPrevDailyBalance = function(prevDailyBalance)
   {
     if (prevDailyBalance && prevDailyBalance.goods)
     {
-      this.goods = lodash.cloneDeep(prevDailyBalance.goods);
+      this.goods = _.cloneDeep(prevDailyBalance.goods);
       this.resetDaily();
     }
     else

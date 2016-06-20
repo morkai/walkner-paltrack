@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -151,7 +149,6 @@ define([
       rqlQuery.selector = {name: 'and', args: selector};
       rqlQuery.skip = 0;
       rqlQuery.limit = Math.min(Math.max(parseInt(this.$id('limit').val(), 10) || 15, this.minLimit), this.maxLimit);
-      rqlQuery.sift = null;
 
       this.trigger('filterChanged', rqlQuery);
     },
@@ -172,7 +169,7 @@ define([
       /*jshint unused:false*/
     },
 
-    serializeRegexTerm: function(selector, property, maxLength, replaceRe)
+    serializeRegexTerm: function(selector, property, maxLength, replaceRe, ignoreCase)
     {
       var $el = this.$id(property.replace(/\./g, '-'));
       var value = $el.val().trim();
@@ -189,14 +186,33 @@ define([
         value = null;
       }
 
-      if (value === null || value.length === maxLength)
+      var args = [property, value];
+
+      if (value === null || (!ignoreCase && value.length === maxLength))
       {
-        selector.push({name: 'eq', args: [property, value]});
+        selector.push({name: 'eq', args: args});
+
+        return;
       }
-      else if (value.length > 0)
+
+      if (value.length === 0)
       {
-        selector.push({name: 'regex', args: [property, value]});
+        return;
       }
+
+      if (ignoreCase)
+      {
+        args.push('i');
+      }
+
+      args[1] = args[1].replace(/[-[\]{}()*+!<=:?.\/\\^$|#\s,]/g, '\\$&');
+
+      if (value.length === maxLength)
+      {
+        args[1] = '^' + args[1] + '$';
+      }
+
+      selector.push({name: 'regex', args: args});
     }
 
   });

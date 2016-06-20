@@ -1,3 +1,7 @@
 {
-  "breadcrumbs:logIn": "Logowanie do systemu"
+  "breadcrumbs:logIn": "Logowanie do systemu",
+
+  "grn": "PZ",
+  "gdn": "WZ",
+  "ob": "BO"
 }

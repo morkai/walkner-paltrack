@@ -1,6 +1,4 @@
-// Copyright (c) 2014, Łukasz Walukiewicz <lukasz@walukiewicz.eu>. Some Rights Reserved.
-// Licensed under CC BY-NC-SA 4.0 <http://creativecommons.org/licenses/by-nc-sa/4.0/>.
-// Part of the walkner-paltrack project <http://lukasz.walukiewicz.eu/p/walkner-paltrack>
+// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -29,7 +27,7 @@ exports.start = function startUserModule(app, module)
 {
   var localAddresses = module.config.localAddresses || getLocalAddresses();
 
-  module.root = _.merge(module.config.root, {
+  module.root = _.assign(module.config.root, {
     loggedIn: true,
     super: true,
     _id: '52a33b8bfb955dac8a92261b',
@@ -37,7 +35,7 @@ exports.start = function startUserModule(app, module)
     privileges: []
   });
 
-  module.guest = _.merge({privileges: []}, module.config.guest, {
+  module.guest = _.assign({privileges: []}, module.config.guest, {
     loggedIn: false,
     super: false,
     _id: '52a33b9cfb955dac8a92261c',
@@ -70,7 +68,7 @@ exports.start = function startUserModule(app, module)
   {
     var localAddresses = [];
 
-    _.each(os.networkInterfaces(), function(addresses)
+    _.forEach(os.networkInterfaces(), function(addresses)
     {
       _.forEach(addresses, function(address)
       {
@@ -132,6 +130,11 @@ exports.start = function startUserModule(app, module)
 
   function isAllowedTo(user, anyPrivileges)
   {
+    if (!user)
+    {
+      return false;
+    }
+
     if (user.super)
     {
       return true;
@@ -166,7 +169,16 @@ exports.start = function startUserModule(app, module)
 
       for (var ii = 0, ll = allPrivileges.length; ii < ll; ++ii)
       {
-        matches += user.privileges.indexOf(allPrivileges[ii]) === -1 ? 0 : 1;
+        var privilege = allPrivileges[ii];
+
+        if (privilege === 'USER')
+        {
+          matches += user.loggedIn ? 1 : 0;
+        }
+        else
+        {
+          matches += hasPrivilege(user, allPrivileges[ii]) ? 1 : 0;
+        }
       }
 
       if (matches === ll)
@@ -176,6 +188,36 @@ exports.start = function startUserModule(app, module)
     }
 
     return false;
+  }
+
+  function preparePrivileges(user)
+  {
+    if (!Array.isArray(user.privileges))
+    {
+      user.privileges = [];
+    }
+
+    user.privilegesString = '|' + user.privileges.join('|');
+    user.privilegesMap = {};
+
+    _.forEach(user.privileges, function(privilege) { user.privilegesMap[privilege] = true; });
+
+    return user;
+  }
+
+  function hasPrivilege(user, privilege)
+  {
+    if (_.isEmpty(user.privilegesString))
+    {
+      preparePrivileges(user);
+    }
+
+    if (privilege.charAt(privilege.length - 1) === '*')
+    {
+      return user.privilegesString.indexOf('|' + privilege.substr(0, privilege.length - 1)) !== -1;
+    }
+
+    return user.privilegesMap[privilege] === true;
   }
 
   function ensureUserMiddleware(req, res, next)
@@ -256,7 +298,7 @@ exports.start = function startUserModule(app, module)
 
         if (credentials.login === module.root.login)
         {
-          next(null, _.merge({}, module.root));
+          next(null, _.assign({}, module.root));
         }
         else
         {
@@ -421,15 +463,16 @@ exports.start = function startUserModule(app, module)
    */
   function setUpSio()
   {
-    var sio = app[module.config.sioId];
+    var sioModule = app[module.config.sioId];
+    var expressModule = app[module.config.expressId];
     var sosMap = {};
+    var usersToSocketsMap = {};
 
-    sio.use(function(socket, done)
+    sioModule.use(function(socket, done)
     {
       var handshakeData = socket.handshake;
-      var express = app[module.config.expressId];
       var cookies = cookie.parse(String(handshakeData.headers.cookie));
-      var sessionCookie = cookies[express.config.sessionCookieKey];
+      var sessionCookie = cookies[expressModule.config.sessionCookieKey];
 
       if (typeof sessionCookie !== 'string')
       {
@@ -439,9 +482,9 @@ exports.start = function startUserModule(app, module)
         return done();
       }
 
-      var sessionId = cookieParser.signedCookie(sessionCookie, express.config.cookieSecret);
+      var sessionId = cookieParser.signedCookie(sessionCookie, expressModule.config.cookieSecret);
 
-      express.sessionStore.get(sessionId, function(err, session)
+      expressModule.sessionStore.get(sessionId, function(err, session)
       {
         if (err)
         {
@@ -457,11 +500,13 @@ exports.start = function startUserModule(app, module)
       });
     });
 
-    sio.sockets.on('connection', function(socket)
+    sioModule.sockets.on('connection', function(socket)
     {
-      if (socket.handshake.sessionId)
+      var handshake = socket.handshake;
+
+      if (handshake.sessionId)
       {
-        socket.sessionId = socket.handshake.sessionId;
+        socket.sessionId = handshake.sessionId;
 
         if (typeof sosMap[socket.sessionId] === 'undefined')
         {
@@ -471,25 +516,37 @@ exports.start = function startUserModule(app, module)
         sosMap[socket.sessionId][socket.id] = true;
       }
 
-      if (socket.handshake.user)
+      if (handshake.user)
       {
         socket.emit('user.reload', socket.handshake.user);
       }
 
+      mapUserToSocket(socket);
+
       socket.on('disconnect', function()
       {
-        var sessionSockets = sosMap[socket.sessionId];
+        var userSockets = socket.handshake.user ? usersToSocketsMap[socket.handshake.user._id] : null;
 
-        if (typeof sessionSockets === 'undefined')
+        if (userSockets)
         {
-          return;
+          delete userSockets[socket.id];
+
+          if (Object.keys(userSockets).length === 0)
+          {
+            delete userSockets[socket.handshake.user._id];
+          }
         }
 
-        delete sessionSockets[socket.id];
+        var sessionSockets = sosMap[socket.sessionId];
 
-        if (Object.keys(sessionSockets).length === 0)
+        if (sessionSockets)
         {
-          delete sessionSockets[socket.sessionId];
+          delete sessionSockets[socket.id];
+
+          if (Object.keys(sessionSockets).length === 0)
+          {
+            delete sessionSockets[socket.sessionId];
+          }
         }
       });
     });
@@ -503,6 +560,8 @@ exports.start = function startUserModule(app, module)
         socket.handshake.sessionId = message.newSessionId;
         socket.handshake.user = message.user;
 
+        mapUserToSocket(socket);
+
         if (socket.id !== message.socketId)
         {
           socket.emit('user.reload', message.user);
@@ -513,11 +572,23 @@ exports.start = function startUserModule(app, module)
     app.broker.subscribe('users.logout', function(message)
     {
       var sockets = moveSos(message.oldSessionId, message.newSessionId);
+      var userId =  message.user._id;
+      var userToSocketsMap = usersToSocketsMap[userId];
 
       _.forEach(sockets, function(socket)
       {
         socket.handshake.sessionId = message.newSessionId;
         socket.handshake.user = createGuestData(getRealIp({}, socket));
+
+        if (userToSocketsMap[socket.id])
+        {
+          delete userToSocketsMap[socket.id];
+
+          if (Object.keys(userToSocketsMap).length === 0)
+          {
+            delete usersToSocketsMap[userId];
+          }
+        }
 
         if (socket.id !== message.socketId)
         {
@@ -525,6 +596,43 @@ exports.start = function startUserModule(app, module)
         }
       });
     });
+
+    app.broker.subscribe('users.edited', function(message)
+    {
+      var userToSocketsMap = usersToSocketsMap[message.model._id];
+
+      if (userToSocketsMap)
+      {
+        handleUserEdit(userToSocketsMap, message.model.toJSON());
+      }
+    });
+
+    app.broker.subscribe('users.deleted', function(message)
+    {
+      var userToSocketsMap = usersToSocketsMap[message.model._id];
+
+      if (userToSocketsMap)
+      {
+        handleUserDelete(userToSocketsMap, message.model._id);
+      }
+    });
+
+    function mapUserToSocket(socket)
+    {
+      var handshake = socket.handshake;
+
+      if (handshake.user && handshake.user.loggedIn)
+      {
+        var userId = handshake.user._id;
+
+        if (!usersToSocketsMap[userId])
+        {
+          usersToSocketsMap[userId] = {};
+        }
+
+        usersToSocketsMap[userId][socket.id] = true;
+      }
+    }
 
     function moveSos(oldSessionId, newSessionId)
     {
@@ -537,7 +645,7 @@ exports.start = function startUserModule(app, module)
 
       _.forEach(Object.keys(sosMap[oldSessionId]), function(socketId)
       {
-        var socket = sio.sockets.connected[socketId];
+        var socket = sioModule.sockets.connected[socketId];
 
         if (typeof socket === 'undefined')
         {
@@ -559,6 +667,107 @@ exports.start = function startUserModule(app, module)
       }
 
       return sockets;
+    }
+
+    function getSessionsCollection()
+    {
+      var sessionStore = expressModule.sessionStore;
+
+      if (typeof sessionStore.collection === 'function')
+      {
+        return sessionStore.collection();
+      }
+
+      return null;
+    }
+
+    function handleUserEdit(userToSocketsMap, userData)
+    {
+      var userId = userData._id.toString();
+
+      delete userData._id;
+
+      preparePrivileges(userData);
+      updateUserSessions(userId, userData);
+      updateUserSockets(userToSocketsMap, userData);
+    }
+
+    function handleUserDelete(userToSocketsMap, userId)
+    {
+      removeUserSessions(userId);
+
+      _.forEach(userToSocketsMap, function(unused, socketId)
+      {
+        var socket = sioModule.sockets.connected[socketId];
+
+        if (socket)
+        {
+          socket.emit('user.deleted');
+        }
+      });
+    }
+
+    function updateUserSockets(userToSocketsMap, userData)
+    {
+      _.forEach(userToSocketsMap, function(unused, socketId)
+      {
+        var socket = sioModule.sockets.connected[socketId];
+
+        if (socket)
+        {
+          _.assign(socket.handshake.user, userData);
+
+          socket.emit('user.reload', socket.handshake.user);
+        }
+      });
+    }
+
+    function updateUserSessions(userId, userData)
+    {
+      var collection = getSessionsCollection();
+
+      if (!collection)
+      {
+        return;
+      }
+
+      var conditions = {
+        'data.user._id': userId
+      };
+      var update = {
+        $set: {}
+      };
+
+      _.forEach(userData, function(v, k)
+      {
+        update.$set['data.user.' + k] = v;
+      });
+
+      collection.update(conditions, update, {multi: true}, function(err)
+      {
+        if (err)
+        {
+          return module.error("Failed to update user sessions: %s", err.message);
+        }
+      });
+    }
+
+    function removeUserSessions(userId)
+    {
+      var collection = getSessionsCollection();
+
+      if (!collection)
+      {
+        return;
+      }
+
+      collection.remove({'data.user._id': userId.toString()}, function(err)
+      {
+        if (err)
+        {
+          return module.error("Failed to remove user sessions: %s", err.message);
+        }
+      });
     }
   }
 };
