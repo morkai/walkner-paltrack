@@ -51,7 +51,8 @@ module.exports = function setupGrnModel(app, mongoose)
       default: null
     }
   }, {
-    id: false
+    id: false,
+    minimize: false
   });
 
   grnSchema.statics.TOPIC_PREFIX = 'registry.grn';

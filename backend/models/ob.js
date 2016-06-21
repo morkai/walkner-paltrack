@@ -27,7 +27,8 @@ module.exports = function setupObModel(app, mongoose)
     updater: {},
     changes: [obChangeSchema]
   }, {
-    id: false
+    id: false,
+    minimize: false
   });
 
   obSchema.statics.TOPIC_PREFIX = 'registry.ob';

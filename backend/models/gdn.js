@@ -51,7 +51,8 @@ module.exports = function setupGdnModel(app, mongoose)
       default: null
     }
   }, {
-    id: false
+    id: false,
+    minimize: false
   });
 
   gdnSchema.statics.TOPIC_PREFIX = 'registry.gdn';
