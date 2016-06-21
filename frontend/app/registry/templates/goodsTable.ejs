@@ -2,15 +2,17 @@
   <thead>
     <tr>
       <% ths.forEach(function(th) { %>
-      <th><%= th %></th>
+      <th class="is-min"><%= th %></th>
       <% }) %>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <% tds.forEach(function(td) { %>
-      <td><%= td %></td>
+      <td class="is-min is-number"><%= td %></td>
       <% }) %>
+      <td></td>
     </tr>
   </tbody>
 </table>
