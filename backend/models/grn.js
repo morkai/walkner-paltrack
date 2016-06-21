@@ -61,6 +61,7 @@ module.exports = function setupGrnModel(app, mongoose)
   grnSchema.index({receiver: 1, date: -1});
   grnSchema.index({supplier: 1, date: -1});
   grnSchema.index({receiver: 1, docNo: 1});
+  grnSchema.index({docNo: 1});
 
   grnSchema.path('goods').validate(validateGoods, 'goods:required');
 

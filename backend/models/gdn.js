@@ -60,7 +60,7 @@ module.exports = function setupGdnModel(app, mongoose)
   gdnSchema.index({date: -1});
   gdnSchema.index({supplier: 1, date: -1});
   gdnSchema.index({receiver: 1, date: -1});
-  gdnSchema.index({supplier: 1, docNo: 1}, {unique: true});
+  gdnSchema.index({supplier: 1, docNo: 1});
   gdnSchema.index({docNo: 1});
 
   gdnSchema.path('goods').validate(validateGoods, 'goods:required');
