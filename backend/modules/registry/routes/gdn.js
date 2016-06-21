@@ -41,6 +41,7 @@ module.exports = function setUpGdnRoutes(app, registryModule)
   express.post(
     '/registry/gdn',
     canManage,
+    checkForDuplicateGdn,
     prepareNewGdnModel,
     express.crud.addRoute.bind(null, app, Gdn)
   );
@@ -60,11 +61,44 @@ module.exports = function setUpGdnRoutes(app, registryModule)
   express.put(
     '/registry/gdn/:id',
     canManage,
+    checkForDuplicateGdn,
     prepareExistingGdnModel,
     express.crud.editRoute.bind(null, app, Gdn)
   );
 
   express.delete('/registry/gdn/:id', canManage, express.crud.deleteRoute.bind(null, app, Gdn));
+
+  function checkForDuplicateGdn(req, res, next)
+  {
+    var body = req.body;
+    var conditions = {
+      receiver: body.receiver,
+      supplier: body.supplier,
+      docNo: typeof body.docNo === 'string' ? body.docNo.trim() : null
+    };
+
+    if (req.params.id)
+    {
+      conditions._id = {$ne: req.params.id};
+    }
+
+    Gdn.findOne(conditions, {_id: 1}).lean().exec(function(err, grn)
+    {
+      if (err)
+      {
+        return next(err);
+      }
+
+      if (grn)
+      {
+        res.statusCode = 400;
+
+        return next(new Error('docNo:duplicate'));
+      }
+
+      return next();
+    });
+  }
 
   function prepareNewGdnModel(req, res, next)
   {

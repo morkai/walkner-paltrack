@@ -135,10 +135,11 @@ module.exports = function setUpGrnRoutes(app, registryModule)
 
   function checkForDuplicateGrn(req, res, next)
   {
+    var body = req.body;
     var conditions = {
-      receiver: req.body.receiver,
-      supplier: req.body.supplier,
-      docNo: typeof req.body.docNo === 'string' ? req.body.docNo.trim() : null
+      receiver: body.receiver,
+      supplier: body.supplier,
+      docNo: typeof body.docNo === 'string' ? body.docNo.trim() : null
     };
 
     if (req.params.id)
