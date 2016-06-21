@@ -120,7 +120,7 @@ module.exports = function setUpDailyBalance(app, registryModule)
 
   function getPrevDailyBalance(partnerId, date, done)
   {
-    var prevDay = moment(date.getTime()).subtract('days', 1).toDate();
+    var prevDay = moment(date.getTime()).subtract(1, 'days').toDate();
     var cachedPrevDailyBalance = getCachedDailyBalance(partnerId, prevDay);
 
     if (cachedPrevDailyBalance)
@@ -308,7 +308,7 @@ module.exports = function setUpDailyBalance(app, registryModule)
         }
 
         var toDate = ob
-          ? moment(ob.date).subtract('days', 1).toDate()
+          ? moment(ob.date).subtract(1, 'days').toDate()
           : moment().hours(0).minutes(0).seconds(0).milliseconds(0).toDate();
 
         recountDailyBalanceBetweenDates(partnerId, fromDate, toDate, done);
@@ -325,7 +325,7 @@ module.exports = function setUpDailyBalance(app, registryModule)
     {
       steps.push(createRecountDailyBalanceStep(partnerId, fromMoment.valueOf()));
 
-      fromMoment.add('days', 1);
+      fromMoment.add(1, 'days');
     }
     while (fromMoment.valueOf() <= toTime);
 
