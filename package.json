@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "walkner-paltrack",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "updater": {
     "paltrack": {
       "backend": 13,
