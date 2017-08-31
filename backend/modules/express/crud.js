@@ -1,25 +1,36 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var EventEmitter = require('events').EventEmitter;
-var _ = require('lodash');
-var step = require('h5.step');
-var mongoSerializer = require('h5.rql/lib/serializers/mongoSerializer');
+const EventEmitter = require('events').EventEmitter;
+const {spawn} = require('child_process');
+const _ = require('lodash');
+const step = require('h5.step');
+const mongoSerializer = require('h5.rql/lib/serializers/mongoSerializer');
+const helpers = require('../../helpers');
 
-var CSV_COLUMN_SEPARATOR = ';';
-var CSV_ROW_SEPARATOR = '\r\n';
-var CSV_FORMATTERS = {
-  '"': function(value)
+const CSV_COLUMN_SEPARATOR = ';';
+const CSV_ROW_SEPARATOR = '\r\n';
+const CSV_FORMATTERS = {
+  'string': function(value)
   {
     if (value === null || value === undefined || value === '')
     {
       return '""';
     }
 
-    return '"' + String(value).replace(/"/g, '""') + '"';
+    return '"' + String(value).trim().replace(/"/g, '""').replace(/\s+/g, ' ') + '"';
   },
-  '#': function(value)
+  'integer': function(value)
+  {
+    if (value === null || value === undefined || value === '')
+    {
+      return '';
+    }
+
+    return parseInt(value, 10).toString();
+  },
+  'decimal': function(value)
   {
     if (value === null || value === undefined || value === '')
     {
@@ -27,12 +38,45 @@ var CSV_FORMATTERS = {
     }
 
     return parseFloat(Number(value).toFixed(3)).toString().replace('.', ',');
-  }
+  },
+  'percent': function(value)
+  {
+    if (value === null || value === undefined || value === '')
+    {
+      return '';
+    }
+
+    return parseFloat(Number(value).toFixed(3)).toString().replace('.', ',');
+  },
+  'datetime': function(value) { return helpers.formatDateTime(value); },
+  'date': function(value) { return helpers.formatDate(value); },
+  'time': function(value) { return helpers.formatTime(value); },
+  'boolean': function(value) { return value ? 1 : 0; }
+};
+const EXPORT_SHORT_TYPES = {
+  '"': 'string',
+  '#': 'integer',
+  '%': 'percent',
+  '$': 'decimal',
+  '@': 'datetime',
+  '-': 'date',
+  ':': 'time',
+  '?': 'boolean'
+};
+const EXPORT_TYPE_WIDTHS = {
+  'string': 20,
+  'integer': 10,
+  'decimal': 10,
+  'percent': 7,
+  'datetime': 18,
+  'date': 10,
+  'time': 10,
+  'boolean': 10
 };
 
 exports.browseRoute = function(app, options, req, res, next)
 {
-  var Model;
+  let Model;
 
   if (options.model && options.model.model)
   {
@@ -44,11 +88,21 @@ exports.browseRoute = function(app, options, req, res, next)
     options = {};
   }
 
-  var queryOptions = mongoSerializer.fromQuery(req.rql);
+  const queryOptions = mongoSerializer.fromQuery(req.rql);
 
   if (queryOptions.limit === 0)
   {
     queryOptions.limit = typeof Model.BROWSE_LIMIT === 'number' ? Model.BROWSE_LIMIT : 100;
+  }
+
+  if (queryOptions.limit > Model.BROWSE_LIMIT && Model.BROWSE_LIMIT > 0)
+  {
+    queryOptions.limit = Model.BROWSE_LIMIT;
+  }
+
+  if (queryOptions.limit === Number.MAX_SAFE_INTEGER)
+  {
+    queryOptions.limit = 0;
   }
 
   step(
@@ -72,7 +126,7 @@ exports.browseRoute = function(app, options, req, res, next)
 
       if (totalCount > 0)
       {
-        var query = Model.find(queryOptions.selector, queryOptions.fields, queryOptions).lean();
+        const query = Model.find(queryOptions.selector, queryOptions.fields, queryOptions).lean();
 
         try
         {
@@ -93,14 +147,11 @@ exports.browseRoute = function(app, options, req, res, next)
         return this.done(next, err);
       }
 
-      var totalCount = this.totalCount;
+      const totalCount = this.totalCount;
 
-      if (typeof Model.customizeLeanObject === 'function' && totalCount > 0)
+      if (totalCount > 0 && typeof Model.customizeLeanObject === 'function')
       {
-        models = models.map(function(leanModel)
-        {
-          return Model.customizeLeanObject(leanModel, queryOptions.fields);
-        });
+        models = models.map(leanModel => Model.customizeLeanObject(leanModel, queryOptions.fields));
       }
 
       if (typeof options.prepareResult === 'function')
@@ -135,7 +186,7 @@ exports.browseRoute = function(app, options, req, res, next)
 
 exports.addRoute = function(app, Model, req, res, next)
 {
-  var model = req.model || new Model(req.body);
+  const model = req.model || new Model(req.body);
 
   model.save(function(err)
   {
@@ -152,7 +203,7 @@ exports.addRoute = function(app, Model, req, res, next)
         res.statusCode = 400;
         err.code = 'DUPLICATE_KEY';
 
-        var matches = err.message.match(/\.\$(.*?) /);
+        let matches = err.message.match(/\.\$(.*?) /);
 
         if (!matches)
         {
@@ -184,7 +235,7 @@ exports.addRoute = function(app, Model, req, res, next)
 
 exports.readRoute = function(app, options, req, res, next)
 {
-  var Model;
+  let Model;
 
   if (options.model && options.model.model)
   {
@@ -196,8 +247,11 @@ exports.readRoute = function(app, options, req, res, next)
     options = {};
   }
 
-  var queryOptions = mongoSerializer.fromQuery(req.rql);
-  var query = Model.findById(req.params.id, queryOptions.fields).lean();
+  const idProperty = options.idProperty
+    ? (typeof options.idProperty === 'function' ? options.idProperty(req) : options.idProperty)
+    : '_id';
+  const queryOptions = mongoSerializer.fromQuery(req.rql);
+  const query = Model.findOne({[idProperty]: req.params.id}, queryOptions.fields).lean();
 
   try
   {
@@ -260,7 +314,7 @@ exports.readRoute = function(app, options, req, res, next)
 
 exports.editRoute = function(app, options, req, res, next)
 {
-  var Model;
+  let Model;
 
   if (options.model && options.model.model)
   {
@@ -329,7 +383,7 @@ exports.editRoute = function(app, options, req, res, next)
           res.statusCode = 400;
           err.code = 'DUPLICATE_KEY';
 
-          var matches = err.message.match(/\.\$(.*?) /);
+          let matches = err.message.match(/\.\$(.*?) /);
 
           if (!matches)
           {
@@ -424,37 +478,55 @@ exports.deleteRoute = function(app, Model, req, res, next)
   }
 };
 
-exports.exportRoute = function(options, req, res, next)
+exports.exportRoute = function(app, options, req, res, next)
 {
-  var queryOptions = mongoSerializer.fromQuery(req.rql);
-  var headerWritten = false;
-  var columnNames = null;
+  const format = req.params.format === 'xlsx' && app.express.config.jsonToXlsxExe ? 'xlsx' : 'csv';
+  const queryOptions = mongoSerializer.fromQuery(req.rql);
+  let headerWritten = false;
+  let columns = null;
+  let jsonToXlsx = null;
 
-  var query = options.model
-    .find(queryOptions.selector, queryOptions.fields)
-    .sort(queryOptions.sort)
-    .lean();
-
-  try
+  if (format === 'xlsx')
   {
-    populateQuery(query, req.rql);
+    initializeXlsx();
   }
-  catch (err)
+  else if (format === 'csv')
   {
-    return next(err);
+    initializeCsv();
   }
 
-  if (options.serializeStream)
+  function stream()
   {
-    var emitter = new EventEmitter();
+    const query = options.model
+      .find(queryOptions.selector, queryOptions.fields)
+      .sort(queryOptions.sort)
+      .lean();
 
-    handleExportStream(emitter, false, req, options.cleanUp);
+    try
+    {
+      populateQuery(query, req.rql);
+    }
+    catch (err)
+    {
+      return next(err);
+    }
 
-    options.serializeStream(query.stream(), emitter);
-  }
-  else
-  {
-    handleExportStream(query.stream(), true, req, options.cleanUp);
+    const cursor = query.cursor();
+
+    req.once('aborted', () => cursor.close());
+
+    if (options.serializeStream)
+    {
+      const emitter = new EventEmitter();
+
+      handleExportStream(emitter, false, req, options.cleanUp);
+
+      options.serializeStream(cursor, emitter);
+    }
+    else
+    {
+      handleExportStream(cursor, true, req, options.cleanUp);
+    }
   }
 
   function handleExportStream(queryStream, serializeRow, req, cleanUp)
@@ -469,10 +541,18 @@ exports.exportRoute = function(options, req, res, next)
       }
     });
 
-    queryStream.on('close', function()
+    queryStream.on('end', function()
     {
       writeHeader();
-      res.end();
+
+      if (format === 'xlsx')
+      {
+        finalizeXlsx();
+      }
+      else if (format === 'csv')
+      {
+        finalizeCsv();
+      }
 
       if (cleanUp)
       {
@@ -482,17 +562,17 @@ exports.exportRoute = function(options, req, res, next)
 
     queryStream.on('data', function(doc)
     {
-      var row = serializeRow ? options.serializeRow(doc, req) : doc;
-      var multiple = Array.isArray(row);
+      const row = serializeRow ? options.serializeRow(doc, req) : doc;
+      const multiple = Array.isArray(row);
 
       if (!row || (multiple && !row.length))
       {
         return;
       }
 
-      if (columnNames === null)
+      if (columns === null)
       {
-        columnNames = Object.keys(multiple ? row[0] : row);
+        columns = prepareExportColumns(format, options, Object.keys(multiple ? row[0] : row));
       }
 
       writeHeader();
@@ -515,40 +595,204 @@ exports.exportRoute = function(options, req, res, next)
       return;
     }
 
-    if (columnNames === null)
+    headerWritten = true;
+
+    if (columns === null)
     {
       return res.sendStatus(204);
     }
 
-    res.attachment(options.filename + '.csv');
+    res.attachment(options.filename + '.' + format);
 
-    var line = columnNames
-      .map(function(columnName)
-      {
-        return CSV_FORMATTERS[columnName.charAt(0)] ? columnName.substr(1) : columnName;
-      })
-      .join(CSV_COLUMN_SEPARATOR);
-
-    res.write(new Buffer([0xEF, 0xBB, 0xBF]));
-    res.write(line + CSV_ROW_SEPARATOR);
-
-    headerWritten = true;
+    if (format === 'xlsx')
+    {
+      writeXlsxHeader();
+    }
+    else if (format === 'csv')
+    {
+      writeCsvHeader();
+    }
   }
 
   function writeRow(row)
   {
-    var line = columnNames
-      .map(function(columnName)
-      {
-        var formatter = CSV_FORMATTERS[columnName.charAt(0)];
+    if (format === 'xlsx')
+    {
+      writeXlsxRow(row);
+    }
+    else if (format === 'csv')
+    {
+      writeCsvRow(row);
+    }
+  }
 
-        return formatter ? formatter(row[columnName]) : row[columnName];
+  function initializeXlsx()
+  {
+    const complete = _.once(err =>
+    {
+      jsonToXlsx.kill();
+      jsonToXlsx = null;
+
+      if (!res.headersSent && err)
+      {
+        res.removeHeader('Content-Disposition');
+        res.removeHeader('Content-Type');
+
+        next(err);
+      }
+      else
+      {
+        res.end();
+      }
+    });
+
+    jsonToXlsx = spawn(app.express.config.jsonToXlsxExe);
+
+    jsonToXlsx.once('error', err => complete(err));
+    jsonToXlsx.once('close', exitCode => complete(exitCode === 0 ? null : new Error('[jsonToXlsx] Unexpected exit!')));
+
+    jsonToXlsx.stdout.on('data', data => res.write(data));
+
+    jsonToXlsx.stdin.setEncoding('utf8');
+    jsonToXlsx.stdin.on('error', () => {});
+
+    jsonToXlsx.stderr.setEncoding('utf8');
+    jsonToXlsx.stderr.on('data', data => process.stdout.write(data));
+
+    setImmediate(stream);
+  }
+
+  function writeXlsxHeader()
+  {
+    const config = {
+      sheetName: options.sheetName || options.filename,
+      freezeRows: options.freezeRows || 0,
+      freezeColumns: options.freezeColumns || 0,
+      columns: columns
+    };
+
+    if (jsonToXlsx)
+    {
+      jsonToXlsx.stdin.write(JSON.stringify(config) + '\r\n');
+    }
+  }
+
+  function writeXlsxRow(row)
+  {
+    if (jsonToXlsx)
+    {
+      jsonToXlsx.stdin.write(JSON.stringify(row) + '\r\n');
+    }
+  }
+
+  function finalizeXlsx()
+  {
+    if (jsonToXlsx)
+    {
+      jsonToXlsx.stdin.write('\r\n');
+      jsonToXlsx.stdin.end();
+    }
+  }
+
+  function initializeCsv()
+  {
+    stream();
+  }
+
+  function writeCsvHeader()
+  {
+    const line = columns
+      .map(column => column.caption)
+      .join(CSV_COLUMN_SEPARATOR);
+
+    res.write(new Buffer([0xEF, 0xBB, 0xBF]));
+    res.write(line + CSV_ROW_SEPARATOR);
+  }
+
+  function writeCsvRow(row)
+  {
+    const line = columns
+      .map(function(column)
+      {
+        const rawValue = row[column.name];
+        const formatter = CSV_FORMATTERS[column.type];
+
+        return formatter ? formatter(rawValue) : rawValue;
       })
       .join(CSV_COLUMN_SEPARATOR);
 
     res.write(line + CSV_ROW_SEPARATOR);
   }
+
+  function finalizeCsv()
+  {
+    res.end();
+  }
 };
+
+function prepareExportColumns(format, options, columnNames)
+{
+  const columnConfig = options.columns || {};
+  let orderedColumnNames;
+
+  if (format === 'csv')
+  {
+    orderedColumnNames = columnNames;
+  }
+  else
+  {
+    orderedColumnNames = Object
+      .keys(columnConfig)
+      .filter(c => columnConfig[c] && columnConfig[c].position > 0)
+      .sort((a, b) => columnConfig[a].position - columnConfig[b].position);
+
+    columnNames.forEach(c =>
+    {
+      if (!orderedColumnNames.includes(c))
+      {
+        orderedColumnNames.push(c);
+      }
+    });
+  }
+
+  return orderedColumnNames.map(name =>
+  {
+    const option = columnConfig[name];
+    const column = {
+      name: name,
+      caption: name,
+      type: 'string',
+      width: 0
+    };
+    const type = EXPORT_SHORT_TYPES[name.charAt(0)];
+
+    if (type)
+    {
+      column.type = type;
+      column.caption = name.substring(1);
+    }
+
+    if (typeof option === 'number')
+    {
+      column.width = option;
+    }
+    else if (typeof option === 'string')
+    {
+      column.type = option;
+    }
+    else if (option)
+    {
+      Object.assign(column, option);
+    }
+
+    if (!column.width)
+    {
+      column.width = EXPORT_TYPE_WIDTHS[column.type];
+    }
+
+    return column;
+  });
+}
 
 function populateQuery(query, rql)
 {

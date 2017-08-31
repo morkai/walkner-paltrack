@@ -23,13 +23,13 @@ module.exports = function(grunt)
         './frontend-build/**/nls/*.json'
       ]
     },
-    jshint: {
+    eslint: {
       backend: {
         src: [
           './backend/**/*.js'
         ],
         options: {
-          jshintrc: '.jshintrc'
+          configFile: '.eslintrc.json'
         }
       },
       frontend: {
@@ -37,7 +37,7 @@ module.exports = function(grunt)
           './frontend/app/**/*.js'
         ],
         options: {
-          jshintrc: 'frontend/.jshintrc'
+          configFile: 'frontend/.eslintrc.json'
         }
       }
     },
@@ -120,15 +120,15 @@ module.exports = function(grunt)
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-copy');
-  grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-ejs-amd');
+  grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-messageformat-amd');
 
   grunt.registerTask('default', [
     'clean',
-    'jshint:backend',
-    'jshint:frontend'
+    'eslint:backend',
+    'eslint:frontend'
   ]);
 
   grunt.registerTask('build-frontend', [

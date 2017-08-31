@@ -123,6 +123,10 @@ exports.user = {
   ]
 };
 
+exports.users = {
+  browsePrivileges: ['USER']
+};
+
 exports['mail/sender'] = {
   smtp: {
     host: 'smtp.localhost',

@@ -1,12 +1,12 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var fs = require('fs');
-var _ = require('lodash');
-var setUpRoutes = require('./routes');
-var setUpCommands = require('./commands');
-var expressMiddleware = require('./expressMiddleware');
+const fs = require('fs');
+const _ = require('lodash');
+const setUpRoutes = require('./routes');
+const setUpCommands = require('./commands');
+const expressMiddleware = require('./expressMiddleware');
 
 exports.DEFAULT_CONFIG = {
   expressId: 'express',
@@ -29,8 +29,8 @@ exports.DEFAULT_CONFIG = {
 
 exports.start = function startUpdaterModule(app, module)
 {
-  var reloadTimer = null;
-  var restartTimer = null;
+  let reloadTimer = null;
+  let restartTimer = null;
 
   module.config.packageJsonPath = require.resolve(module.config.packageJsonPath);
 
@@ -47,8 +47,8 @@ exports.start = function startUpdaterModule(app, module)
       module.package.updater = {};
     }
 
-    var updater = module.package.updater;
-    var versionsKey = module.config.versionsKey;
+    const updater = module.package.updater;
+    const versionsKey = module.config.versionsKey;
 
     if (!updater[versionsKey])
     {
@@ -62,19 +62,26 @@ exports.start = function startUpdaterModule(app, module)
     return clone === false ? updater[versionsKey] : _.cloneDeep(updater[versionsKey]);
   };
 
-  module.getBackendVersion = function()
+  module.getBackendVersion = function(backendVersionKey)
   {
-    return module.getVersions(false)[module.config.backendVersionKey];
+    return module.getVersions(false)[backendVersionKey || module.config.backendVersionKey];
   };
 
-  module.getFrontendVersion = function()
+  module.getFrontendVersion = function(frontendVersionKey)
   {
-    return module.getVersions(false)[module.config.frontendVersionKey];
+    return module.getVersions(false)[frontendVersionKey || module.config.frontendVersionKey];
   };
 
-  module.updateFrontendVersion = function()
+  module.updateFrontendVersion = function(frontendVersionKey)
   {
-    module.getVersions(false)[module.config.frontendVersionKey] = Date.now();
+    const versions = module.getVersions(false);
+
+    if (typeof versions[frontendVersionKey] === 'undefined')
+    {
+      frontendVersionKey = module.config.frontendVersionKey;
+    }
+
+    versions[frontendVersionKey] = Date.now();
   };
 
   app.broker
@@ -82,8 +89,8 @@ exports.start = function startUpdaterModule(app, module)
     .setLimit(1)
     .on('message', function(message)
     {
-      var expressModule = message.module;
-      var expressApp = expressModule.app;
+      const expressModule = message.module;
+      const expressApp = expressModule.app;
 
       expressApp.use(expressMiddleware.bind(null, app, module));
     });
@@ -120,18 +127,20 @@ exports.start = function startUpdaterModule(app, module)
   {
     reloadTimer = null;
 
-    var oldBackendVersion = module.getBackendVersion();
-    var oldFrontendVersion = module.getFrontendVersion();
+    const oldVersions = module.getVersions(true);
+    const oldBackendVersion = module.getBackendVersion();
+    const oldFrontendVersion = module.getFrontendVersion();
 
     reloadPackageJson();
 
-    var newBackendVersion = module.getBackendVersion();
-    var newFrontendVersion = module.getFrontendVersion();
+    const newVersions = module.getVersions(false);
+    const newBackendVersion = module.getBackendVersion();
+    const newFrontendVersion = module.getFrontendVersion();
 
     if (newBackendVersion !== oldBackendVersion)
     {
       module.info(
-        "Backend version changed from [%s] to [%s]...",
+        'Backend version changed from [%s] to [%s]...',
         oldBackendVersion,
         newBackendVersion
       );
@@ -141,13 +150,27 @@ exports.start = function startUpdaterModule(app, module)
     else if (newFrontendVersion !== oldFrontendVersion)
     {
       module.info(
-        "Frontend version changed from [%s] to [%s]...",
+        'Frontend version changed from [%s] to [%s]...',
         oldFrontendVersion,
         newFrontendVersion
       );
 
       handleFrontendUpdate(oldFrontendVersion, newFrontendVersion);
     }
+
+    _.forEach(newVersions, function(newVersion, service)
+    {
+      const oldVersion = oldVersions[service] || 0;
+
+      if (newVersion !== oldVersion)
+      {
+        app.broker.publish('updater.newVersion', {
+          service: service,
+          oldVersion: oldVersion,
+          newVersion: newVersion
+        });
+      }
+    });
   }
 
   function handleBackendUpdate(oldBackendVersion, newBackendVersion)
@@ -159,7 +182,7 @@ exports.start = function startUpdaterModule(app, module)
 
     module.restarting = Date.now();
 
-    module.info("Restarting in %d seconds...", module.config.restartDelay / 1000);
+    module.info('Restarting in %d seconds...', module.config.restartDelay / 1000);
 
     restartTimer = setTimeout(shutdown, module.config.restartDelay);
 
@@ -190,7 +213,7 @@ exports.start = function startUpdaterModule(app, module)
 
     if (!handleBackendUpdate(backendVersion, backendVersion))
     {
-      module.info("Forcing shutdown...");
+      module.info('Forcing shutdown...');
 
       shutdown();
     }
@@ -198,7 +221,7 @@ exports.start = function startUpdaterModule(app, module)
 
   function shutdown()
   {
-    module.info("Exiting the process...");
+    module.info('Exiting the process...');
 
     setImmediate(process.exit.bind(process));
   }

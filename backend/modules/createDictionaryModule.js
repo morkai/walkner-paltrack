@@ -1,8 +1,8 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var _ = require('lodash');
+const _ = require('lodash');
 
 module.exports = function createDictionaryModule(modelName, setUpRoutes, customSetUp)
 {
@@ -14,18 +14,19 @@ module.exports = function createDictionaryModule(modelName, setUpRoutes, customS
     },
     start: function startDictionaryModule(app, module, done)
     {
-      var mongoose = app[module.config.mongooseId];
+      const mongoose = app[module.config.mongooseId];
 
       if (!mongoose)
       {
-        return done(new Error("mongoose module is required"));
+        return done(new Error('mongoose module is required'));
       }
 
-      var Model = mongoose.model(modelName);
+      const Model = mongoose.model(modelName);
 
       module.Model = Model;
       module.models = [];
       module.modelsById = {};
+      module.updatedAt = Date.now();
 
       if (setUpRoutes)
       {
@@ -72,7 +73,7 @@ module.exports = function createDictionaryModule(modelName, setUpRoutes, customS
 
       function fetchData(done)
       {
-        var query = Model.findForDictionary ? Model.findForDictionary() : Model.find();
+        const query = Model.findForDictionary ? Model.findForDictionary() : Model.find();
 
         query.exec(function(err, models)
         {
@@ -103,6 +104,8 @@ module.exports = function createDictionaryModule(modelName, setUpRoutes, customS
 
       function publishDictionaryUpdate(topic, message, meta)
       {
+        module.updatedAt = Date.now();
+
         app.broker.publish('dictionaries.updated', {
           topic: topic,
           message: message,

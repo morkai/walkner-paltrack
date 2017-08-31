@@ -1,28 +1,27 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-tp> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var setUpRoutes = require('./routes');
+const setUpRoutes = require('./routes');
 
 exports.DEFAULT_CONFIG = {
   mongooseId: 'mongoose',
   expressId: 'express',
   userId: 'user',
-  sioId: 'sio',
+  settingsId: 'settings',
   mailSenderId: 'mail/sender',
   browsePrivileges: ['USERS:VIEW']
 };
 
-exports.start = function startUsersModule(app, usersModule)
+exports.start = function startUsersModule(app, module)
 {
-  usersModule.syncing = false;
-
   app.onModuleReady(
     [
-      usersModule.config.mongooseId,
-      usersModule.config.userId,
-      usersModule.config.expressId
+      module.config.mongooseId,
+      module.config.userId,
+      module.config.expressId,
+      module.config.settingsId
     ],
-    setUpRoutes.bind(null, app, usersModule)
+    setUpRoutes.bind(null, app, module)
   );
 };

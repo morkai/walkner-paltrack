@@ -1,14 +1,15 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
-var os = require('os');
-var cookie = require('cookie');
-var cookieParser = require('cookie-parser');
-var _ = require('lodash');
-var bcrypt = require('bcrypt');
-var step = require('h5.step');
-var ObjectId = require('mongoose').Types.ObjectId;
+const os = require('os');
+const cookie = require('cookie');
+const cookieParser = require('cookie-parser');
+const _ = require('lodash');
+const bcrypt = require('bcrypt');
+const step = require('h5.step');
+const ObjectId = require('mongoose').Types.ObjectId;
+const resolveIpAddress = require('./util/resolveIpAddress');
 
 exports.DEFAULT_CONFIG = {
   sioId: 'sio',
@@ -25,7 +26,7 @@ exports.DEFAULT_CONFIG = {
 
 exports.start = function startUserModule(app, module)
 {
-  var localAddresses = module.config.localAddresses || getLocalAddresses();
+  const localAddresses = module.config.localAddresses || getLocalAddresses();
 
   module.root = _.assign(module.config.root, {
     loggedIn: true,
@@ -54,8 +55,8 @@ exports.start = function startUserModule(app, module)
 
   app.broker.subscribe('express.beforeRouter').setLimit(1).on('message', function(message)
   {
-    var expressModule = message.module;
-    var expressApp = expressModule.app;
+    const expressModule = message.module;
+    const expressApp = expressModule.app;
 
     expressApp.use(ensureUserMiddleware);
   });
@@ -66,7 +67,7 @@ exports.start = function startUserModule(app, module)
    */
   function getLocalAddresses()
   {
-    var localAddresses = [];
+    const localAddresses = [];
 
     _.forEach(os.networkInterfaces(), function(addresses)
     {
@@ -93,9 +94,9 @@ exports.start = function startUserModule(app, module)
       return true;
     }
 
-    for (var i = 0, l = localAddresses.length; i < l; ++i)
+    for (let i = 0, l = localAddresses.length; i < l; ++i)
     {
-      var pattern = localAddresses[i];
+      const pattern = localAddresses[i];
 
       if (typeof pattern === 'string')
       {
@@ -116,11 +117,11 @@ exports.start = function startUserModule(app, module)
   /**
    * @private
    * @param {string} ipAddress
-   * @returns {object}
+   * @returns {Object}
    */
   function createGuestData(ipAddress)
   {
-    var user = _.cloneDeep(module.guest);
+    const user = _.cloneDeep(module.guest);
 
     user.ipAddress = ipAddress;
     user.local = isLocalIpAddress(ipAddress);
@@ -162,18 +163,22 @@ exports.start = function startUserModule(app, module)
       return true;
     }
 
-    for (var i = 0, l = anyPrivileges.length; i < l; ++i)
+    for (let i = 0, l = anyPrivileges.length; i < l; ++i)
     {
-      var allPrivileges = anyPrivileges[i];
-      var matches = 0;
+      const allPrivileges = anyPrivileges[i];
+      let matches = 0;
 
-      for (var ii = 0, ll = allPrivileges.length; ii < ll; ++ii)
+      for (let ii = 0; ii < allPrivileges.length; ++ii)
       {
-        var privilege = allPrivileges[ii];
+        const privilege = allPrivileges[ii];
 
         if (privilege === 'USER')
         {
           matches += user.loggedIn ? 1 : 0;
+        }
+        else if (/^FN:/.test(privilege))
+        {
+          matches += user.prodFunction === privilege.substring(3) ? 1 : 0;
         }
         else
         {
@@ -181,7 +186,7 @@ exports.start = function startUserModule(app, module)
         }
       }
 
-      if (matches === ll)
+      if (matches === allPrivileges.length)
       {
         return true;
       }
@@ -227,7 +232,7 @@ exports.start = function startUserModule(app, module)
       return next();
     }
 
-    var user = req.session.user;
+    const user = req.session.user;
 
     if (!user)
     {
@@ -242,11 +247,11 @@ exports.start = function startUserModule(app, module)
    */
   function createAuthMiddleware()
   {
-    var anyPrivileges = [];
+    const anyPrivileges = [];
 
-    for (var i = 0, l = arguments.length; i < l; ++i)
+    for (let i = 0, l = arguments.length; i < l; ++i)
     {
-      var allPrivileges = arguments[i];
+      let allPrivileges = arguments[i];
 
       if (!Array.isArray(allPrivileges))
       {
@@ -258,24 +263,27 @@ exports.start = function startUserModule(app, module)
 
     return function authMiddleware(req, res, next)
     {
-      var user = req.session.user;
-
-      if (!user)
+      if (req.session)
       {
-        user = req.session.user = createGuestData(getRealIp({}, req));
-      }
+        let user = req.session.user;
 
-      if (isAllowedTo(user, anyPrivileges))
-      {
-        return next();
-      }
+        if (!user)
+        {
+          user = req.session.user = createGuestData(getRealIp({}, req));
+        }
 
-      module.debug(
-        "[auth] %s (%s) tried to access [%s] without sufficient privileges :(",
-        user.login,
-        user.ipAddress,
-        req.url
-      );
+        if (isAllowedTo(user, anyPrivileges))
+        {
+          return next();
+        }
+
+        module.debug(
+          '[auth] %s (%s) tried to access [%s] without sufficient privileges :(',
+          user.login,
+          user.ipAddress,
+          req.url
+        );
+      }
 
       return res.sendStatus(403);
     };
@@ -294,24 +302,19 @@ exports.start = function startUserModule(app, module)
     step(
       function findUserDataStep()
       {
-        var next = this.next();
+        const next = this.next();
 
-        if (credentials.login === module.root.login)
+        if (credentials.login.toLowerCase() === module.root.login.toLowerCase())
         {
           next(null, _.assign({}, module.root));
         }
         else
         {
-          var conditions = {};
-
-          if (/^.*?@.*?\.[a-zA-Z]+/.test(credentials.login))
-          {
-            conditions.email = credentials.login;
-          }
-          else
-          {
-            conditions.login = credentials.login;
-          }
+          const property = /^.*?@.*?\.[a-zA-Z]+$/.test(credentials.login) ? 'email' : 'login';
+          const conditions = {
+            [property]: new RegExp('^' + _.escapeRegExp(credentials.login) + '$', 'i'),
+            active: true
+          };
 
           app[module.config.mongooseId].model('User').findOne(conditions, next);
         }
@@ -372,19 +375,19 @@ exports.start = function startUserModule(app, module)
 
     /**
      * @name UserInfo
-     * @type {{_id: string, ip: string, label: string}}
+     * @type {{id: string, ip: string, label: string}}
      */
-    var userInfo = {
-      _id: null,
+    const userInfo = {
+      id: null,
       ip: '',
       label: ''
     };
 
     try
     {
-      userInfo._id = ObjectId.createFromHexString(String(userData._id || userData.id));
+      userInfo.id = ObjectId.createFromHexString(String(userData._id || userData.id));
     }
-    catch (err) {}
+    catch (err) {} // eslint-disable-line no-empty
 
     if (typeof userData.label === 'string')
     {
@@ -406,28 +409,11 @@ exports.start = function startUserModule(app, module)
 
   function getRealIp(userData, addressData)
   {
-    var ip = '';
+    let ip = '';
 
     if (addressData)
     {
-      if (hasRealIpFromProxyServer(addressData))
-      {
-        ip = (addressData.headers || addressData.request.headers)['x-real-ip'];
-      }
-      // HTTP
-      else if (addressData.socket && typeof addressData.socket.remoteAddress === 'string')
-      {
-        ip = addressData.socket.remoteAddress;
-      }
-      // Socket.IO
-      else if (addressData.conn && typeof addressData.conn.remoteAddress === 'string')
-      {
-        ip = addressData.conn.remoteAddress;
-      }
-      else if (typeof addressData.address === 'string')
-      {
-        ip = addressData.address;
-      }
+      ip = resolveIpAddress(addressData);
     }
 
     if (ip === '')
@@ -438,41 +424,21 @@ exports.start = function startUserModule(app, module)
     return ip;
   }
 
-  function hasRealIpFromProxyServer(addressData)
-  {
-    var handshake = addressData.request;
-    var headers = handshake ? handshake.headers : addressData.headers;
-
-    if (!headers || typeof headers['x-real-ip'] !== 'string')
-    {
-      return false;
-    }
-
-    // HTTP
-    if (addressData.socket && addressData.socket.remoteAddress === '127.0.0.1')
-    {
-      return true;
-    }
-
-    // Socket.IO
-    return addressData.conn && addressData.conn.remoteAddress === '127.0.0.1';
-  }
-
   /**
    * @private
    */
   function setUpSio()
   {
-    var sioModule = app[module.config.sioId];
-    var expressModule = app[module.config.expressId];
-    var sosMap = {};
-    var usersToSocketsMap = {};
+    const sioModule = app[module.config.sioId];
+    const expressModule = app[module.config.expressId];
+    const sosMap = {};
+    const usersToSocketsMap = {};
 
     sioModule.use(function(socket, done)
     {
-      var handshakeData = socket.handshake;
-      var cookies = cookie.parse(String(handshakeData.headers.cookie));
-      var sessionCookie = cookies[expressModule.config.sessionCookieKey];
+      const handshakeData = socket.handshake;
+      const cookies = cookie.parse(String(handshakeData.headers.cookie));
+      const sessionCookie = cookies[expressModule.config.sessionCookieKey];
 
       if (typeof sessionCookie !== 'string')
       {
@@ -482,7 +448,7 @@ exports.start = function startUserModule(app, module)
         return done();
       }
 
-      var sessionId = cookieParser.signedCookie(sessionCookie, expressModule.config.cookieSecret);
+      const sessionId = cookieParser.signedCookie(sessionCookie, expressModule.config.cookieSecret);
 
       expressModule.sessionStore.get(sessionId, function(err, session)
       {
@@ -502,7 +468,7 @@ exports.start = function startUserModule(app, module)
 
     sioModule.sockets.on('connection', function(socket)
     {
-      var handshake = socket.handshake;
+      const handshake = socket.handshake;
 
       if (handshake.sessionId)
       {
@@ -525,7 +491,7 @@ exports.start = function startUserModule(app, module)
 
       socket.on('disconnect', function()
       {
-        var userSockets = socket.handshake.user ? usersToSocketsMap[socket.handshake.user._id] : null;
+        const userSockets = socket.handshake.user ? usersToSocketsMap[socket.handshake.user._id] : null;
 
         if (userSockets)
         {
@@ -537,7 +503,7 @@ exports.start = function startUserModule(app, module)
           }
         }
 
-        var sessionSockets = sosMap[socket.sessionId];
+        const sessionSockets = sosMap[socket.sessionId];
 
         if (sessionSockets)
         {
@@ -553,7 +519,7 @@ exports.start = function startUserModule(app, module)
 
     app.broker.subscribe('users.login', function(message)
     {
-      var sockets = moveSos(message.oldSessionId, message.newSessionId);
+      const sockets = moveSos(message.oldSessionId, message.newSessionId);
 
       _.forEach(sockets, function(socket)
       {
@@ -562,25 +528,22 @@ exports.start = function startUserModule(app, module)
 
         mapUserToSocket(socket);
 
-        if (socket.id !== message.socketId)
-        {
-          socket.emit('user.reload', message.user);
-        }
+        socket.emit('user.reload', message.user);
       });
     });
 
     app.broker.subscribe('users.logout', function(message)
     {
-      var sockets = moveSos(message.oldSessionId, message.newSessionId);
-      var userId =  message.user._id;
-      var userToSocketsMap = usersToSocketsMap[userId];
+      const sockets = moveSos(message.oldSessionId, message.newSessionId);
+      const userId = message.user._id;
+      const userToSocketsMap = usersToSocketsMap[userId];
 
       _.forEach(sockets, function(socket)
       {
         socket.handshake.sessionId = message.newSessionId;
         socket.handshake.user = createGuestData(getRealIp({}, socket));
 
-        if (userToSocketsMap[socket.id])
+        if (userToSocketsMap && userToSocketsMap[socket.id])
         {
           delete userToSocketsMap[socket.id];
 
@@ -590,16 +553,13 @@ exports.start = function startUserModule(app, module)
           }
         }
 
-        if (socket.id !== message.socketId)
-        {
-          socket.emit('user.reload', socket.handshake.user);
-        }
+        socket.emit('user.reload', socket.handshake.user);
       });
     });
 
     app.broker.subscribe('users.edited', function(message)
     {
-      var userToSocketsMap = usersToSocketsMap[message.model._id];
+      const userToSocketsMap = usersToSocketsMap[message.model._id];
 
       if (userToSocketsMap)
       {
@@ -609,7 +569,7 @@ exports.start = function startUserModule(app, module)
 
     app.broker.subscribe('users.deleted', function(message)
     {
-      var userToSocketsMap = usersToSocketsMap[message.model._id];
+      const userToSocketsMap = usersToSocketsMap[message.model._id];
 
       if (userToSocketsMap)
       {
@@ -619,11 +579,11 @@ exports.start = function startUserModule(app, module)
 
     function mapUserToSocket(socket)
     {
-      var handshake = socket.handshake;
+      const handshake = socket.handshake;
 
       if (handshake.user && handshake.user.loggedIn)
       {
-        var userId = handshake.user._id;
+        const userId = handshake.user._id;
 
         if (!usersToSocketsMap[userId])
         {
@@ -636,7 +596,7 @@ exports.start = function startUserModule(app, module)
 
     function moveSos(oldSessionId, newSessionId)
     {
-      var sockets = [];
+      const sockets = [];
 
       if (typeof sosMap[oldSessionId] !== 'object')
       {
@@ -645,7 +605,7 @@ exports.start = function startUserModule(app, module)
 
       _.forEach(Object.keys(sosMap[oldSessionId]), function(socketId)
       {
-        var socket = sioModule.sockets.connected[socketId];
+        const socket = sioModule.sockets.connected[socketId];
 
         if (typeof socket === 'undefined')
         {
@@ -671,7 +631,7 @@ exports.start = function startUserModule(app, module)
 
     function getSessionsCollection()
     {
-      var sessionStore = expressModule.sessionStore;
+      const sessionStore = expressModule.sessionStore;
 
       if (typeof sessionStore.collection === 'function')
       {
@@ -683,7 +643,7 @@ exports.start = function startUserModule(app, module)
 
     function handleUserEdit(userToSocketsMap, userData)
     {
-      var userId = userData._id.toString();
+      const userId = userData._id.toString();
 
       delete userData._id;
 
@@ -698,7 +658,7 @@ exports.start = function startUserModule(app, module)
 
       _.forEach(userToSocketsMap, function(unused, socketId)
       {
-        var socket = sioModule.sockets.connected[socketId];
+        const socket = sioModule.sockets.connected[socketId];
 
         if (socket)
         {
@@ -711,7 +671,7 @@ exports.start = function startUserModule(app, module)
     {
       _.forEach(userToSocketsMap, function(unused, socketId)
       {
-        var socket = sioModule.sockets.connected[socketId];
+        const socket = sioModule.sockets.connected[socketId];
 
         if (socket)
         {
@@ -724,17 +684,17 @@ exports.start = function startUserModule(app, module)
 
     function updateUserSessions(userId, userData)
     {
-      var collection = getSessionsCollection();
+      const collection = getSessionsCollection();
 
       if (!collection)
       {
         return;
       }
 
-      var conditions = {
+      const conditions = {
         'data.user._id': userId
       };
-      var update = {
+      const update = {
         $set: {}
       };
 
@@ -747,14 +707,14 @@ exports.start = function startUserModule(app, module)
       {
         if (err)
         {
-          return module.error("Failed to update user sessions: %s", err.message);
+          return module.error('Failed to update user sessions: %s', err.message);
         }
       });
     }
 
     function removeUserSessions(userId)
     {
-      var collection = getSessionsCollection();
+      const collection = getSessionsCollection();
 
       if (!collection)
       {
@@ -765,7 +725,7 @@ exports.start = function startUserModule(app, module)
       {
         if (err)
         {
-          return module.error("Failed to remove user sessions: %s", err.message);
+          return module.error('Failed to remove user sessions: %s', err.message);
         }
       });
     }

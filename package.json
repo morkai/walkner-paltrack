@@ -4,8 +4,8 @@
   "version": "0.7.0",
   "updater": {
     "paltrack": {
-      "backend": 12,
-      "frontend": 19
+      "backend": 13,
+      "frontend": 20
     }
   },
   "description": "Pallet tracking application.",
@@ -22,44 +22,44 @@
     "url": "http://github.com/morkai/walkner-paltrack.git"
   },
   "engine": [
-    "node >=6"
+    "node >=8"
   ],
   "main": "./backend/main",
   "dependencies": {
-    "bcrypt": "~0.8.6",
+    "bcrypt": "~1.0.2",
     "blocked": "~1.2.1",
-    "body-parser": "~1.15.0",
-    "cookie": "~0.2.3",
-    "cookie-parser": "~1.4.1",
-    "csv": "~0.3.7",
+    "body-parser": "~1.17.2",
+    "cookie": "~0.3.1",
+    "cookie-parser": "~1.4.3",
+    "csv": "~1.1.1",
     "deep-equal": "~1.0.1",
-    "ejs": "~2.4.1",
+    "ejs": "~2.5.7",
     "ejs-amd": "~1.0.0",
-    "express": "~4.14.0",
-    "express-session": "~1.13.0",
+    "express": "~4.15.4",
+    "express-session": "~1.15.5",
     "h5.main": "git+http://github.com/morkai/h5.main.git#7fb51e2571",
     "h5.pubsub": "git+http://github.com/morkai/h5.pubsub.git#c1a899cb7e",
     "h5.rql": "git+http://github.com/morkai/h5.rql.git#5622189665",
-    "h5.step": "~0.1.0",
-    "lodash": "~4.13.1",
+    "h5.step": "git+http://github.com/morkai/h5.step.git#14ea69a759",
+    "lodash": "~4.17.4",
     "messageformat": "~0.2.2",
     "messageformat-amd": "git+http://github.com/morkai/messageformat-amd.git#d41fd5caba",
-    "nodemailer": "~1.10.0",
-    "methods": "~1.1.1",
-    "moment": "~2.13.0",
-    "mongodb": "~2.1.11",
-    "mongoose": "~4.4.10",
+    "methods": "~1.1.2",
+    "moment": "~2.18.1",
+    "mongodb": "~2.2.31",
+    "mongoose": "~4.11.7",
     "mongoose-auto-increment": "~5.0.1",
-    "socket.io": "~1.4.5"
+    "nodemailer": "~4.0.1",
+    "socket.io": "~1.7.4"
   },
   "devDependencies": {
-    "grunt": "~0.4.5",
-    "grunt-contrib-clean": "~1.0.0",
-    "grunt-contrib-copy": "~1.0.0",
+    "grunt": "~1.0.1",
+    "grunt-contrib-clean": "~1.1.0",
     "grunt-contrib-concat": "~1.0.1",
-    "grunt-contrib-jshint": "~1.0.0",
+    "grunt-contrib-copy": "~1.0.0",
     "grunt-contrib-requirejs": "~1.0.0",
-    "grunt-ejs-amd": "git+http://github.com/morkai/grunt-ejs-amd.git#a09723eabe",
-    "grunt-messageformat-amd": "git+http://github.com/morkai/grunt-messageformat-amd.git#7c47f564a5"
+    "grunt-ejs-amd": "git+http://github.com/morkai/grunt-ejs-amd.git#07b9f7ae3a",
+    "grunt-eslint": "^20.0.0",
+    "grunt-messageformat-amd": "git+http://github.com/morkai/grunt-messageformat-amd.git#052e4d4ee5"
   }
 }
