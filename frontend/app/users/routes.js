@@ -7,6 +7,7 @@ define([
   '../core/util/showDeleteFormPage',
   './User',
   './UserCollection',
+  './pages/LogInFormPage',
   'i18n!app/nls/users'
 ], function(
   router,
@@ -14,12 +15,18 @@ define([
   user,
   showDeleteFormPage,
   User,
-  UserCollection
+  UserCollection,
+  LogInFormPage
 ) {
   'use strict';
 
   var canView = user.auth('USERS:VIEW');
   var canManage = user.auth('USERS:MANAGE');
+
+  router.map('/login', function()
+  {
+    viewport.showPage(new LogInFormPage());
+  });
 
   router.map('/users', canView, function(req)
   {
@@ -71,19 +78,33 @@ define([
     );
   });
 
-  router.map('/users/:id;edit', canManage, function(req)
-  {
-    viewport.loadPage(
-      ['app/core/pages/EditFormPage', 'app/users/views/UserFormView'],
-      function(EditFormPage, UserFormView)
+  router.map(
+    '/users/:id;edit',
+    function(req, referer, next)
+    {
+      if (req.params.id === user.data._id)
       {
-        return new EditFormPage({
-          FormView: UserFormView,
-          model: new User({_id: req.params.id})
-        });
+        next();
       }
-    );
-  });
+      else
+      {
+        canManage(req, referer, next);
+      }
+    },
+    function(req)
+    {
+      viewport.loadPage(
+        ['app/core/pages/EditFormPage', 'app/users/views/UserFormView'],
+        function(EditFormPage, UserFormView)
+        {
+          return new EditFormPage({
+            FormView: UserFormView,
+            model: new User({_id: req.params.id})
+          });
+        }
+      );
+    }
+  );
 
   router.map('/users/:id;delete', canManage, showDeleteFormPage.bind(null, User));
 });

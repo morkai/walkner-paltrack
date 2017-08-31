@@ -27,12 +27,16 @@
         <div class="col-md-6 form-group">
           <label for="<%- idPrefix %>-password" class="control-label"><%- t('users', 'PROPERTY:password') %></label>
           <input id="<%- idPrefix %>-password" class="form-control" type="password" name="password">
+          <% if (editMode) { %>
+          <p class="help-block"><%- t('users', 'FORM:HELP:password') %></p>
+          <% } %>
         </div>
         <div class="col-md-6 form-group">
           <label for="<%- idPrefix %>-password2" class="control-label"><%- t('users', 'PROPERTY:password2') %></label>
           <input id="<%- idPrefix %>-password2" class="form-control" type="password">
         </div>
       </div>
+      <% if (!accountMode) { %>
       <div class="row">
         <div class="col-md-6 form-group">
           <label for="<%- idPrefix %>-partner" class="control-label"><%- t('users', 'PROPERTY:partner') %></label>
@@ -53,6 +57,7 @@
           </span>
         </div>
       </div>
+      <% } %>
     </div>
     <div class="panel-footer">
       <button type="submit" class="btn btn-primary"><%- formActionText %></button>

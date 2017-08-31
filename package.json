@@ -4,8 +4,8 @@
   "version": "0.6.0",
   "updater": {
     "paltrack": {
-      "backend": 9,
-      "frontend": 12
+      "backend": 12,
+      "frontend": 19
     }
   },
   "description": "Pallet tracking application.",
@@ -13,8 +13,8 @@
   "homepage": "https://github.com/morkai/walkner-paltrack",
   "author": {
     "name": "Łukasz Walukiewicz",
-    "email": "lukasz@walukiewicz.eu",
-    "url": "http://lukasz.walukiewicz.eu/"
+    "email": "lukasz@miracle.systems",
+    "url": "http://miracle.systems/"
   },
   "bugs": "https://github.com/morkai/walkner-paltrack/issues",
   "repository": {
@@ -44,6 +44,7 @@
     "lodash": "~4.13.1",
     "messageformat": "~0.2.2",
     "messageformat-amd": "git+http://github.com/morkai/messageformat-amd.git#d41fd5caba",
+    "nodemailer": "~1.10.0",
     "methods": "~1.1.1",
     "moment": "~2.13.0",
     "mongodb": "~2.1.11",

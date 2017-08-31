@@ -4,7 +4,6 @@
 @import url(./form.css);
 @import url(./modal.css);
 @import url(./properties.css);
-@import url(./logInForm.css);
 @import url(./filter.css);
 
 body.is-development-env .navbar {

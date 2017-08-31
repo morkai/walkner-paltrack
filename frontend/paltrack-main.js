@@ -28,7 +28,8 @@
       'app/core/layouts/PrintLayout',
       'app/core/layouts/BlankLayout',
       'app/core/views/NavbarView',
-      'app/core/views/LogInFormView',
+      'app/core/views/FormView',
+      'app/users/views/LogInFormView',
       'app/reports/views/CurrentBalanceBarView',
       'app/time',
       'app/paltrack-routes',
@@ -59,6 +60,7 @@
     PrintLayout,
     BlankLayout,
     NavbarView,
+    FormView,
     LogInFormView,
     CurrentBalanceBarView)
   {
@@ -178,6 +180,8 @@
         startBroker = null;
       }
 
+      var userReloadTimer = null;
+
       broker.subscribe('i18n.reloaded', function(message)
       {
         localStorage.setItem('LOCALE', message.newLocale);
@@ -186,14 +190,39 @@
 
       broker.subscribe('user.reloaded', function()
       {
-        var currentRequest = router.getCurrentRequest();
+        if (userReloadTimer)
+        {
+          clearTimeout(userReloadTimer);
+        }
 
-        viewport.render();
-        router.dispatch(currentRequest.url);
+        userReloadTimer = setTimeout(function()
+        {
+          userReloadTimer = null;
+
+          if (viewport.currentPage && viewport.currentPage.view instanceof FormView)
+          {
+            return;
+          }
+
+          var currentRequest = router.getCurrentRequest();
+
+          viewport.render();
+
+          if (!/^\/production\//.test(currentRequest.path))
+          {
+            router.dispatch(currentRequest.url);
+          }
+        }, 1);
       });
 
       broker.subscribe('user.loggedIn', function()
       {
+        if (userReloadTimer)
+        {
+          clearTimeout(userReloadTimer);
+          userReloadTimer = null;
+        }
+
         var req = router.getCurrentRequest();
 
         if (!req)
@@ -201,11 +230,17 @@
           return;
         }
 
+        viewport.render();
+
         var url = req.url;
 
-        if (url === '/' && typeof window.DASHBOARD_URL_AFTER_LOG_IN === 'string')
+        if (url === '/' || url === '/login')
         {
-          router.replace(window.DASHBOARD_URL_AFTER_LOG_IN);
+          router.dispatch(window.DASHBOARD_URL_AFTER_LOG_IN || '/');
+        }
+        else
+        {
+          router.dispatch(url);
         }
       });
 

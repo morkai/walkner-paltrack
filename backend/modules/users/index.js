@@ -9,7 +9,8 @@ exports.DEFAULT_CONFIG = {
   expressId: 'express',
   userId: 'user',
   sioId: 'sio',
-  mailSenderId: 'mail/sender'
+  mailSenderId: 'mail/sender',
+  browsePrivileges: ['USERS:VIEW']
 };
 
 exports.start = function startUsersModule(app, usersModule)

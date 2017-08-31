@@ -4,6 +4,7 @@ define([
   'underscore',
   'app/ZeroClipboard',
   'app/i18n',
+  'app/user',
   'app/core/Model',
   'app/core/views/FormView',
   'app/data/privileges',
@@ -13,6 +14,7 @@ define([
   _,
   ZeroClipboard,
   t,
+  user,
   Model,
   FormView,
   privileges,
@@ -43,6 +45,10 @@ define([
     initialize: function()
     {
       FormView.prototype.initialize.call(this);
+
+      this.accountMode = this.options.editMode
+        && user.data._id === this.model.id
+        && !user.isAllowedTo('USERS:MANAGE');
     },
 
     destroy: function()
@@ -64,12 +70,15 @@ define([
         this.$('input[type="password"]').attr('required', true);
       }
 
-      this.$id('partner').select2({
-        width: '100%',
-        allowClear: true
-      });
+      if (!this.accountMode)
+      {
+        this.$id('partner').select2({
+          width: '100%',
+          allowClear: true
+        });
 
-      this.setUpPrivilegesControls();
+        this.setUpPrivilegesControls();
+      }
     },
 
     setUpPrivilegesControls: function()
@@ -153,7 +162,8 @@ define([
     {
       return _.extend(FormView.prototype.serialize.call(this), {
         partners: partners.toJSON(),
-        privileges: privileges
+        privileges: privileges,
+        accountMode: this.accountMode
       });
     },
 
@@ -183,6 +193,19 @@ define([
       }
 
       return formData;
+    },
+
+    handleFailure: function(jqXhr)
+    {
+      var json = jqXhr.responseJSON;
+      var error = json && json.error && json.error.message;
+
+      if (t.has('users', 'FORM:ERROR:' + error))
+      {
+        return this.showErrorMessage(t('users', 'FORM:ERROR:' + error));
+      }
+
+      return FormView.prototype.handleFailure.apply(this, arguments);
     }
 
   });

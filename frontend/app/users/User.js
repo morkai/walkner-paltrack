@@ -1,9 +1,11 @@
 // Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
-  '../core/Model'
+  '../core/Model',
+  '../data/partners'
 ], function(
-  Model
+  Model,
+  partners
 ) {
   'use strict';
 
@@ -44,6 +46,19 @@ define([
       var firstName = this.get('firstName') || '';
 
       return lastName.length && firstName.length ? (lastName + ' ' + firstName) : this.get('login');
+    },
+
+    serialize: function()
+    {
+      var obj = this.toJSON();
+      var partner = partners.get(obj.partner);
+
+      if (partner)
+      {
+        obj.partner = partner.getLabel();
+      }
+
+      return obj;
     }
 
   });

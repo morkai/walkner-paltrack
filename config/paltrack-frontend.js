@@ -18,6 +18,7 @@ exports.modules = [
   'settings',
   'events',
   'pubsub',
+  'mail/sender',
   'user',
   'express',
   'users',
@@ -120,6 +121,21 @@ exports.user = {
     'REGISTRY:VIEW', 'REGISTRY:MANAGE', 'REGISTRY:CHECK',
     'REPORTS:VIEW'
   ]
+};
+
+exports['mail/sender'] = {
+  smtp: {
+    host: 'smtp.localhost',
+    port: 465,
+    secureConnection: true,
+    auth: {
+      user: 'support@localhost',
+      pass: '123456'
+    },
+    maxConnections: 2
+  },
+  from: 'support+paltrack@localhost',
+  replyTo: 'support+paltrack@localhost'
 };
 
 exports.updater = {

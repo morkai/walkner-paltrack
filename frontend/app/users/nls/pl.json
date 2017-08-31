@@ -11,6 +11,7 @@
 
   "PAGE_ACTION:add": "Dodaj użytkownika",
   "PAGE_ACTION:edit": "Edytuj użytkownika",
+  "PAGE_ACTION:editAccount": "Edytuj konto",
   "PAGE_ACTION:delete": "Usuń użytkownika",
 
   "PANEL:TITLE:details": "Szczegóły użytkownika",
@@ -39,6 +40,8 @@
   "FORM:ERROR:passwordMismatch": "Podane hasła nie pasują do siebie.",
   "FORM:ERROR:addFailure": "Nie udało się dodać użytkownika :-(",
   "FORM:ERROR:editFailure": "Nie udało się zmodyfikować użytkownika :-(",
+  "FORM:ERROR:LOGIN_USED": "Podany login jest już wykorzystany w innym aktywnym koncie :-(",
+  "FORM:HELP:password": "Podaj hasła tylko wtedy, gdy chcesz je zmienić.",
   "NO_DATA:partner": "Wszyscy",
 
   "ACTION_FORM:DIALOG_TITLE:delete": "Potwierdzenie usunięcia użytkownika",
@@ -60,5 +63,21 @@
   "PRIVILEGE:REGISTRY:CHECK": "Rejestr: sprawdzanie",
 
   "select2:placeholder": "Szukaj po nazwisku...",
-  "select2:users:system": "System"
+  "select2:users:system": "System",
+
+  "LOG_IN_FORM:TITLE:LOG_IN": "Logowanie do systemu",
+  "LOG_IN_FORM:TITLE:RESET": "Resetowanie hasła",
+  "LOG_IN_FORM:LABEL:LOGIN": "Login",
+  "LOG_IN_FORM:LABEL:PASSWORD": "Hasło",
+  "LOG_IN_FORM:LABEL:NEW_PASSWORD": "Nowe hasło",
+  "LOG_IN_FORM:SUBMIT:LOG_IN": "Zaloguj się",
+  "LOG_IN_FORM:SUBMIT:RESET": "Resetuj hasło",
+  "LOG_IN_FORM:LINK:LOG_IN": "Zaloguj się",
+  "LOG_IN_FORM:LINK:RESET": "Zapomniałeś hasła?",
+  "LOG_IN_FORM:RESET:SUBJECT": "Reset hasła w systemie Paltrack",
+  "LOG_IN_FORM:RESET:TEXT": "Otrzymaliśmy żądanie zresetowania hasła do Twojego konta w systemie Paltrack.\n\nAby potwierdzić zmianę hasła, kliknij poniższy odnośnik:\n{resetUrl}\n\nOdnośnik aktywny będzie tylko przez 24 godziny. Po tym czasie możesz wygenerować nowe żądanie wchodząc do systemu: {appUrl}\n\nJeżeli nie chcesz zmianiać swojego hasła, zignoruj tego e-maila.\n\nW razie jakichkolwiek problemów skonsultuj się ze swoim przełożonym lub administratorem systemu.",
+  "LOG_IN_FORM:RESET:MSG:NOT_FOUND": "Użytkownik o podanym loginie nie istnieje :-(",
+  "LOG_IN_FORM:RESET:MSG:INVALID_EMAIL": "Użytkownik nie ma ustawionego adresu e-mail :-(",
+  "LOG_IN_FORM:RESET:MSG:FAILURE": "Nie udało się zresetować hasła :-(",
+  "LOG_IN_FORM:RESET:MSG:SUCCESS": "Sprawdź swojego e-maila!"
 }

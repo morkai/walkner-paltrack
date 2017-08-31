@@ -2,12 +2,10 @@
 
 define([
   'app/i18n',
-  'app/core/views/ListView',
-  './decorateUser'
+  'app/core/views/ListView'
 ], function(
   t,
-  ListView,
-  decorateUser
+  ListView
 ) {
   'use strict';
 
@@ -25,12 +23,7 @@ define([
       {id: 'firstName', className: 'is-min'},
       {id: 'email', className: 'is-min'},
       'partner'
-    ],
-
-    serializeRows: function()
-    {
-      return this.collection.map(decorateUser);
-    }
+    ]
 
   });
 });

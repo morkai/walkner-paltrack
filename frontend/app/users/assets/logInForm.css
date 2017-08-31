@@ -12,7 +12,11 @@
   display: none;
 }
 .logInForm > .message {
-  margin-top: 15px;
   font-size: 1.2em;
   line-height: 1.4;
 }
+.logInForm-links {
+  margin: 0;
+  text-align: right;
+}
+

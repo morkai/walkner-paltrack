@@ -3,12 +3,10 @@
 define([
   'app/i18n',
   'app/core/views/DetailsView',
-  './decorateUser',
   'app/users/templates/details'
 ], function(
   t,
   DetailsView,
-  decorateUser,
   detailsTemplate
 ) {
   'use strict';
@@ -19,9 +17,7 @@ define([
 
     localTopics: {
       'partners.synced': 'render'
-    },
-
-    serializeDetails: decorateUser
+    }
 
   });
 });

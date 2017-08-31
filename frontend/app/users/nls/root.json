@@ -12,6 +12,7 @@
 
     "PAGE_ACTION:add": "Add user",
     "PAGE_ACTION:edit": "Edit user",
+    "PAGE_ACTION:editAccount": "Edit account",
     "PAGE_ACTION:delete": "Delete user",
 
     "PANEL:TITLE:details": "User's details",
@@ -40,6 +41,8 @@
     "FORM:ERROR:passwordMismatch": "The specified password do not match.",
     "FORM:ERROR:addFailure": "Failed to add the user :-(",
     "FORM:ERROR:editFailure": "Failed to edit the user :-(",
+    "FORM:ERROR:LOGIN_USED": "The specified login is already used in another active account :-(",
+    "FORM:HELP:password": "Enter a new password only if you want to change the current password.",
     "NO_DATA:partner": "All",
 
     "ACTION_FORM:DIALOG_TITLE:delete": "User deletion confirmation",
@@ -61,7 +64,23 @@
     "PRIVILEGE:REGISTRY:CHECK": "Registry: check",
 
     "select2:placeholder": "Search by last name...",
-    "select2:users:system": "System"
+    "select2:users:system": "System",
+
+    "LOG_IN_FORM:TITLE:LOG_IN": "Log in form",
+    "LOG_IN_FORM:TITLE:RESET": "Password reset form",
+    "LOG_IN_FORM:LABEL:LOGIN": "Login",
+    "LOG_IN_FORM:LABEL:PASSWORD": "Password",
+    "LOG_IN_FORM:LABEL:NEW_PASSWORD": "New password",
+    "LOG_IN_FORM:SUBMIT:LOG_IN": "Log in",
+    "LOG_IN_FORM:SUBMIT:RESET": "Reset password",
+    "LOG_IN_FORM:LINK:LOG_IN": "Log in",
+    "LOG_IN_FORM:LINK:RESET": "Forgot your password?",
+    "LOG_IN_FORM:RESET:SUBJECT": "Paltrack password reset",
+    "LOG_IN_FORM:RESET:TEXT": "We've received a request to reset your Paltrack account password.\n\nTo change your password, please click this link:\n{resetUrl}\n\nPassword reset links are valid for only 24 hours. If the link expires, you will need to submit a new request here: {appUrl}\n\nIf you didn't request a change, please discregard this e-mail and your password will stay the same.\n\nContact your superior or Paltrack administrator if you need help or have questions.\n\nSincerely, Paltrack support team.",
+    "LOG_IN_FORM:RESET:MSG:NOT_FOUND": "User not found :-(",
+    "LOG_IN_FORM:RESET:MSG:INVALID_EMAIL": "User doesn't have an e-mail address :-(",
+    "LOG_IN_FORM:RESET:MSG:FAILURE": "Failed to reset the password :-(",
+    "LOG_IN_FORM:RESET:MSG:SUCCESS": "Check your e-mail!"
   },
   "pl": true
 }
