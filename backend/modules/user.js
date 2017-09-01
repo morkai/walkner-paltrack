@@ -21,7 +21,8 @@ exports.DEFAULT_CONFIG = {
   },
   guest: {},
   localAddresses: null,
-  loginFailureDelay: 1000
+  loginFailureDelay: 1000,
+  userInfoIdProperty: '_id'
 };
 
 exports.start = function startUserModule(app, module)
@@ -310,13 +311,18 @@ exports.start = function startUserModule(app, module)
         }
         else
         {
+          const User = app[module.config.mongooseId].model('User');
           const property = /^.*?@.*?\.[a-zA-Z]+$/.test(credentials.login) ? 'email' : 'login';
           const conditions = {
-            [property]: new RegExp('^' + _.escapeRegExp(credentials.login) + '$', 'i'),
-            active: true
+            [property]: new RegExp('^' + _.escapeRegExp(credentials.login) + '$', 'i')
           };
 
-          app[module.config.mongooseId].model('User').findOne(conditions, next);
+          if (User.schema.path('active'))
+          {
+            conditions.active = true;
+          }
+
+          User.findOne(conditions, next);
         }
       },
       function checkUserDataStep(err, userData)
@@ -378,14 +384,14 @@ exports.start = function startUserModule(app, module)
      * @type {{id: string, ip: string, label: string}}
      */
     const userInfo = {
-      id: null,
+      [module.config.userInfoIdProperty]: null,
       ip: '',
       label: ''
     };
 
     try
     {
-      userInfo.id = ObjectId.createFromHexString(String(userData._id || userData.id));
+      userInfo[module.config.userInfoIdProperty] = ObjectId.createFromHexString(String(userData._id || userData.id));
     }
     catch (err) {} // eslint-disable-line no-empty
 
