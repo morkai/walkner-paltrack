@@ -23,21 +23,11 @@ define([
 
     labelAttribute: 'login',
 
-    defaults: {
-      login: null,
-      email: null,
-      privileges: null,
-      partner: null,
-      firstName: null,
-      lastName: null
-    },
-
-    initialize: function()
+    defaults: function()
     {
-      if (!Array.isArray(this.get('privileges')))
-      {
-        this.set('privileges', []);
-      }
+      return {
+        privileges: []
+      };
     },
 
     getLabel: function()

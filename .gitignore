@@ -1,8 +1,8 @@
 .idea
-node_modules
-build
-frontend-build
-data/gdn/*.pdf
-config/development
-config/production
-config/vps
+/node_modules
+/build
+/config/development
+/config/vps
+/config/license.ed.private.pem
+/frontend/files
+/frontend-build/files

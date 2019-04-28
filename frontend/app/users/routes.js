@@ -1,18 +1,25 @@
 // Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
+  '../i18n',
+  '../broker',
   '../router',
   '../viewport',
   '../user',
+  '../core/View',
   '../core/util/showDeleteFormPage',
   './User',
   './UserCollection',
   './pages/LogInFormPage',
+  './util/userInfoPopover',
   'i18n!app/nls/users'
 ], function(
+  t,
+  broker,
   router,
   viewport,
   user,
+  View,
   showDeleteFormPage,
   User,
   UserCollection,
@@ -23,9 +30,17 @@ define([
   var canView = user.auth('USERS:VIEW');
   var canManage = user.auth('USERS:MANAGE');
 
-  router.map('/login', function()
+  router.map('/login', function(req)
   {
-    viewport.showPage(new LogInFormPage());
+    broker.publish('router.navigate', {
+      url: '/',
+      replace: true,
+      trigger: false
+    });
+
+    viewport.showPage(new LogInFormPage({
+      model: {unknown: req.query.unknown}
+    }));
   });
 
   router.map('/users', canView, function(req)
@@ -55,12 +70,15 @@ define([
     },
     function(req)
     {
-      viewport.loadPage(['app/users/pages/UserDetailsPage'], function(UserDetailsPage)
-      {
-        return new UserDetailsPage({
-          model: new User({_id: req.params.id})
-        });
-      });
+      viewport.loadPage(
+        ['app/users/pages/UserDetailsPage'],
+        function(UserDetailsPage)
+        {
+          return new UserDetailsPage({
+            model: new User({_id: req.params.id})
+          });
+        }
+      );
     }
   );
 
@@ -94,11 +112,10 @@ define([
     function(req)
     {
       viewport.loadPage(
-        ['app/core/pages/EditFormPage', 'app/users/views/UserFormView'],
-        function(EditFormPage, UserFormView)
+        ['app/users/pages/UserEditFormPage'],
+        function(UserEditFormPage)
         {
-          return new EditFormPage({
-            FormView: UserFormView,
+          return new UserEditFormPage({
             model: new User({_id: req.params.id})
           });
         }

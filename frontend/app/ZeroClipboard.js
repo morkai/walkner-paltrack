@@ -8,7 +8,7 @@ define([
   'use strict';
 
   ZeroClipboard.config({
-    moviePath: '/vendor/zeroclipboard/ZeroClipboard.swf',
+    swfPath: '/vendor/zeroclipboard/ZeroClipboard.swf',
     cacheBust: false,
     zIndex: 100
   });

@@ -8,7 +8,7 @@ define([
   'app/time',
   'app/core/views/FilterView',
   'app/core/util/idAndLabel',
-  'app/core/util/prepareDateRange',
+  'app/core/util/forms/dateTimeRange',
   'app/data/partners',
   'app/registry/templates/grnFilter'
 ], function(
@@ -19,7 +19,7 @@ define([
   time,
   FilterView,
   idAndLabel,
-  prepareDateRange,
+  dateTimeRange,
   partners,
   filterTemplate
 ) {
@@ -29,15 +29,11 @@ define([
 
     template: filterTemplate,
 
-    events: _.extend({}, FilterView.prototype.events, {
-      'click a[data-range]': function(e)
-      {
-        var dateRange = prepareDateRange(e.target.getAttribute('data-range'), false);
+    events: _.assign({
 
-        this.$id('from').val(dateRange.fromMoment.format('YYYY-MM-DD'));
-        this.$id('to').val(dateRange.toMoment.format('YYYY-MM-DD'));
-      }
-    }),
+      'click a[data-date-time-range]': dateTimeRange.handleRangeEvent
+
+    }, FilterView.prototype.events),
 
     firstPartnerProperty: 'receiver',
     secondPartnerProperty: 'supplier',
@@ -45,31 +41,17 @@ define([
     defaultFormData: {
       receiver: '',
       supplier: '',
-      from: '',
-      to: '',
       docNo: ''
     },
 
     termToForm: {
+      'date': dateTimeRange.rqlToForm,
       'receiver': function(propertyName, term, formData)
       {
         formData[propertyName] = term.args[1];
       },
       'supplier': 'receiver',
-      'docNo': 'receiver',
-      'date': function(propertyName, term, formData)
-      {
-        var value = time.format(term.args[1], 'YYYY-MM-DD');
-
-        if (term.name === 'lt')
-        {
-          formData.to = value;
-        }
-        else if (term.name === 'ge')
-        {
-          formData.from = value;
-        }
-      }
+      'docNo': 'receiver'
     },
 
     initialize: function()
@@ -79,10 +61,9 @@ define([
       this.on('filterChanged', this.onFilterChanged);
     },
 
-    serialize: function()
+    getTemplateData: function()
     {
       return {
-        idPrefix: this.idPrefix,
         firstPartnerProperty: this.firstPartnerProperty,
         secondPartnerProperty: this.secondPartnerProperty
       };
@@ -93,14 +74,14 @@ define([
       FilterView.prototype.afterRender.call(this);
 
       this.$id('receiver').select2({
-        width: '150px',
+        width: '250px',
         placeholder: ' ',
         allowClear: true,
         data: this.getReceivers()
       });
 
       this.$id('supplier').select2({
-        width: '150px',
+        width: '250px',
         placeholder: ' ',
         allowClear: true,
         data: this.getSuppliers()
@@ -110,22 +91,6 @@ define([
     focusFirstPartner: function()
     {
       this.$id(this.firstPartnerProperty).select2('focus');
-    },
-
-    focusEmptyDate: function()
-    {
-      if (!this.$id('from').val().trim().length)
-      {
-        this.$id('from').focus();
-      }
-      else if (!this.$id('to').val().trim().length)
-      {
-        this.$id('to').focus();
-      }
-      else
-      {
-        this.$('[type=submit]').focus();
-      }
     },
 
     getSuppliers: function()
@@ -142,9 +107,9 @@ define([
     {
       var receiver = this.$id('receiver').val();
       var supplier = this.$id('supplier').val();
-      var fromMoment = time.getMoment(this.$id('from').val(), 'YYYY-MM-DD');
-      var toMoment = time.getMoment(this.$id('to').val(), 'YYYY-MM-DD');
       var docNo = this.$id('docNo').val();
+
+      dateTimeRange.formToRql(this, selector);
 
       if (receiver)
       {
@@ -154,23 +119,6 @@ define([
       if (supplier)
       {
         selector.push({name: 'eq', args: ['supplier', supplier]});
-      }
-
-      if (fromMoment.isValid() && toMoment.isValid() && fromMoment.valueOf() === toMoment.valueOf())
-      {
-        toMoment.add(1, 'days');
-
-        this.$id('to').val(toMoment.format('YYYY-MM-DD'));
-      }
-
-      if (fromMoment.isValid())
-      {
-        selector.push({name: 'ge', args: ['date', fromMoment.valueOf()]});
-      }
-
-      if (toMoment.isValid())
-      {
-        selector.push({name: 'lt', args: ['date', toMoment.valueOf()]});
       }
 
       if (docNo.length)

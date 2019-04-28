@@ -67,7 +67,7 @@ define([
 
     afterRender: function()
     {
-      FormView.prototype.afterRender.call(this);
+      FormView.prototype.afterRender.apply(this, arguments);
 
       this.setUpSelect2();
       this.resetGoodsValidity();

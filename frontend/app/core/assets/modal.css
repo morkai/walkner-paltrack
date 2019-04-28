@@ -1,3 +1,6 @@
+.modal-open .modal {
+  overflow-y: scroll;
+}
 .modal-header {
   padding: 15px;
 }

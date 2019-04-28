@@ -38,6 +38,8 @@ define([
 
     this.currentLayoutName = null;
 
+    this.defaultLayoutName = null;
+
     this.currentPage = null;
 
     this.$dialog = null;
@@ -45,6 +47,8 @@ define([
     this.dialogQueue = [];
 
     this.currentDialog = null;
+
+    this.pageCounter = 0;
 
     this.closeDialog = this.closeDialog.bind(this);
 
@@ -102,8 +106,20 @@ define([
     this.$dialog.on('hidden.bs.modal', this.onDialogHidden.bind(this));
   };
 
+  Viewport.prototype.setDefaultLayout = function(name)
+  {
+    this.defaultLayoutName = name;
+
+    return this;
+  };
+
   Viewport.prototype.registerLayout = function(name, layoutFactory)
   {
+    if (!this.defaultLayoutName)
+    {
+      this.defaultLayoutName = name;
+    }
+
     this.layouts[name] = layoutFactory;
 
     return this;
@@ -119,32 +135,98 @@ define([
     }
 
     var viewport = this;
+    var pageCounter = ++this.pageCounter;
 
-    require([].concat(dependencies), function()
-    {
-      viewport.showPage(createPage.apply(null, arguments));
-      viewport.msg.loaded();
-    });
+    require(
+      [].concat(dependencies),
+      function()
+      {
+        if (pageCounter === viewport.pageCounter)
+        {
+          viewport.showPage(createPage.apply(null, arguments));
+        }
+
+        viewport.msg.loaded();
+      },
+      function(err)
+      {
+        if (pageCounter === viewport.pageCounter)
+        {
+          viewport.msg.loadingFailed();
+
+          viewport.broker.publish('viewport.page.loadingFailed', {
+            page: null,
+            xhr: {
+              status: 0,
+              responseText: err.stack || err.message
+            }
+          });
+        }
+      }
+    );
   };
 
   Viewport.prototype.showPage = function(page)
   {
-    var layoutName = _.result(page, 'layoutName');
+    var viewport = this;
+    var layoutName = viewport.defaultLayoutName;
 
-    if (!_.isObject(this.layouts[layoutName]))
+    if (typeof page.layoutName === 'string')
     {
-      throw new Error("Unknown layout: `" + layoutName + "`");
+      layoutName = page.layoutName;
+    }
+    else if (typeof page.layoutName === 'function')
+    {
+      layoutName = page.layoutName(viewport);
     }
 
-    var viewport = this;
+    if (!_.isObject(viewport.layouts[layoutName]))
+    {
+      throw new Error('Unknown layout: ' + layoutName);
+    }
+
+    ++viewport.pageCounter;
+
+    viewport.broker.publish('viewport.page.loading', {page: page});
+
+    if (_.isFunction(page.load))
+    {
+      page.load(when).then(onPageLoadSuccess, onPageLoadFailure);
+    }
+    else
+    {
+      when().then(onPageLoadSuccess, onPageLoadFailure);
+    }
 
     function when()
     {
-      return $.when.apply($, _.map(arguments, page.promised, page));
+      var requests = [];
+
+      for (var i = 0; i < arguments.length; ++i)
+      {
+        var request = arguments[i];
+
+        if (Array.isArray(request))
+        {
+          requests.push.apply(requests, request);
+        }
+        else
+        {
+          requests.push(request);
+        }
+      }
+
+      page.trigger('beforeLoad', page, requests);
+
+      return $.when.apply($, _.map(requests, page.promised, page));
     }
 
     function onPageLoadSuccess()
     {
+      viewport.broker.publish('viewport.page.loaded', {page: page});
+
+      page.trigger('afterLoad', page);
+
       if (viewport.currentPage !== null)
       {
         viewport.currentPage.remove();
@@ -183,22 +265,15 @@ define([
       {
         page.render();
       }
+
+      viewport.broker.publish('viewport.page.shown', page);
     }
 
-    function onPageLoadFailure()
+    function onPageLoadFailure(jqXhr)
     {
-      console.log('onPageLoadFailure');
-
       page.remove();
-    }
 
-    if (_.isFunction(page.load))
-    {
-      page.load(when).then(onPageLoadSuccess, onPageLoadFailure);
-    }
-    else
-    {
-      onPageLoadSuccess();
+      viewport.broker.publish('viewport.page.loadingFailed', {page: page, xhr: jqXhr});
     }
   };
 
@@ -211,6 +286,7 @@ define([
       return this;
     }
 
+    var triggerEvent = true;
     var afterRender = dialogView.afterRender;
     var viewport = this;
 
@@ -223,7 +299,12 @@ define([
         $modalBody.empty().append(dialogView.el);
       }
 
-      viewport.$dialog.modal('show');
+      if (triggerEvent)
+      {
+        triggerEvent = false;
+
+        viewport.$dialog.modal('show');
+      }
 
       if (_.isFunction(afterRender))
       {
@@ -264,12 +345,22 @@ define([
 
     this.$dialog.modal('hide');
 
-    if (e)
+    if (e && e.preventDefault)
     {
       e.preventDefault();
     }
 
     return this;
+  };
+
+  Viewport.prototype.closeDialogs = function(closeCurrent, filter)
+  {
+    this.dialogQueue = this.dialogQueue.filter(filter || closeCurrent);
+
+    if (typeof closeCurrent === 'function' && this.currentDialog && closeCurrent(this.currentDialog))
+    {
+      this.closeDialog();
+    }
   };
 
   Viewport.prototype.closeAllDialogs = function()
@@ -303,12 +394,18 @@ define([
     this.currentLayout = createNewLayout();
 
     this.setView(selector, this.currentLayout);
+    this.trigger('layout:change', this.currentLayoutName, this.currentLayout);
 
     return this.currentLayout;
   };
 
   Viewport.prototype.onDialogShown = function()
   {
+    if (!this.currentDialog)
+    {
+      return;
+    }
+
     this.currentDialog.$('[autofocus]').focus();
 
     if (_.isFunction(this.currentDialog.onDialogShown))
@@ -317,10 +414,17 @@ define([
     }
 
     this.broker.publish('viewport.dialog.shown', this.currentDialog);
+
+    this.currentDialog.trigger('dialog:shown');
   };
 
   Viewport.prototype.onDialogHidden = function()
   {
+    if (!this.currentDialog)
+    {
+      return;
+    }
+
     if (this.currentDialog.dialogClassName)
     {
       this.$dialog.removeClass(_.result(this.currentDialog, 'dialogClassName'));
@@ -328,9 +432,10 @@ define([
 
     if (_.isFunction(this.currentDialog.remove))
     {
+      this.currentDialog.trigger('dialog:hidden');
       this.currentDialog.remove();
 
-      this.broker.publish('viewport.dialog.hidden');
+      this.broker.publish('viewport.dialog.hidden', this.currentDialog);
     }
 
     this.currentDialog = null;

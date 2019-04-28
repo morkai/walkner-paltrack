@@ -1,11 +1,18 @@
 // Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
+  'underscore',
   'app/i18n'
 ], function(
+  _,
   t
 ) {
   'use strict';
+
+  function i18n(nlsDomain, key)
+  {
+    return t.bound(t.has(nlsDomain, key) ? nlsDomain : 'core', key);
+  }
 
   return function createPageBreadcrumbs(page, breadcrumbs)
   {
@@ -23,34 +30,81 @@ define([
         if (typeof breadcrumb === 'string')
         {
           return {
-            label: breadcrumb[0] === ':' ? t.bound(nlsDomain, 'BREADCRUMBS' + breadcrumb) : breadcrumb
+            label: breadcrumb[0] === ':' ? i18n(nlsDomain, 'BREADCRUMBS' + breadcrumb) : breadcrumb
           };
         }
 
         if (typeof breadcrumb.label === 'string' && breadcrumb.label[0] === ':')
         {
-          breadcrumb.label = t.bound(nlsDomain, 'BREADCRUMBS' + breadcrumb.label);
+          breadcrumb.label = i18n(nlsDomain, 'BREADCRUMBS' + breadcrumb.label);
         }
 
         return breadcrumb;
       });
     }
 
-    breadcrumbs.unshift({
-      label: t.bound(nlsDomain, 'BREADCRUMBS:browse'),
-      href: breadcrumbs.length ? modelOrCollection.genClientUrl('base') : null
-    });
+    if (page.browseBreadcrumb !== false)
+    {
+      var href = breadcrumbs.length ? modelOrCollection.genClientUrl('base') : null;
+
+      if (href)
+      {
+        var baseUrl = window.location.origin + window.location.pathname + href;
+        var recentUrl = _.find(JSON.parse(localStorage.WMES_RECENT_LOCATIONS || '[]'), function(recent)
+        {
+          if (recent.href.indexOf(baseUrl) !== 0)
+          {
+            return false;
+          }
+
+          var c = recent.href.charAt(baseUrl.length);
+
+          return c === '' || c === '?';
+        });
+
+        if (recentUrl)
+        {
+          var query = recentUrl.href.split('?')[1];
+
+          if (query)
+          {
+            if (href.indexOf('?') === -1)
+            {
+              href += '?' + query;
+            }
+            else
+            {
+              href += '&' + query;
+            }
+          }
+        }
+      }
+
+      breadcrumbs.unshift({
+        label: i18n(nlsDomain, _.result(page, 'browseBreadcrumb') || 'BREADCRUMBS:browse'),
+        href: href
+      });
+    }
 
     if (page.baseBreadcrumb === true)
     {
-      breadcrumbs.unshift(t.bound(nlsDomain, 'BREADCRUMBS:base'));
+      breadcrumbs.unshift(i18n(nlsDomain, 'BREADCRUMBS:base'));
     }
     else if (page.baseBreadcrumb)
     {
-      breadcrumbs.unshift({
-        label: t.bound(nlsDomain, 'BREADCRUMBS:base'),
-        href: page.baseBreadcrumb.toString()
-      });
+      var baseBreadcrumbs = _.result(page, 'baseBreadcrumb');
+
+      if (Array.isArray(baseBreadcrumbs))
+      {
+        breadcrumbs.unshift.apply(breadcrumbs, baseBreadcrumbs);
+      }
+      else
+      {
+        breadcrumbs.unshift({
+          label: i18n(nlsDomain, 'BREADCRUMBS:base'),
+          href: String(baseBreadcrumbs)
+        });
+      }
     }
 
     return breadcrumbs;

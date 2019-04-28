@@ -18,6 +18,7 @@ define([
   'use strict';
 
   var LOADING_MESSAGE_DELAY = 0;
+  var SAVING_MESSAGE_DELAY = 0;
 
   var MessagesView = View.extend({
 
@@ -52,6 +53,12 @@ define([
 
     /**
      * @private
+     * @type {jQuery|null}
+     */
+    this.$savingMessage = null;
+
+    /**
+     * @private
      * @type {number|null}
      */
     this.loadingTimer = null;
@@ -61,6 +68,18 @@ define([
      * @type {number}
      */
     this.loadingCounter = 0;
+
+    /**
+     * @private
+     * @type {number|null}
+     */
+    this.savingTimer = null;
+
+    /**
+     * @private
+     * @type {number}
+     */
+    this.savingCounter = 0;
 
     /**
      * @private
@@ -77,6 +96,16 @@ define([
      * @type {function}
      */
     this.loaded = this.loaded.bind(this);
+
+    /**
+     * @type {function}
+     */
+    this.saving = this.saving.bind(this);
+
+    /**
+     * @type {function}
+     */
+    this.saved = this.saved.bind(this);
   };
 
   MessagesView.prototype.destroy = function()
@@ -89,6 +118,14 @@ define([
       this.loadingTimer = null;
     }
 
+    this.$savingMessage = null;
+
+    if (this.savingTimer !== null)
+    {
+      clearTimeout(this.savingTimer);
+      this.savingTimer = null;
+    }
+
     if (this.hideTimers.length > 0)
     {
       this.hideTimers.forEach(clearTimeout);
@@ -99,14 +136,15 @@ define([
   };
 
   /**
-   * @param {object} options
+   * @param {Object} options
    * @returns {jQuery}
    */
   MessagesView.prototype.show = function(options)
   {
     var $message = $(messageTemplate({
       type: options.type || 'info',
-      text: options.text
+      text: options.text,
+      sticky: !!options.sticky
     }));
 
     this.$el.append($message.attr('data-view', this.idPrefix));
@@ -139,7 +177,7 @@ define([
   {
     if (!$message)
     {
-      $message = this.$('.message[data-view="' + this.idPrefix + '"]');
+      $message = this.$('.message[data-view="' + this.idPrefix + '"]:not(.message-sticky)');
 
       this.$loadingMessage = null;
     }
@@ -198,6 +236,7 @@ define([
 
     this.show({
       type: 'error',
+      time: 10000,
       text: _.isString(text) ? text : t('core', 'MSG:LOADING_FAILURE')
     });
   };
@@ -216,8 +255,7 @@ define([
 
     this.$loadingMessage = this.show({
       type: 'warning',
-      text: '<i class="fa fa-spinner fa-spin"></i><span>'
-        + t('core', 'MSG:LOADING') + '</span>',
+      text: t('core', 'MSG:LOADING'),
       immediate: true
     });
   };
@@ -250,8 +288,88 @@ define([
     }
   };
 
+  MessagesView.prototype.saving = function()
+  {
+    this.savingCounter += 1;
+
+    if (this.savingTimer === null)
+    {
+      this.savingTimer = setTimeout(
+        this.showSavingMessage.bind(this),
+        SAVING_MESSAGE_DELAY
+      );
+    }
+  };
+
+  MessagesView.prototype.saved = function()
+  {
+    this.hideSavingMessage();
+  };
+
+  /**
+   * @param {string} [text]
+   */
+  MessagesView.prototype.savingFailed = function(text)
+  {
+    this.hideSavingMessage();
+
+    this.show({
+      type: 'error',
+      time: 10000,
+      text: _.isString(text) ? text : t('core', 'MSG:SAVING_FAILURE')
+    });
+  };
+
   /**
    * @private
+   */
+  MessagesView.prototype.showSavingMessage = function()
+  {
+    this.savingTimer = null;
+
+    if (this.$savingMessage !== null)
+    {
+      return;
+    }
+
+    this.$savingMessage = this.show({
+      type: 'warning',
+      text: t('core', 'MSG:SAVING'),
+      immediate: true
+    });
+  };
+
+  /**
+   * @private
+   */
+  MessagesView.prototype.hideSavingMessage = function()
+  {
+    if (this.savingCounter > 0)
+    {
+      --this.savingCounter;
+    }
+
+    if (this.savingCounter !== 0)
+    {
+      return;
+    }
+
+    if (this.savingTimer !== null)
+    {
+      clearTimeout(this.savingTimer);
+      this.savingTimer = null;
+    }
+
+    if (this.$savingMessage !== null)
+    {
+      this.hide(this.$savingMessage);
+      this.$savingMessage = null;
+    }
+  };
+
+  /**
+   * @private
+   * @param {jQuery} $newMessage
    */
   MessagesView.prototype.moveDown = function($newMessage)
   {

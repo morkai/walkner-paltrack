@@ -4,12 +4,16 @@ define([
   'underscore',
   'app/i18n',
   'app/user',
+  'app/time',
+  'app/viewport',
   '../View',
   'app/core/templates/navbar'
 ], function(
   _,
-  i18n,
+  t,
   user,
+  time,
+  viewport,
   View,
   navbarTemplate
 ) {
@@ -18,7 +22,7 @@ define([
   /**
    * @constructor
    * @extends {app.core.View}
-   * @param {object} [options]
+   * @param {Object} [options]
    */
   var NavbarView = View.extend({
 
@@ -44,10 +48,20 @@ define([
       'socket.disconnected': function onSocketDisconnected()
       {
         this.setConnectionStatus('offline');
+      },
+      'viewport.page.shown': function()
+      {
+        this.collapse();
+      },
+      'viewport.dialog.shown': function()
+      {
+        this.collapse();
       }
     },
 
     events: {
+      'shown.bs.collapse': function() { this.broker.publish('navbar.shown'); },
+      'hidden.bs.collapse': function() { this.broker.publish('navbar.hidden'); },
       'click .disabled a': function onDisabledEntryClick(e)
       {
         e.preventDefault();
@@ -69,17 +83,6 @@ define([
         e.preventDefault();
 
         this.trigger('logOut');
-      },
-      'click .navbar-feedback': function onFeedbackClick(e)
-      {
-        e.preventDefault();
-
-        e.target.disabled = true;
-
-        this.trigger('feedback', function()
-        {
-          e.target.disabled = false;
-        });
       },
       'mouseup .btn[data-href]': function(e)
       {
@@ -156,6 +159,12 @@ define([
      */
     this.$activeNavItem = null;
 
+    /**
+     * @private
+     * @type {string}
+     */
+    this.lastSearchPhrase = '';
+
     this.activateNavItem(this.getModuleNameFromPath(this.options.currentPath));
   };
 
@@ -167,10 +176,18 @@ define([
 
   NavbarView.prototype.afterRender = function()
   {
+    this.broker.publish('navbar.render', {
+      view: this
+    });
+
     this.selectActiveNavItem();
     this.setConnectionStatus(this.socket.isConnected() ? 'online' : 'offline');
     this.hideNotAllowedEntries();
     this.hideEmptyEntries();
+
+    this.broker.publish('navbar.rendered', {
+      view: this
+    });
   };
 
   NavbarView.prototype.serialize = function()
@@ -201,7 +218,7 @@ define([
    */
   NavbarView.prototype.changeLocale = function(newLocale)
   {
-    i18n.reload(newLocale);
+    t.reload(newLocale);
   };
 
   NavbarView.prototype.setConnectionStatus = function(status)
@@ -232,8 +249,6 @@ define([
    */
   NavbarView.prototype.getModuleNameFromLi = function(liEl, useAnchor, clientModule)
   {
-    /*jshint -W116*/
-
     var module = liEl.dataset[clientModule ? 'clientModule' : 'module'];
 
     if (module === undefined && !useAnchor)
@@ -309,7 +324,12 @@ define([
 
     var $newActiveNavItem = this.navItems[this.activeModuleName];
 
-    if (_.isUndefined($newActiveNavItem))
+    if (!$newActiveNavItem && viewport.currentPage && viewport.currentPage.navbarModuleName)
+    {
+      $newActiveNavItem = this.navItems[viewport.currentPage.navbarModuleName];
+    }
+
+    if (!$newActiveNavItem)
     {
       this.$activeNavItem = null;
     }
@@ -382,18 +402,19 @@ define([
 
       if (!checkSpecial($li))
       {
-        $li.toggle(isEntryVisible($li) && hideChildEntries($li));
+        $li[0].style.display = isEntryVisible($li) && hideChildEntries($li) ? '' : 'none';
       }
     });
 
     dropdownHeaders.forEach(function($li)
     {
-      $li.toggle(navbarView.hasVisibleSiblings($li, 'next'));
+      $li[0].style.display = navbarView.hasVisibleSiblings($li, 'next') ? '' : 'none';
     });
 
     dividers.forEach(function($li)
     {
-      $li.toggle(navbarView.hasVisibleSiblings($li, 'prev') && navbarView.hasVisibleSiblings($li, 'next'));
+      $li[0].style.display = navbarView.hasVisibleSiblings($li, 'prev') && navbarView.hasVisibleSiblings($li, 'next')
+        ? '' : 'none';
     });
 
     this.$('.btn[data-privilege]').each(function()
@@ -418,7 +439,7 @@ define([
         {
           var entryVisible = isEntryVisible($li) && hideChildEntries($li);
 
-          $li.toggle(entryVisible);
+          $li[0].style.display = entryVisible ? '' : 'none';
 
           anyVisible = anyVisible || entryVisible;
         }
@@ -514,7 +535,7 @@ define([
 
       if (!visible)
       {
-        $dropdownMenu.parent().hide();
+        $dropdownMenu.parent()[0].style.display = 'none';
       }
     });
   };
@@ -529,8 +550,6 @@ define([
 
     this.$('li[data-online]').each(function()
     {
-      /*jshint -W015*/
-
       var $li = navbarView.$(this);
 
       if (typeof $li.attr('data-disabled') !== 'undefined')
@@ -541,11 +560,11 @@ define([
       switch ($li.attr('data-online'))
       {
         case 'show':
-          $li[online ? 'show' : 'hide']();
+          $li[0].style.display = online ? '' : 'none';
           break;
 
         case 'hide':
-          $li[online ? 'hide' : 'show']();
+          $li[0].style.display = online ? 'none' : '';
           break;
 
         default:
@@ -553,6 +572,14 @@ define([
           break;
       }
     });
+  };
+
+  NavbarView.prototype.collapse = function()
+  {
+    if (this.$('.navbar-collapse.in').length)
+    {
+      this.$('.navbar-toggle').click();
+    }
   };
 
   return NavbarView;

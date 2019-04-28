@@ -41,7 +41,7 @@
   "use strict";
 
   var _subArrayRegexp = /^\[\d+?\]/,
-    _subObjectRegexp = /^[a-zA-Z_][a-zA-Z_0-9]*/,
+    _subObjectRegexp = /^[a-zA-Z0-9_][a-zA-Z_0-9]*/,
     _arrayItemRegexp = /\[[0-9]+?\]$/,
     _lastIndexedArrayRegexp = /(.*)(\[)([0-9]*)(\])$/,
     _arrayOfArraysRegexp = /\[([0-9]+)\]\[([0-9]+)\]/g,
@@ -54,8 +54,9 @@
    * @param delimiter
    * @param nodeCallback
    * @param useIdIfEmptyName
+   * @param shouldClean
    */
-  function js2form(rootNode, data, delimiter, nodeCallback, useIdIfEmptyName)
+  function js2form(rootNode, data, delimiter, nodeCallback, useIdIfEmptyName, shouldClean)
   {
     if (arguments.length < 3) delimiter = '.';
     if (arguments.length < 4) nodeCallback = null;
@@ -65,7 +66,7 @@
       formFieldsByName;
 
     fieldValues = object2array(data);
-    formFieldsByName = getFields(rootNode, useIdIfEmptyName, delimiter, {}, true);
+    formFieldsByName = getFields(rootNode, useIdIfEmptyName, delimiter, {}, shouldClean !== false);
 
     for (var i = 0; i < fieldValues.length; i++)
     {
@@ -94,7 +95,7 @@
         if (String(field[i].value) == String(value)) field[i].checked = true;
       }
     }
-    else if (_inputOrTextareaRegexp.test(field.nodeName))
+    else if (_inputOrTextareaRegexp.test(field.nodeName) && field.type !== 'file')
     {
       field.value = value;
     }

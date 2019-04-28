@@ -2,16 +2,30 @@
 
 define([
   'underscore',
+  'h5.rql/index',
+  'app/core/util/transliterate',
   'app/i18n',
   'app/user'
 ], function(
   _,
+  rql,
+  transliterate,
   t,
   user
 ) {
   'use strict';
 
-  function userToData(user)
+  function formatText(noPersonnelId, user, name, query) // eslint-disable-line no-unused-vars
+  {
+    if (!noPersonnelId && user.personellId)
+    {
+      name += ' (' + user.personellId + ')';
+    }
+
+    return name;
+  }
+
+  function userToData(user, textFormatter, query)
   {
     if (user.id && user.text)
     {
@@ -20,11 +34,11 @@ define([
 
     var name = user.lastName && user.firstName
       ? (user.lastName + ' ' + user.firstName)
-      : (user.name || '-');
+      : (user.name || user.login || user._id);
 
     return {
       id: user._id,
-      text: name,
+      text: textFormatter(user, name, query),
       user: user
     };
   }
@@ -49,9 +63,104 @@ define([
     };
   }
 
-  return function setUpUserSelect2($input, options)
+  function filterDuplicates(users)
   {
-    $input.select2(_.extend({
+    var map = {};
+
+    _.forEach(users, function(newUser)
+    {
+      var searchName = newUser.searchName;
+      var mappedUser = map[searchName];
+
+      // First
+      if (!mappedUser)
+      {
+        map[searchName] = newUser;
+
+        return;
+      }
+
+      // Prefer active users
+      if (mappedUser.active === false && newUser.active === true)
+      {
+        map[searchName] = newUser;
+
+        return;
+      }
+
+      if (mappedUser.active === true && newUser.active === false)
+      {
+        return;
+      }
+
+      // Prefer users with e-mail
+      if (!mappedUser.email && newUser.email)
+      {
+        map[searchName] = newUser;
+
+        return;
+      }
+
+      if (mappedUser.email && !newUser.email)
+      {
+        return;
+      }
+
+      // Prefer users from PHILIPS
+      if (mappedUser.company !== 'PHILIPS' && newUser.company === 'PHILIPS')
+      {
+        map[searchName] = newUser;
+      }
+    });
+
+    return _.values(map);
+  }
+
+  function createDefaultRqlQuery(rql, term, options)
+  {
+    term = term.trim();
+
+    var property = /^[0-9]+$/.test(term) ? 'personellId' : 'searchName';
+
+    if (property === 'searchName')
+    {
+      term = setUpUserSelect2.transliterate(term);
+    }
+
+    var rqlQuery = {
+      fields: {},
+      sort: {},
+      limit: 20,
+      skip: 0,
+      selector: {
+        name: 'and',
+        args: [
+          {name: 'regex', args: [property, '^' + term]}
+        ]
+      }
+    };
+
+    if (options.activeOnly)
+    {
+      rqlQuery.selector.args.push({name: 'eq', args: ['active', true]});
+    }
+
+    rqlQuery.sort[property] = 1;
+
+    return rql.Query.fromObject(rqlQuery);
+  }
+
+  function setUpUserSelect2($input, options)
+  {
+    if (!options)
+    {
+      options = {};
+    }
+
+    var rqlQueryProvider = options.rqlQueryProvider ? options.rqlQueryProvider : createDefaultRqlQuery;
+    var userFilter = options.userFilter ? options.userFilter : null;
+
+    $input.select2(_.assign({
       openOnEnter: null,
       allowClear: true,
       minimumInputLength: 3,
@@ -61,7 +170,7 @@ define([
         quietMillis: 300,
         url: function(term)
         {
-          return '/users?sort(lastName)&limit(20)&regex(lastName,' + encodeURIComponent('^' + term.trim()) + ',i)';
+          return '/users' + '?' + rqlQueryProvider(rql, term, options);
         },
         results: function(data, page, query)
         {
@@ -70,15 +179,19 @@ define([
             return user.text.toLowerCase().indexOf(query.term.toLowerCase()) !== -1;
           });
 
-          var users = results.concat(data.collection || []);
+          var users = results.concat(filterDuplicates(data.collection || []));
 
-          if (options && options.userFilter)
+          if (userFilter)
           {
-            users = users.filter(options.userFilter);
+            users = users.filter(userFilter);
           }
 
+          var textFormatter = options.textFormatter || formatText.bind(null, !!options.noPersonnelId);
+
           return {
-            results: users.map(userToData).sort(function(a, b) { return a.text.localeCompare(b.text); })
+            results: users
+              .map(function(user) { return userToData(user, textFormatter, query); })
+              .sort(function(a, b) { return a.text.localeCompare(b.text); })
           };
         }
       }
@@ -99,14 +212,20 @@ define([
     {
       var req = options.view.ajax({
         type: 'GET',
-        url: '/users?_id=' + userId
+        url: '/users?_id=in=(' + userId + ')'
       });
 
       req.done(function(res)
       {
         if (res.collection && res.collection.length)
         {
-          $input.select2('data', userToData(res.collection[0]));
+          var textFormatter = options.textFormatter || formatText.bind(null, !!options.noPersonnelId);
+          var data = res.collection.map(function(userData)
+          {
+            return userToData(userData, textFormatter);
+          });
+
+          $input.select2('data', options.multiple ? data : data[0]);
 
           if (options.onDataLoaded)
           {
@@ -117,5 +236,14 @@ define([
     }
 
     return $input;
+  }
+
+  setUpUserSelect2.defaultRqlQueryProvider = createDefaultRqlQuery;
+  setUpUserSelect2.filterDuplicates = filterDuplicates;
+  setUpUserSelect2.transliterate = function(value)
+  {
+    return transliterate(value.toUpperCase()).replace(/[^A-Z0-9]+/g, '');
   };
+
+  return setUpUserSelect2;
 });

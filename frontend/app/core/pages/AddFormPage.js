@@ -32,6 +32,11 @@ define([
       this.defineViews();
     },
 
+    load: function(when)
+    {
+      return when(this.model.id ? this.model.fetch(this.options.fetchOptions) : null);
+    },
+
     defineModels: function()
     {
 
@@ -52,14 +57,15 @@ define([
     getFormViewOptions: function()
     {
       var model = this.model;
+      var nlsDomain = model.getNlsDomain();
       var options = {
         editMode: false,
         model: model,
         formMethod: 'POST',
         formAction: model.url(),
-        formActionText: t(model.getNlsDomain(), 'FORM:ACTION:add'),
-        failureText: t(model.getNlsDomain(), 'FORM:ERROR:addFailure'),
-        panelTitleText: t(model.getNlsDomain(), 'PANEL:TITLE:addForm')
+        formActionText: t(t.has(nlsDomain, 'FORM:ACTION:add') ? nlsDomain : 'core', 'FORM:ACTION:add'),
+        failureText: t(t.has(nlsDomain, 'FORM:ERROR:addFailure') ? nlsDomain : 'core', 'FORM:ERROR:addFailure'),
+        panelTitleText: t(t.has(nlsDomain, 'PANEL:TITLE:addForm') ? nlsDomain : 'core', 'PANEL:TITLE:addForm')
       };
 
       if (typeof this.options.formTemplate === 'function')

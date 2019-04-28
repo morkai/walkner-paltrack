@@ -102,9 +102,9 @@ define([
   };
 
   /**
-   * @param {function|object|string|Array.<object|string>} breadcrumbs
+   * @param {function|Object|string|Array.<Object|string>} breadcrumbs
    * @param {string|function} breadcrumbs.label
-   * @param {object} [context]
+   * @param {Object} [context]
    * @returns {PrintLayout}
    */
   PrintLayout.prototype.setBreadcrumbs = function(breadcrumbs, context)
@@ -163,17 +163,19 @@ define([
     var $bd = $pageTpl.find('.print-page-bd');
     var $bdContainer = $('<div class="print-page-bd-container"></div>');
 
+    $pageTpl.toggleClass('is-landscape', !!$pageView.landscape);
+
     if (_.isFunction($pageView.hdLeft))
     {
-      $hd.find('.print-page-hd-left').text($pageView.hdLeft.call($pageView));
+      $hd.find('.print-page-hd-left').html($pageView.hdLeft.call($pageView));
     }
 
     if (_.isFunction($pageView.hdRight))
     {
-      $hd.find('.print-page-hd-right').text($pageView.hdRight.call($pageView));
+      $hd.find('.print-page-hd-right').html($pageView.hdRight.call($pageView));
     }
 
-    var pageHeight = 1122;
+    var pageHeight = $pageView.landscape ? 792 : 1122;
     var pageMargins = {
       top: parseFloat($pageTpl.css('padding-top')) || 0,
       left: parseFloat($pageTpl.css('padding-left')) || 0,

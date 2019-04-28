@@ -2,16 +2,20 @@
 
 define([
   'underscore',
+  'jquery',
   'app/i18n',
   'app/viewport',
   '../views/ActionFormView',
-  'app/core/templates/jumpAction'
+  'app/core/templates/jumpAction',
+  'app/core/templates/exportAction'
 ], function(
   _,
+  $,
   t,
   viewport,
   ActionFormView,
-  jumpActionTemplate
+  jumpActionTemplate,
+  exportActionTemplate
 ) {
   'use strict';
 
@@ -35,38 +39,33 @@ define([
     return collection.length;
   }
 
-  function onJumpFormSubmit(page, collection, $form)
+  function onJumpFormSubmit(page, collection, $form, options)
   {
-    var ridEl = $form[0].rid;
+    var phraseEl = $form[0].phrase;
 
-    if (ridEl.readOnly)
+    if (phraseEl.readOnly)
     {
       return false;
     }
 
-    var rid = parseInt(ridEl.value, 10);
+    var phrase = phraseEl.value;
 
-    if (isNaN(rid) || rid <= 0)
-    {
-      ridEl.value = '';
-
-      return false;
-    }
-
-    ridEl.readOnly = true;
-    ridEl.value = rid;
+    phraseEl.readOnly = true;
 
     var $iconEl = $form.find('.fa').removeClass('fa-search').addClass('fa-spinner fa-spin');
 
-    var req = page.ajax({
+    var req = page.ajax(options.mode === 'rid' ? {
       url: _.result(collection, 'url') + ';rid',
-      data: {rid: rid}
+      data: {rid: phrase}
+    } : {
+      method: 'HEAD',
+      url: _.result(collection, 'url') + '/' + phrase
     });
 
     req.done(function(modelId)
     {
       page.broker.publish('router.navigate', {
-        url: collection.genClientUrl() + '/' + modelId,
+        url: collection.genClientUrl() + '/' + (modelId || phrase),
         trigger: true
       });
     });
@@ -76,23 +75,64 @@ define([
       viewport.msg.show({
         type: 'error',
         time: 2000,
-        text: t(collection.getNlsDomain(), 'MSG:jump:404', {rid: rid})
+        text: i18n(collection, 'MSG:jump:404', {rid: phrase})
       });
 
       $iconEl.removeClass('fa-spinner fa-spin').addClass('fa-search');
 
-      ridEl.readOnly = false;
-      ridEl.select();
+      phraseEl.readOnly = false;
+      phraseEl.select();
     });
 
     return false;
+  }
+
+  function exportXlsx(url)
+  {
+    var $msg = viewport.msg.show({
+      type: 'warning',
+      text: t('core', 'MSG:EXPORTING'),
+      sticky: true
+    });
+
+    var req = $.ajax({
+      url: url
+    });
+
+    req.fail(function()
+    {
+      viewport.msg.show({
+        type: 'error',
+        time: 2500,
+        text: t('core', 'MSG:EXPORTING_FAILURE')
+      });
+    });
+
+    req.done(function(res)
+    {
+      window.open('/express/exports/' + res);
+    });
+
+    req.always(function()
+    {
+      viewport.msg.hide($msg);
+    });
+
+    return false;
+  }
+
+  function i18n(model, key, data)
+  {
+    var nlsDomain = model.getNlsDomain();
+
+    return t.bound(t.has(nlsDomain, key) ? nlsDomain : 'core', key, data);
   }
 
   return {
     add: function(collection, privilege)
     {
       return {
-        label: t.bound(collection.getNlsDomain(), 'PAGE_ACTION:add'),
+        label: i18n(collection, 'PAGE_ACTION:add'),
         icon: 'plus',
         href: collection.genClientUrl('add'),
         privileges: resolvePrivileges(collection, privilege)
@@ -101,7 +141,7 @@ define([
     edit: function(model, privilege)
     {
       return {
-        label: t.bound(model.getNlsDomain(), 'PAGE_ACTION:edit'),
+        label: i18n(model, 'PAGE_ACTION:edit'),
         icon: 'edit',
         href: model.genClientUrl('edit'),
         privileges: resolvePrivileges(model, privilege)
@@ -115,7 +155,7 @@ define([
       }
 
       return {
-        label: t.bound(model.getNlsDomain(), 'PAGE_ACTION:delete'),
+        label: i18n(model, 'PAGE_ACTION:delete'),
         icon: 'times',
         href: model.genClientUrl('delete'),
         privileges: resolvePrivileges(model, privilege),
@@ -135,47 +175,103 @@ define([
     },
     export: function(layout, page, collection, privilege)
     {
-      page.listenTo(collection, 'sync', function()
-      {
-        var totalCount = getTotalCount(collection);
-        var $export = layout.$('.page-actions .export')
-          .attr('href', _.result(collection, 'url') + ';export?' + collection.rqlQuery)
-          .toggleClass('disabled', !totalCount)
-          .removeClass('btn-default btn-warning');
+      var options = {
+        layout: layout,
+        page: page,
+        collection: collection,
+        privilege: privilege,
+        maxCount: 60000
+      };
 
-        if (totalCount >= 10000)
+      if (arguments.length === 1)
+      {
+        _.assign(options, layout);
+      }
+
+      var template = function()
+      {
+        var totalCount = getTotalCount(options.collection);
+        var url = _.result(options.collection, 'url') + ';export.${format}?' + options.collection.rqlQuery;
+        var formats = [
+          {
+            type: 'csv',
+            href: url.replace('${format}', 'csv')
+          }
+        ];
+
+        if (window.XLSX_EXPORT && totalCount < (options.maxCount / 2))
         {
-          $export.removeClass('btn-default').addClass('btn-warning');
+          formats.push({
+            type: 'xlsx',
+            href: url.replace('${format}', 'xlsx')
+          });
         }
-        else
-        {
-          $export.removeClass('btn-warning').addClass('btn-default');
-        }
+
+        return exportActionTemplate({
+          type: totalCount >= (options.maxCount / 2)
+            ? 'danger'
+            : totalCount >= (options.maxCount / 4) ? 'warning' : 'default',
+          formats: formats,
+          disabled: totalCount >= options.maxCount || totalCount === 0,
+          label: options.label || i18n(options.collection, 'PAGE_ACTION:export')
+        });
+      };
+
+      options.page.listenTo(options.collection, 'sync', function()
+      {
+        options.layout.$('.page-actions-export').replaceWith(template());
+
+        afterRender(options.layout.$('.page-actions-export'));
       });
 
       return {
-        label: t.bound(collection.getNlsDomain(), 'PAGE_ACTION:export'),
-        icon: 'download',
-        type: getTotalCount(collection) >= 10000 ? 'warning' : 'default',
-        href: _.result(collection, 'url') + ';export?' + collection.rqlQuery,
-        privileges: resolvePrivileges(collection, privilege, 'VIEW'),
-        className: 'export' + (collection.length ? '' : ' disabled')
+        template: template,
+        privileges: resolvePrivileges(options.collection, options.privilege, 'VIEW'),
+        callback: options.callback,
+        afterRender: afterRender
       };
+
+      function afterRender($container)
+      {
+        var $xlsx = $container.find('a[data-export-type="xlsx"]');
+
+        if (!$xlsx.length)
+        {
+          return;
+        }
+
+        var href = $xlsx.prop('href');
+
+        $xlsx.prop('href', 'javascript:void(0)'); // eslint-disable-line no-script-url
+
+        $xlsx.on('click', function(e)
+        {
+          e.preventDefault();
+
+          exportXlsx(href);
+        });
+      }
     },
-    jump: function(page, collection)
+    exportXlsx: exportXlsx,
+    jump: function(page, collection, options)
     {
+      options = _.assign({mode: 'rid', pattern: '^ *[0-9]+ *$', autoFocus: !window.IS_MOBILE}, options);
+
       return {
         template: function()
         {
           return jumpActionTemplate({
-            nlsDomain: collection.getNlsDomain()
+            title: options.title || i18n(collection, 'PAGE_ACTION:jump:title'),
+            placeholder: options.placeholder || i18n(collection, 'PAGE_ACTION:jump:placeholder'),
+            autoFocus: options.autoFocus,
+            pattern: options.pattern
           });
         },
         afterRender: function($action)
         {
           var $form = $action.find('form');
 
-          $form.submit(onJumpFormSubmit.bind(null, page, collection, $form));
+          $form.submit(onJumpFormSubmit.bind(null, page, collection, $form, options));
         }
       };
     }

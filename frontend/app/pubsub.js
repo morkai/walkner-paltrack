@@ -11,6 +11,7 @@ define([
  * @param {function(new:h5.pubsub.MessageBroker)} MessageBroker
  * @param {h5.pubsub.Broker} broker
  * @param {Socket} socket
+ * @returns {h5.pubsub.Broker}
  */
 function(
   _,
@@ -97,9 +98,16 @@ function(
     }
   });
 
-  socket.on('pubsub.message', function(topic, message)
+  socket.on('pubsub.message', function(topic, message, meta)
   {
-    pubsub.publish(topic, message, {remote: true});
+    meta.remote = true;
+
+    if (meta.json && typeof message === 'string')
+    {
+      message = JSON.parse(message);
+    }
+
+    pubsub.publish(topic, message, meta);
   });
 
   function onSocketSubscribe(topics, err, notAllowedTopics)

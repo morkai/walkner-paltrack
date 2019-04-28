@@ -1,5 +1,6 @@
 'use strict';
 
+const fs = require('fs-extra');
 const mongodb = require('./paltrack-mongodb');
 
 try
@@ -12,17 +13,18 @@ catch (err) {}
 
 exports.id = 'paltrack-frontend';
 
+Object.assign(exports, require('./paltrack-common'));
+
 exports.modules = [
   'updater',
-  'mongoose',
+  {id: 'h5-mongoose', name: 'mongoose'},
   'settings',
   'events',
   'pubsub',
   'mail/sender',
   'user',
-  'express',
+  {id: 'h5-express', name: 'express'},
   'users',
-  'feedback',
   'partners',
   'palletKinds',
   'registry',
@@ -30,35 +32,19 @@ exports.modules = [
   'sio'
 ];
 
-exports.mainJsFile = 'paltrack-main.js';
-exports.mainCssFile = 'assets/paltrack-main.css';
-
-exports.dashboardUrlAfterLogIn = '/';
-
-exports.dictionaryModules = {
-  partners: 'PARTNERS',
-  palletKinds: 'PALLET_KINDS'
-};
-
 exports.events = {
   collection: function(app) { return app.mongoose.model('Event').collection; },
   insertDelay: 1000,
   topics: {
     debug: [
-      'app.started',
-      'users.login', 'users.logout',
-      '*.added', '*.edited'
+      '*.added', '*.edited',
     ],
-    info: [
-      'events.**'
-    ],
+    info: [],
     warning: [
-      'users.loginFailure',
-      '*.deleted',
-      'registry.*.edited', 'registry.*.deleted'
+      '*.deleted'
     ],
     error: [
-
+      'app.started'
     ]
   }
 };
@@ -68,33 +54,41 @@ exports.httpServer = {
   port: 80
 };
 
+exports.httpsServer = {
+  host: '0.0.0.0',
+  port: 443,
+  key: `${__dirname}/privatekey.pem`,
+  cert: `${__dirname}/certificate.pem`
+};
+
+exports.sio = {
+  httpServerIds: ['httpServer'],
+  socketIo: {
+    pingInterval: 10000,
+    pingTimeout: 5000
+  }
+};
+
 exports.pubsub = {
-  statsPublishInterval: 10000,
+  statsPublishInterval: 60000,
   republishTopics: [
-    'events.saved',
-    '*.added', '*.edited', '*.deleted', '*.synced',
-    'updater.newVersion',
-    'settings.updated.**',
-    'registry.*.added', 'registry.*.edited', 'registry.*.deleted', 'registry.*.checked.**',
-    'balance.daily.**', 'balance.current.*'
+    'dictionaries.updated',
+    '*.added', '*.edited', '*.deleted', '*.synced'
   ]
 };
 
 exports.mongoose = {
   uri: mongodb.uri,
-  options: mongodb,
+  mongoClient: Object.assign(mongodb.mongoClient, {
+    poolSize: 10
+  }),
   maxConnectTries: 10,
-  connectAttemptDelay: 500,
-  models: [
-    'setting', 'event', 'user', 'passwordResetRequest', 'feedback',
-    'partner', 'palletKind',
-    'grn', 'gdn', 'ob', 'dailyBalance'
-  ]
+  connectAttemptDelay: 500
 };
 
 exports.express = {
-  staticPath: __dirname + '/../frontend',
-  staticBuildPath: __dirname + '/../frontend-build',
+  staticPath: `${__dirname}/../frontend`,
+  staticBuildPath: `${__dirname}/../frontend-build`,
   sessionCookieKey: 'paltrack.sid',
   sessionCookie: {
     httpOnly: true,
@@ -102,29 +96,36 @@ exports.express = {
     maxAge: 3600 * 24 * 30 * 1000
   },
   sessionStore: {
-    touchInterval: 3600 * 8 * 1000,
-    touchChance: 0
+    touchInterval: 10 * 60 * 1000,
+    touchChance: 0,
+    gcInterval: 8 * 3600,
+    cacheInMemory: false
   },
   cookieSecret: '1ee7\\/\\/alkner-paltrack',
   ejsAmdHelpers: {
-    t: 'app/i18n'
+    _: 'underscore',
+    $: 'jquery',
+    t: 'app/i18n',
+    time: 'app/time',
+    user: 'app/user',
+    forms: 'app/core/util/forms'
   },
   title: 'PalTrack',
-  jsonBody: {limit: '1mb'}
-};
-
-exports.user = {
-  privileges: [
-    'USERS:VIEW', 'USERS:MANAGE',
-    'EVENTS:VIEW', 'EVENTS:MANAGE',
-    'DICTIONARIES:VIEW', 'DICTIONARIES:MANAGE',
-    'REGISTRY:VIEW', 'REGISTRY:MANAGE', 'REGISTRY:CHECK',
-    'REPORTS:VIEW'
+  jsonBody: {limit: '1mb'},
+  routes: [
+    require('../backend/routes/core')
   ]
 };
 
 exports.users = {
   browsePrivileges: ['USER']
+};
+
+exports.user = {
+  privileges: [
+    'DICTIONARIES:VIEW', 'DICTIONARIES:MANAGE',
+    'REPORTS:VIEW'
+  ]
 };
 
 exports['mail/sender'] = {
@@ -143,20 +144,31 @@ exports['mail/sender'] = {
 };
 
 exports.updater = {
-  manifestPath: __dirname + '/paltrack-manifest.appcache',
-  packageJsonPath: __dirname + '/../package.json',
+  manifestPath: `${__dirname}/paltrack-manifest.appcache`,
+  packageJsonPath: `${__dirname}/../package.json`,
   restartDelay: 5000,
   pull: {
     exe: 'git.exe',
-    cwd: __dirname + '/../',
+    cwd: `${__dirname}/../`,
     timeout: 30000
   },
   versionsKey: 'paltrack',
   manifests: [
     {
+      frontendVersionKey: 'frontend',
       path: '/manifest.appcache',
-      mainJsFile: exports.mainJsFile,
-      mainCssFile: exports.mainCssFile
+      mainJsFile: '/paltrack-main.js',
+      mainCssFile: '/assets/paltrack-main.css',
+      template: fs.readFileSync(`${__dirname}/paltrack-manifest.appcache`, 'utf8'),
+      frontendAppData: {
+        XLSX_EXPORT: process.platform === 'win32',
+        CORS_PING_URL: 'https://test.wmes.pl/ping',
+        DASHBOARD_URL_AFTER_LOG_IN: '/'
+      },
+      dictionaryModules: {
+        partners: 'PARTNERS',
+        palletKinds: 'PALLET_KINDS'
+      }
     }
   ]
 };

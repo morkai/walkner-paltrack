@@ -7,6 +7,7 @@ define([
   'h5.rql/specialTerms',
   'app/i18n',
   'app/core/View',
+  'app/core/util',
   'app/core/util/buttonGroup',
   'app/core/templates/filterLimit',
   'select2'
@@ -17,6 +18,7 @@ define([
   specialTerms,
   t,
   View,
+  util,
   buttonGroup,
   filterLimitTemplate
 ) {
@@ -46,17 +48,17 @@ define([
     {
       var view = this;
 
-      return {
-        idPrefix: this.idPrefix,
-        renderLimit: function()
+      return _.assign(View.prototype.serialize.apply(view, arguments), {
+        renderLimit: function(templateData)
         {
-          return filterLimitTemplate({
+          return filterLimitTemplate(_.assign({
             idPrefix: view.idPrefix,
             min: view.minLimit,
-            max: view.maxLimit
-          });
+            max: view.maxLimit,
+            hidden: false
+          }, templateData));
         }
-      };
+      });
     },
 
     toggleButtonGroup: function(groupName)
@@ -90,7 +92,9 @@ define([
       {
         this.collapsed = !this.collapsed;
 
-        this.$el.toggleClass('is-collapsed', this.collapsed);
+        this.$el
+          .toggleClass('is-collapsed', this.collapsed)
+          .toggleClass('is-expanded', !this.collapsed);
       }
 
       this.$toggleFilter.find('span').text(t('core', 'filter:' + (this.collapsed ? 'show' : 'hide')));
@@ -102,7 +106,7 @@ define([
     serializeQueryToForm: function()
     {
       var rqlQuery = this.model.rqlQuery;
-      var formData = _.extend({}, _.result(this, 'defaultFormData'), {
+      var formData = _.assign({}, _.result(this, 'defaultFormData'), {
         limit: rqlQuery.limit < 5 ? 5 : (rqlQuery.limit > 100 ? 100 : rqlQuery.limit)
       });
 
@@ -138,17 +142,34 @@ define([
       }
     },
 
+    isValid: function()
+    {
+      return true;
+    },
+
     changeFilter: function()
     {
+      if (!this.isValid())
+      {
+        return;
+      }
+
       var rqlQuery = this.model.rqlQuery;
       var selector = [];
+      var $limit = this.$id('limit');
 
       this.copyPopulateTerms(selector);
       this.serializeFormToQuery(selector, rqlQuery);
 
+      this.trigger('filtering', selector, rqlQuery);
+
       rqlQuery.selector = {name: 'and', args: selector};
       rqlQuery.skip = 0;
-      rqlQuery.limit = Math.min(Math.max(parseInt(this.$id('limit').val(), 10) || 15, this.minLimit), this.maxLimit);
+
+      if ($limit.length)
+      {
+        rqlQuery.limit = Math.min(Math.max(parseInt(this.$id('limit').val(), 10) || 15, this.minLimit), this.maxLimit);
+      }
 
       this.trigger('filterChanged', rqlQuery);
     },
@@ -164,12 +185,12 @@ define([
       });
     },
 
-    serializeFormToQuery: function(selector, rqlQuery)
+    serializeFormToQuery: function(selector, rqlQuery) // eslint-disable-line no-unused-vars
     {
-      /*jshint unused:false*/
+
     },
 
-    serializeRegexTerm: function(selector, property, maxLength, replaceRe, ignoreCase)
+    serializeRegexTerm: function(selector, property, maxLength, replaceRe, ignoreCase, startAnchor)
     {
       var $el = this.$id(property.replace(/\./g, '-'));
       var value = $el.val().trim();
@@ -205,14 +226,23 @@ define([
         args.push('i');
       }
 
-      args[1] = args[1].replace(/[-[\]{}()*+!<=:?.\/\\^$|#\s,]/g, '\\$&');
+      args[1] = util.escapeRegExp(args[1]);
 
       if (value.length === maxLength)
       {
         args[1] = '^' + args[1] + '$';
       }
+      else if (startAnchor)
+      {
+        args[1] = '^' + args[1];
+      }
 
       selector.push({name: 'regex', args: args});
+    },
+
+    unescapeRegExp: function(string)
+    {
+      return util.unescapeRegExp(string, true);
     }
 
   });

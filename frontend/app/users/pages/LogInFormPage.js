@@ -21,7 +21,28 @@ define([
 
     initialize: function()
     {
-      this.view = new LogInFormView();
+      this.view = new LogInFormView({
+        model: this.model
+      });
+    },
+
+    afterRender: function()
+    {
+      if (window.ENV === 'development')
+      {
+        return;
+      }
+
+      var location = window.location;
+
+      if (location.protocol === 'http:')
+      {
+        location.protocol = 'https:';
+      }
+      else if (location.hostname === 'ket.wmes.walkner.pl')
+      {
+        location.hostname = 'ket.wmes.pl';
+      }
     }
 
   });

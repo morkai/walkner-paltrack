@@ -4,6 +4,8 @@
 {
   'use strict';
 
+  window.WMES_APP_ID = 'main';
+
   window.requireApp = requireApp;
 
   function requireApp()
@@ -36,7 +38,8 @@
       'bootstrap',
       'moment-lang/' + window.appLocale,
       'select2-lang/' + window.appLocale,
-      'i18n!app/nls/core'
+      'i18n!app/nls/core',
+      'i18n!app/nls/users'
     ], startApp);
   }
 
@@ -64,7 +67,7 @@
     LogInFormView,
     CurrentBalanceBarView)
   {
-    var startBroker = null;
+    var startBroker = broker.sandbox();
 
     socket.connect();
 
@@ -74,7 +77,8 @@
       dataType: 'json',
       accepts: {
         json: 'application/json',
-        text: 'text/plain'
+        text: 'text/plain',
+        html: 'text/html'
       },
       contentType: 'application/json'
     });
@@ -106,23 +110,21 @@
       return new BlankLayout();
     });
 
+    broker.subscribe('page.titleChanged', function(newTitle)
+    {
+      newTitle.unshift(i18n('core', 'TITLE'));
+
+      document.title = newTitle.reverse().join(' < ');
+    });
+
     if (navigator.onLine)
     {
-      startBroker = broker.sandbox();
-
       startBroker.subscribe('socket.connected', function()
       {
         startBroker.subscribe('user.reloaded', doStartApp);
       });
 
       startBroker.subscribe('socket.connectFailed', doStartApp);
-
-      broker.subscribe('page.titleChanged', function(newTitle)
-      {
-        newTitle.unshift(i18n('core', 'TITLE'));
-
-        document.title = newTitle.reverse().join(' < ');
-      });
     }
     else
     {
@@ -174,18 +176,13 @@
 
     function doStartApp()
     {
-      if (startBroker !== null)
-      {
-        startBroker.destroy();
-        startBroker = null;
-      }
-
       var userReloadTimer = null;
 
       broker.subscribe('i18n.reloaded', function(message)
       {
         localStorage.setItem('LOCALE', message.newLocale);
-        viewport.render();
+
+        window.location.reload();
       });
 
       broker.subscribe('user.reloaded', function()
@@ -199,19 +196,16 @@
         {
           userReloadTimer = null;
 
-          if (viewport.currentPage && viewport.currentPage.view instanceof FormView)
+          if (user.isReloadLocked()
+            || (viewport.currentPage && viewport.currentPage.view instanceof FormView))
           {
             return;
           }
 
-          var currentRequest = router.getCurrentRequest();
+          var url = window.location.hash.replace(/^#/, '/');
 
           viewport.render();
-
-          if (!/^\/production\//.test(currentRequest.path))
-          {
-            router.dispatch(currentRequest.url);
-          }
+          router.dispatch(url);
         }, 1);
       });
 
@@ -252,23 +246,28 @@
           time: 2500
         });
 
-        broker.publish('router.navigate', {
-          url: '/',
-          trigger: true
-        });
+        setTimeout(function()
+        {
+          broker.publish('router.navigate', {
+            url: '/',
+            trigger: true
+          });
+        }, 1);
       });
 
-      if (window.ENV === 'development')
+      if (typeof window.onPageShown === 'function')
       {
-        broker.subscribe('socket.connected', function()
-        {
-          window.location.reload();
-        });
+        broker.subscribe('viewport.page.shown', window.onPageShown);
       }
 
       domReady(function()
       {
-        $('#app-loading').fadeOut(function() { $(this).remove(); });
+        startBroker.subscribe('viewport.page.shown', reveal);
+
+        if (window.ENV)
+        {
+          document.body.classList.add('is-' + window.ENV + '-env');
+        }
 
         Backbone.history.start({
           root: '/',
@@ -276,6 +275,18 @@
           pushState: false
         });
       });
+
+      function reveal()
+      {
+        if (startBroker !== null)
+        {
+          startBroker.destroy();
+          startBroker = null;
+        }
+
+        $('#app-loading').remove();
+        $('body').removeClass('is-loading');
+      }
     }
   }
 })();

@@ -3,26 +3,19 @@
 define([
   '../router',
   '../viewport',
-  '../user',
-  './EventCollection',
-  'i18n!app/nls/events'
+  '../user'
 ], function(
   router,
   viewport,
-  user,
-  EventCollection
+  user
 ) {
   'use strict';
 
   router.map('/events', user.auth('EVENTS:VIEW'), function(req)
   {
-    viewport.loadPage('app/events/pages/EventListPage', function(EventListPage)
+    viewport.loadPage(['app/events/pages/EventListPage', 'i18n!app/nls/events'], function(EventListPage)
     {
-      return new EventListPage({
-        collection: new EventCollection(null, {
-          rqlQuery: req.rql
-        })
-      });
+      return new EventListPage({rql: req.rql});
     });
   });
 });

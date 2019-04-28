@@ -12,11 +12,18 @@
   display: none;
 }
 .logInForm > .message {
+  margin-bottom: 15px;
   font-size: 1.2em;
   line-height: 1.4;
+  text-align: justify;
 }
 .logInForm-links {
+  display: flex;
   margin: 0;
-  text-align: right;
 }
-
+.logInForm-links .btn-link {
+  margin-left: auto;
+}
+.logInForm-links .logInForm-links-office365 {
+  margin-left: 0;
+}

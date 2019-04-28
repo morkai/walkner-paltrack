@@ -8,7 +8,7 @@ define([
   'app/time',
   'app/core/views/FilterView',
   'app/core/util/idAndLabel',
-  'app/core/util/prepareDateRange',
+  'app/core/util/forms/dateTimeRange',
   'app/data/partners',
   'app/registry/templates/obFilter'
 ], function(
@@ -19,7 +19,7 @@ define([
   time,
   FilterView,
   idAndLabel,
-  prepareDateRange,
+  dateTimeRange,
   partners,
   filterTemplate
 ) {
@@ -29,39 +29,21 @@ define([
 
     template: filterTemplate,
 
-    events: _.extend({}, FilterView.prototype.events, {
-      'click a[data-range]': function(e)
-      {
-        var dateRange = prepareDateRange(e.target.getAttribute('data-range'), false);
+    events: _.assign({
 
-        this.$id('from').val(dateRange.fromMoment.format('YYYY-MM-DD'));
-        this.$id('to').val(dateRange.toMoment.format('YYYY-MM-DD'));
-      }
-    }),
+      'click a[data-date-time-range]': dateTimeRange.handleRangeEvent
+
+    }, FilterView.prototype.events),
 
     defaultFormData: {
-      partner: '',
-      from: '',
-      to: ''
+      partner: ''
     },
 
     termToForm: {
+      'date': dateTimeRange.rqlToForm,
       'partner': function(propertyName, term, formData)
       {
         formData[propertyName] = term.args[1];
-      },
-      'date': function(propertyName, term, formData)
-      {
-        var value = time.format(term.args[1], 'YYYY-MM-DD');
-
-        if (term.name === 'lt')
-        {
-          formData.to = value;
-        }
-        else if (term.name === 'ge')
-        {
-          formData.from = value;
-        }
       }
     },
 
@@ -79,7 +61,7 @@ define([
       if (!user.data.partner)
       {
         this.$id('partner').select2({
-          width: '150px',
+          width: '250px',
           placeholder: ' ',
           allowClear: true,
           data: partners.map(idAndLabel)
@@ -90,29 +72,12 @@ define([
     serializeFormToQuery: function(selector)
     {
       var partner = this.$id('partner').val();
-      var fromMoment = time.getMoment(this.$id('from').val(), 'YYYY-MM-DD');
-      var toMoment = time.getMoment(this.$id('to').val(), 'YYYY-MM-DD');
+
+      dateTimeRange.formToRql(this, selector);
 
       if (partner)
       {
         selector.push({name: 'eq', args: ['partner', partner]});
-      }
-
-      if (fromMoment.isValid() && toMoment.isValid() && fromMoment.valueOf() === toMoment.valueOf())
-      {
-        toMoment.add(1, 'days');
-
-        this.$id('to').val(toMoment.format('YYYY-MM-DD'));
-      }
-
-      if (fromMoment.isValid())
-      {
-        selector.push({name: 'ge', args: ['date', fromMoment.valueOf()]});
-      }
-
-      if (toMoment.isValid())
-      {
-        selector.push({name: 'lt', args: ['date', toMoment.valueOf()]});
       }
     },
 

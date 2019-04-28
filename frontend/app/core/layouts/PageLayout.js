@@ -4,12 +4,14 @@ define([
   'underscore',
   'jquery',
   'app/user',
+  'app/i18n',
   '../View',
   'app/core/templates/pageLayout'
 ], function(
   _,
   $,
   user,
+  t,
   View,
   template
 ) {
@@ -27,6 +29,7 @@ define([
   {
     this.model = {
       id: null,
+      className: null,
       actions: [],
       breadcrumbs: [],
       title: null
@@ -70,7 +73,8 @@ define([
 
   PageLayout.prototype.serialize = function()
   {
-    return _.extend(View.prototype.serialize.call(this), {
+    return _.assign(View.prototype.serialize.call(this), {
+      hdHidden: !!this.options.hdHidden,
       version: this.options.version,
       changelogUrl: this.options.changelogUrl
     });
@@ -95,17 +99,23 @@ define([
     {
       this.setId(this.model.id);
     }
+
+    if (this.model.className !== null)
+    {
+      this.setClassName(this.model.className);
+    }
   };
 
   PageLayout.prototype.reset = function()
   {
     this.setId(null);
+    this.setClassName(null);
 
     this.model.title = null;
 
     if (this.$header)
     {
-      this.$header.hide();
+      this.$header[0].style.display = 'none';
     }
 
     if (this.$breadcrumbs)
@@ -130,6 +140,11 @@ define([
     if (page.pageId)
     {
       this.setId(page.pageId);
+    }
+
+    if (page.pageClassName)
+    {
+      this.setClassName(page.pageClassName);
     }
 
     if (page.breadcrumbs)
@@ -168,10 +183,31 @@ define([
   };
 
   /**
-   * @param {function|object|string|Array.<object|string>} breadcrumbs
+   * @param {string} className
+   * @returns {PageLayout}
+   */
+  PageLayout.prototype.setClassName = function(className)
+  {
+    if (this.model.className)
+    {
+      document.body.classList.remove(this.model.className);
+    }
+
+    if (this.isRendered() && className)
+    {
+      document.body.classList.add(className);
+    }
+
+    this.model.className = className;
+
+    return this;
+  };
+
+  /**
+   * @param {function|Object|string|Array.<Object|string>} breadcrumbs
    * @param {string|function} breadcrumbs.label
    * @param {string} [breadcrumbs.href]
-   * @param {object} [context]
+   * @param {Object} [context]
    * @returns {PageLayout}
    */
   PageLayout.prototype.setBreadcrumbs = function(breadcrumbs, context)
@@ -220,7 +256,7 @@ define([
 
   /**
    * @param {function|string|Array.<string>} title
-   * @param {object} [context]
+   * @param {Object} [context]
    * @returns {PageLayout}
    */
   PageLayout.prototype.setTitle = function(title, context)
@@ -248,13 +284,13 @@ define([
   };
 
   /**
-   * @param {function|object|string|Array.<object|string>} actions
+   * @param {function|Object|string|Array.<Object|string>} actions
    * @param {string} actions.label
    * @param {string} [actions.type]
    * @param {string} [actions.icon]
    * @param {string} [actions.href]
    * @param {function} [actions.callback]
-   * @param {object} [context]
+   * @param {Object} [context]
    * @returns {PageLayout}
    */
   PageLayout.prototype.setActions = function(actions, context)
@@ -279,7 +315,7 @@ define([
       actions = [actions];
     }
 
-    this.model.actions = actions.map(this.prepareAction.bind(this));
+    this.model.actions = actions.map(this.prepareAction.bind(this, context));
 
     if (this.$actions)
     {
@@ -299,15 +335,23 @@ define([
 
   /**
    * @private
-   * @param action
+   * @param {*} context
+   * @param {Object} action
    * @returns {*}
    */
-  PageLayout.prototype.prepareAction = function(action)
+  PageLayout.prototype.prepareAction = function(context, action)
   {
     if (action.prepared)
     {
       return action;
     }
+
+    if (!action.id)
+    {
+      action.id = '';
+    }
+
+    action.idPrefix = context && context.idPrefix || '';
 
     if (typeof action.href === 'string')
     {
@@ -328,12 +372,10 @@ define([
       action.icon = 'fa-' + action.icon.split(' ').join(' fa-');
     }
 
-    if (typeof action.className !== 'string')
+    if (!action.className)
     {
       action.className = '';
     }
-
-    action.className = 'btn btn-' + (action.type || 'default') + ' ' + action.className;
 
     action.prepared = true;
 
@@ -354,7 +396,11 @@ define([
 
       html += '<li>';
 
-      if (i === l - 1 || !breadcrumb.href)
+      if (typeof breadcrumb.template === 'function')
+      {
+        html += breadcrumb.template(breadcrumb, this);
+      }
+      else if (!breadcrumb.href)
       {
         html += breadcrumb.label;
       }
@@ -365,9 +411,11 @@ define([
     }
 
     this.$breadcrumbs.html(html);
-    this.$header.show();
+    this.$header[0].style.display = '';
 
     this.adjustBreadcrumbsPosition();
+
+    this.trigger('afterRender:breadcrumbs');
   };
 
   /**
@@ -402,7 +450,14 @@ define([
       {
         if (_.isFunction(privileges))
         {
-          if (!privileges())
+          if (!privileges(user))
+          {
+            continue;
+          }
+        }
+        else if (Array.isArray(privileges))
+        {
+          if (!user.isAllowedTo.apply(user, privileges))
           {
             continue;
           }
@@ -427,17 +482,31 @@ define([
 
       if (typeof action.template === 'function')
       {
-        html += action.template(action);
+        html += action.template(action, this);
       }
       else
       {
+        var className = 'btn btn-' + (action.type || 'default') + ' ' + _.result(action, 'className');
+
+        if (action.disabled)
+        {
+          className += ' disabled';
+        }
+
+        var id = _.result(action, 'id');
+
+        if (id && id.charAt(0) === '-')
+        {
+          id = action.idPrefix + id;
+        }
+
         if (action.href === null)
         {
-          html += '<button class="' + action.className + '">';
+          html += '<button id="' + id + '" class="' + className + '">';
         }
         else
         {
-          html += '<a class="' + action.className + '" href="' + action.href + '">';
+          html += '<a id="' + id + '" class="' + className + '" href="' + action.href + '">';
         }
 
         if (typeof action.icon === 'string')
@@ -445,7 +514,12 @@ define([
           html += '<i class="fa ' + action.icon + '"></i>';
         }
 
-        html += '<span>' + action.label + '</span>' + (action.href ? '</a>' : '</button>');
+        if (action.label)
+        {
+          html += '<span>' + action.label + '</span>';
+        }
+
+        html += action.href ? '</a>' : '</button>';
       }
     }
 
@@ -463,7 +537,9 @@ define([
       afterRender[i]($actions.filter('li[data-index="' + i + '"]'), actions[i]);
     });
 
-    this.$header.show();
+    this.$header[0].style.display = '';
+
+    this.trigger('afterRender:actions');
   };
 
   /**

@@ -1,49 +1,93 @@
 // Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
 
 define([
+  'app/viewport',
+  'app/i18n',
   'app/core/util/bindLoadingMessage',
-  'app/core/pages/FilteredListPage',
+  'app/core/View',
+  '../EventCollection',
   '../EventTypeCollection',
   '../views/EventListView',
-  '../views/EventFilterView'
+  '../views/EventFilterView',
+  'app/core/templates/listPage'
 ], function(
+  viewport,
+  t,
   bindLoadingMessage,
-  FilteredListPage,
+  View,
+  EventCollection,
   EventTypeCollection,
   EventListView,
-  EventFilterView
+  EventFilterView,
+  listPageTemplate
 ) {
   'use strict';
 
-  return FilteredListPage.extend({
+  return View.extend({
 
-    ListView: EventListView,
+    template: listPageTemplate,
 
-    actions: null,
+    layoutName: 'page',
+
+    pageId: 'eventList',
+
+    breadcrumbs: [
+      t.bound('events', 'BREADCRUMBS:browse')
+    ],
+
+    initialize: function()
+    {
+      this.defineModels();
+      this.defineViews();
+
+      this.setView('.filter-container', this.filterView);
+      this.setView('.list-container', this.listView);
+    },
 
     defineModels: function()
     {
-      FilteredListPage.prototype.defineModels.call(this);
+      this.eventList = bindLoadingMessage(
+        new EventCollection(null, {rqlQuery: this.options.rql}), this
+      );
 
-      this.eventTypes = bindLoadingMessage(new EventTypeCollection(), this, 'MSG:LOADING_TYPES_FAILURE');
+      this.eventTypes = bindLoadingMessage(
+        new EventTypeCollection(), this, 'MSG:LOADING_TYPES_FAILURE'
+      );
     },
 
-    createFilterView: function()
+    defineViews: function()
     {
-      return new EventFilterView({
+      this.listView = new EventListView({collection: this.eventList});
+
+      this.filterView = new EventFilterView({
         model: {
-          rqlQuery: this.collection.rqlQuery,
+          rqlQuery: this.eventList.rqlQuery,
           eventTypes: this.eventTypes
         }
       });
+
+      this.listenTo(this.filterView, 'filterChanged', this.refreshList);
     },
 
     load: function(when)
     {
       return when(
-        this.collection.fetch({reset: true}),
+        this.eventList.fetch({reset: true}),
         this.eventTypes.fetch({reset: true})
       );
+    },
+
+    refreshList: function(newRqlQuery)
+    {
+      this.eventList.rqlQuery = newRqlQuery;
+
+      this.listView.refreshCollectionNow();
+
+      this.broker.publish('router.navigate', {
+        url: this.eventList.genClientUrl() + '?' + newRqlQuery,
+        trigger: false,
+        replace: true
+      });
     }
 
   });

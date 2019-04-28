@@ -1,35 +1,23 @@
-<div class="list">
-  <div class="table-responsive">
-    <table class="table table-bordered table-hover table-condensed">
-      <thead>
-        <tr>
-          <th class="is-min"><%- t('events', 'PROPERTY:time') %>
-          <th class="is-min"><%- t('events', 'PROPERTY:type') %>
-          <th class="is-min"><%- t('events', 'PROPERTY:user') %>
-          <th><%- t('events', 'PROPERTY:text') %>
-        </tr>
-      </thead>
-      <tbody>
-        <% events.forEach(function(event) { %>
-        <tr class="list-item <%- event.severity %>">
-          <td class="is-min"><%- event.time %>
-          <td class="is-min"><%- event.type %>
-          <td class="is-min">
-            <% if (event.user) { %>
-              <% if (event.user.login === 'root') { %>
-                <%- event.user.login %>
-              <% } else { %>
-                <a href="#users/<%- event.user._id %>"><%- event.user.name %></a>
-              <% } %>
-              <% if (event.user.ipAddress) { %>(<%- event.user.ipAddress %>)<% } %>
-            <% } else { %>
-              -
-            <% } %>
-          <td><%- event.text %>
-        </tr>
-        <% }) %>
-      </tbody>
-    </table>
-  </div>
+<div class="list is-colored">
+  <table class="table table-bordered table-hover table-condensed">
+    <thead>
+      <tr>
+        <th class="is-min"><%- t('events', 'PROPERTY:time') %>
+        <th class="is-min"><%- t('events', 'PROPERTY:type') %>
+        <th class="is-min"><%- t('events', 'PROPERTY:user') %>
+        <th><%- t('events', 'PROPERTY:text') %>
+      </tr>
+    </thead>
+    <tbody>
+      <% events.forEach(function(event) { %>
+      <tr class="list-item <%- event.severity %>">
+        <td class="is-min"><%- event.time %>
+        <td class="is-min"><%- event.type %>
+        <td class="is-min"><%- event.user %>
+        <td><%- event.text %>
+      </tr>
+      <% }) %>
+    </tbody>
+  </table>
   <div class="pagination-container"></div>
 </div>

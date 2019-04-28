@@ -4,29 +4,177 @@
 {
   'use strict';
 
-  document.body.classList.toggle('is-ie', window.navigator.userAgent.indexOf('Trident/') !== -1);
+  var lastError = null;
 
+  window.logBrowserError = function(error, event)
+  {
+    if (!window.fetch)
+    {
+      return;
+    }
+
+    if (error.stack === lastError)
+    {
+      return;
+    }
+
+    lastError = error.stack;
+
+    var stack = lastError.split(/\s+at\s+/);
+
+    stack.shift();
+
+    error = {
+      type: error.name,
+      message: error.message,
+      stack: stack,
+      time: event ? event.timeStamp : -1
+    };
+
+    var navigator = window.navigator;
+    var screen = window.screen;
+    var headers = getCommonHeaders();
+
+    headers['Content-Type'] = 'application/json';
+
+    fetch('/logs/browserErrors', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        error: error,
+        browser: {
+          time: new Date(),
+          navigator: {
+            language: navigator.language,
+            languages: navigator.languages,
+            cookieEnabled: navigator.cookieEnabled,
+            onLine: navigator.onLine,
+            platform: navigator.platform,
+            userAgent: navigator.userAgent
+          },
+          screen: {
+            availHeight: screen.availHeight,
+            availWidth: screen.availWidth,
+            width: screen.width,
+            height: screen.height,
+            innerWidth: window.innerWidth,
+            innerHeight: window.innerHeight
+          },
+          location: window.location.href,
+          history: JSON.parse(localStorage.getItem('WMES_RECENT_LOCATIONS') || [])
+        },
+        versions: window.updater && window.updater.versions || {}
+      })
+    }).then(function() {}, function() {});
+  };
+
+  window.addEventListener('error', function(e)
+  {
+    window.logBrowserError(e.error, e);
+  });
+
+  var navigator = window.navigator;
   var location = window.location;
+
+  if (location.protocol === 'http:' && location.pathname === '/' && location.port === '')
+  {
+    location.protocol = 'https:';
+  }
 
   if (!location.origin)
   {
     location.origin = location.protocol + '//' + location.hostname + (location.port ? (':' + location.port) : '');
   }
 
-  var matches = location.hash.match(/^(?:#proxy=([0-9]+))?(#.*?)?$/);
+  window.COMPUTERNAME = (location.href.match(/COMPUTERNAME=(.*?)(?:(?:#|&).*)?$/i) || [null, null])[1];
+  window.INSTANCE_ID = Math.round(Date.now() + Math.random() * 9999999).toString(36).toUpperCase();
+  window.IS_EMBEDDED = window.parent !== window;
+  window.IS_IE = navigator.userAgent.indexOf('Trident/') !== -1;
+  window.IS_MOBILE = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series[46]0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino|android|ipad|playbook|silk/i
+    .test(navigator.userAgent);
+  window.IS_LINUX = navigator.userAgent.indexOf('X11; Linux') !== -1;
 
-  if (!matches || matches[1] === undefined || matches[1] === localStorage.getItem('PROXY'))
+  document.body.classList.toggle('is-ie', window.IS_IE);
+  document.body.classList.toggle('is-mobile', window.IS_MOBILE);
+  document.body.classList.toggle('is-embedded', window.IS_EMBEDDED);
+  document.body.classList.toggle('is-linux', window.IS_LINUX);
+
+  if (window.ENV === 'production')
   {
-    location.href = '/redirect?referrer=' + encodeURIComponent(
-      location.origin + '/#proxy=' + Date.now() + (matches && matches[2] ? matches[2] : '#')
-    );
+    var matches = location.hash.match(/^(?:#proxy=([0-9]+))?(#.*?)?$/);
 
-    return;
+    if (!matches || matches[1] === undefined || matches[1] === localStorage.getItem('PROXY'))
+    {
+      location.href = '/redirect?referrer=' + encodeURIComponent(
+        location.origin + '/#proxy=' + Date.now() + (matches && matches[2] ? matches[2] : '#')
+      );
+
+      return;
+    }
+
+    location.hash = matches && matches[2] ? matches[2] : '#';
+
+    localStorage.setItem('PROXY', matches[1]);
   }
 
-  window.location.hash = matches && matches[2] ? matches[2] : '#';
+  if (window.IS_EMBEDDED)
+  {
+    window.parent.postMessage({type: 'init', host: location.hostname}, '*');
+  }
 
-  localStorage.setItem('PROXY', matches[1]);
+  if (window.SERVICE_WORKER
+    && !window.IS_EMBEDDED
+    && !window.IS_LINUX
+    && window.navigator.serviceWorker
+    && window.navigator.serviceWorker.getRegistrations
+    && location.protocol === 'https:'
+    && location.pathname === '/')
+  {
+    window.navigator.serviceWorker.register('/sw.js')
+      .then(function() { console.log('[sw] Registered!'); })
+      .catch(function(err) { console.error('[sw] Failed to register:', err); });
+  }
+
+  var oldSend = XMLHttpRequest.prototype.send;
+
+  XMLHttpRequest.prototype.send = function()
+  {
+    var headers = getCommonHeaders();
+
+    Object.keys(headers).forEach(function(key)
+    {
+      this.setRequestHeader(key, headers[key]);
+    }, this);
+
+    return oldSend.apply(this, arguments);
+  };
+
+  function getCommonHeaders()
+  {
+    var headers = {};
+
+    if (window.INSTANCE_ID)
+    {
+      headers['X-WMES-INSTANCE'] = window.INSTANCE_ID;
+    }
+
+    if (window.COMPUTERNAME)
+    {
+      headers['X-WMES-CNAME'] = window.COMPUTERNAME;
+    }
+
+    if (window.WMES_APP_ID)
+    {
+      headers['X-WMES-APP'] = window.WMES_APP_ID;
+    }
+
+    if (window.WMES_LINE_ID)
+    {
+      headers['X-WMES-LINE'] = window.WMES_LINE_ID;
+    }
+
+    return headers;
+  }
 
   var domains = [];
   var i18n = null;
@@ -34,7 +182,7 @@
 
   require.onError = function(err)
   {
-    console.error(err);
+    console.error(Object.keys(err), err);
 
     var loadingEl = document.getElementById('app-loading');
 
@@ -97,14 +245,17 @@
     }
   };
 
-  if (!navigator.onLine || !document.getElementsByTagName('html')[0].hasAttribute('manifest'))
+  var appCache = window.applicationCache;
+
+  if (!appCache
+    || !navigator.onLine
+    || !document.getElementsByTagName('html')[0].hasAttribute('manifest'))
   {
     return window.requireApp();
   }
 
-  var appCache = window.applicationCache;
   var reload = location.reload.bind(location);
-  var reloadTimer = setTimeout(reload, 60000);
+  var reloadTimer = setTimeout(reload, 90000);
 
   function doStartApp()
   {

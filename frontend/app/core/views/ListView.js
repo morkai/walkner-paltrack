@@ -27,6 +27,10 @@ define([
 
     tableClassName: 'table-bordered table-hover table-condensed',
 
+    paginationOptions: {},
+
+    refreshDelay: 5000,
+
     remoteTopics: function()
     {
       var topics = {};
@@ -70,14 +74,14 @@ define([
           });
         }
       },
-      'mousedown .list-item[data-id]':  function(e)
+      'mousedown .list-item[data-id]': function(e)
       {
         if (!this.isNotClickable(e) && e.button === 1)
         {
           e.preventDefault();
         }
       },
-      'mouseup .list-item[data-id]':  function(e)
+      'mouseup .list-item[data-id]': function(e)
       {
         if (this.isNotClickable(e) || e.button !== 1)
         {
@@ -108,10 +112,12 @@ define([
 
       if (this.collection.paginationData)
       {
-        this.paginationView = new PaginationView({
-          model: this.collection.paginationData,
-          replaceUrl: !!this.options.replaceUrl
-        });
+        this.paginationView = new PaginationView(_.assign(
+          {replaceUrl: !!this.options.replaceUrl},
+          this.paginationOptions,
+          this.options.pagination,
+          {model: this.collection.paginationData}
+        ));
 
         this.setView('.pagination-container', this.paginationView);
 
@@ -162,12 +168,21 @@ define([
 
       return columns.map(function(column)
       {
-        if (typeof column === 'string')
+        if (!column)
+        {
+          return null;
+        }
+
+        if (column === '-')
+        {
+          column = {id: 'filler', label: ''};
+        }
+        else if (typeof column === 'string')
         {
           column = {id: column, label: t.bound(nlsDomain, 'PROPERTY:' + column)};
         }
 
-        if (!column.label)
+        if (!column.label && column.label !== '')
         {
           column.label = t.bound(nlsDomain, 'PROPERTY:' + column.id);
         }
@@ -189,7 +204,7 @@ define([
         }
 
         return column;
-      });
+      }).filter(function(column) { return column !== null; });
     },
 
     serializeActions: function()
@@ -246,6 +261,16 @@ define([
       this.refreshCollection(model);
     },
 
+    $row: function(rowId)
+    {
+      return this.$('tr[data-id="' + rowId + '"]');
+    },
+
+    $cell: function(rowId, columnId)
+    {
+      return this.$('tr[data-id="' + rowId + '"] > td[data-id="' + columnId + '"]');
+    },
+
     refreshCollection: function(message)
     {
       if (message && this.timers.refreshCollection)
@@ -255,14 +280,14 @@ define([
 
       var now = Date.now();
 
-      if (now - this.lastRefreshAt > 3000)
+      if (now - this.lastRefreshAt > this.refreshDelay)
       {
         this.lastRefreshAt = now;
         this.refreshCollectionNow();
       }
       else
       {
-        this.timers.refreshCollection = setTimeout(this.refreshCollectionNow.bind(this), 3000);
+        this.timers.refreshCollection = setTimeout(this.refreshCollectionNow.bind(this), this.refreshDelay);
       }
     },
 

@@ -94,16 +94,21 @@ input[type=checkbox].filter-inLabel {
   margin-top: 5px;
   height: 29px;
 }
+.filter-radioLabels {
+  display: flex;
+}
 .filter-radioLabels > label {
   margin-left: 15px;
-  margin-bottom: 3px;
-  vertical-align: top;
+  margin-bottom: 5px;
 }
 .filter-radioLabels > label:first-child {
   margin-left: 0;
 }
+.filter-radioLabels input {
+  vertical-align: top;
+}
 .form-control.is-expanded {
-  height: auto;
+  height: auto!important;
   position: absolute;
   z-index: 110;
 }
@@ -167,6 +172,9 @@ input[type=checkbox].filter-inLabel {
   .filter-form .filter-toggle {
     display: block;
   }
+  .filter-radioLabels {
+    display: block;
+  }
   .filter-radioLabels > label {
     margin-left: 0;
     display: block;
@@ -190,6 +198,11 @@ input[type=checkbox].filter-inLabel {
   }
   .filter-form .btn[type="submit"] {
     font-size: 21px;
+  }
+  .filter-actions > hr {
+    display: block;
+    opacity: 0;
+    height: 15px;
   }
   .filter-actions > .btn-group {
     display: block;

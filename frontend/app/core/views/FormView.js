@@ -23,13 +23,15 @@ define([
 
     $errorMessage: null,
 
+    updateOnChange: true,
+
     initialize: function()
     {
       this.$errorMessage = null;
 
       this.listenTo(this.model, 'change', function()
       {
-        if (this.isRendered())
+        if (this.isRendered() && this.updateOnChange)
         {
           js2form(this.el, this.serializeToForm(true), '.', null, false, false);
         }
@@ -43,15 +45,16 @@ define([
 
     serialize: function()
     {
-      return {
-        editMode: !!this.options.editMode,
-        idPrefix: this.idPrefix,
-        formMethod: this.options.formMethod,
-        formAction: this.options.formAction,
-        formActionText: this.options.formActionText,
-        panelTitleText: this.options.panelTitleText,
+      var options = this.options;
+
+      return _.assign(View.prototype.serialize.apply(this, arguments), {
+        editMode: !!options.editMode,
+        formMethod: options.formMethod,
+        formAction: options.formAction,
+        formActionText: options.formActionText,
+        panelTitleText: options.panelTitleText,
         model: this.model.toJSON()
-      };
+      });
     },
 
     afterRender: function()
@@ -59,11 +62,9 @@ define([
       js2form(this.el, this.serializeToForm(false));
     },
 
-    serializeToForm: function(partial)
+    serializeToForm: function(partial) // eslint-disable-line no-unused-vars
     {
-      /*jshint unused:false*/
-
-      return this.model.toJSON();
+      return this.model.serializeForm ? this.model.serializeForm() : this.model.toJSON();
     },
 
     serializeForm: function(formData)
@@ -89,6 +90,8 @@ define([
 
       if (!this.checkValidity(formData))
       {
+        this.handleInvalidity(formData);
+
         return false;
       }
 
@@ -118,6 +121,11 @@ define([
       return !!formData;
     },
 
+    handleInvalidity: function()
+    {
+
+    },
+
     handleSuccess: function()
     {
       if (typeof this.options.done === 'function')
@@ -135,7 +143,12 @@ define([
 
     handleFailure: function()
     {
-      this.showErrorMessage(this.options.failureText);
+      this.showErrorMessage(this.getFailureText());
+    },
+
+    getFailureText: function()
+    {
+      return this.options.failureText;
     },
 
     showErrorMessage: function(text)

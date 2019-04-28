@@ -4,16 +4,12 @@ define([
   'underscore',
   'backbone',
   'h5.rql/index',
-  'h5.rql/serializers/mongoSerializer',
-  'sift',
   './util',
   './PaginationData'
 ], function(
   _,
   Backbone,
   rql,
-  mongoSerializer,
-  sift,
   util,
   PaginationData
 ) {
@@ -28,7 +24,12 @@ define([
 
     this.rqlQuery = this.createRqlQuery(options.rqlQuery || this.rqlQuery);
 
-    this.paginationData = options.paginate !== false ? new PaginationData() : null;
+    if (this.rqlQuery.limit === -1337)
+    {
+      this.rqlQuery.limit = this.getDefaultPageLimit();
+    }
+
+    this.paginationData = options.paginate !== false && this.paginate !== false ? new PaginationData() : null;
 
     if (!this.url)
     {
@@ -49,15 +50,10 @@ define([
   {
     if (this.paginationData)
     {
-      this.paginationData.set({
-        totalCount: res.totalCount,
-        urlTemplate: this.genPaginationUrlTemplate(),
-        skip: this.rqlQuery.skip,
-        limit: this.rqlQuery.limit
-      });
+      this.paginationData.set(this.getPaginationData(res));
     }
 
-    return res.collection;
+    return Array.isArray(res.collection) ? res.collection : [];
   };
 
   Collection.prototype.sync = function(type, model, options)
@@ -102,6 +98,13 @@ define([
     return this.nlsDomain || this.model.prototype.nlsDomain;
   };
 
+  Collection.prototype.getLabel = function(id)
+  {
+    var model = this.get(id);
+
+    return model ? model.getLabel() : null;
+  };
+
   Collection.prototype.createRqlQuery = function(rqlQuery)
   {
     if (_.isString(rqlQuery))
@@ -140,6 +143,16 @@ define([
     return new rql.Query();
   };
 
+  Collection.prototype.getPaginationData = function(res)
+  {
+    return {
+      totalCount: res.totalCount,
+      urlTemplate: this.genPaginationUrlTemplate(),
+      skip: this.rqlQuery.skip,
+      limit: this.rqlQuery.limit
+    };
+  };
+
   Collection.prototype.genPaginationUrlTemplate = function()
   {
     var rqlQuery = this.rqlQuery;
@@ -164,14 +177,42 @@ define([
     this.fetch({reset: true});
   };
 
-  Collection.prototype.matchesRqlQuery = function(obj)
+  Collection.prototype.getDefaultPageLimit = function()
   {
-    if (!this.rqlQuery.sift)
+    var hdHeight = 84 + 15;
+    var filterHeight = 91 + 15;
+    var pagerHeight = 39 + 15;
+    var theadHeight = 32;
+    var rowHeight = 34;
+
+    if (this.theadHeight > 8)
     {
-      this.rqlQuery.sift = sift(mongoSerializer.fromQuery(this.rqlQuery).selector);
+      theadHeight = this.theadHeight;
+    }
+    else
+    {
+      theadHeight = 32 + 20 * ((this.theadHeight || 1) - 1);
     }
 
-    return this.rqlQuery.sift.test(obj);
+    if (typeof this.rowHeight === 'number')
+    {
+      if (this.rowHeight > 8)
+      {
+        rowHeight = this.rowHeight;
+      }
+      else
+      {
+        rowHeight = 31 + 20 * (this.rowHeight - 1);
+      }
+    }
+    else if (this.rowHeight === false)
+    {
+      rowHeight = 31;
+    }
+
+    var availHeight = window.innerHeight - hdHeight - filterHeight - pagerHeight - theadHeight;
+
+    return Math.max(10, Math.floor(availHeight / rowHeight));
   };
 
   return Collection;

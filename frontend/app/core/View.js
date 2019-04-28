@@ -7,6 +7,7 @@ define([
   'app/broker',
   'app/socket',
   'app/pubsub',
+  'app/i18n',
   './util'
 ],
 function(
@@ -16,28 +17,63 @@ function(
   broker,
   socket,
   pubsub,
+  t,
   util
 ) {
   'use strict';
 
   function View(options)
   {
-    this.idPrefix = _.uniqueId('v');
+    var view = this;
 
-    this.options = options || {};
+    view.idPrefix = _.uniqueId('v');
 
-    this.timers = {};
+    view.options = options || {};
 
-    this.promises = [];
+    view.timers = {};
 
-    util.defineSandboxedProperty(this, 'broker', broker);
-    util.defineSandboxedProperty(this, 'pubsub', pubsub);
-    util.defineSandboxedProperty(this, 'socket', socket);
+    view.promises = [];
 
-    Layout.call(this, options);
+    _.forEach(view.sections, function(selector, section)
+    {
+      if (typeof selector !== 'string' || selector === '#')
+      {
+        view.sections[section] = '#' + view.idPrefix + '-' + section;
+      }
+      else
+      {
+        view.sections[section] = selector.replace('#-', '#' + view.idPrefix + '-');
+      }
+    });
 
-    util.subscribeTopics(this, 'broker', this.localTopics, true);
-    util.subscribeTopics(this, 'pubsub', this.remoteTopics, true);
+    util.defineSandboxedProperty(view, 'broker', broker);
+    util.defineSandboxedProperty(view, 'pubsub', pubsub);
+    util.defineSandboxedProperty(view, 'socket', socket);
+
+    Layout.call(view, options);
+
+    util.subscribeTopics(view, 'broker', view.localTopics, true);
+
+    if (view.remoteTopicsAfterSync)
+    {
+      if (view.remoteTopicsAfterSync === true)
+      {
+        view.remoteTopicsAfterSync = 'model';
+      }
+
+      if (typeof view.remoteTopicsAfterSync === 'string' && view[view.remoteTopicsAfterSync])
+      {
+        view.listenToOnce(
+          view[view.remoteTopicsAfterSync],
+          'sync',
+          util.subscribeTopics.bind(util, view, 'pubsub', view.remoteTopics, true)
+        );
+      }
+    }
+    else
+    {
+      util.subscribeTopics(view, 'pubsub', view.remoteTopics, true);
+    }
   }
 
   util.inherits(View, Layout);
@@ -90,6 +126,26 @@ function(
     }, this);
   };
 
+  View.prototype.getViews = function(fn)
+  {
+    if (typeof fn === 'string' && /^#-/.test(fn))
+    {
+      fn = fn.replace('#-', '#' + this.idPrefix + '-');
+    }
+
+    return Layout.prototype.getViews.call(this, fn);
+  };
+
+  View.prototype.setView = function(name, view, insert, insertOptions)
+  {
+    if (typeof name === 'string' && /^#-/.test(name))
+    {
+      name = name.replace('#-', '#' + this.idPrefix + '-');
+    }
+
+    return Layout.prototype.setView.call(this, name, view, insert, insertOptions);
+  };
+
   View.prototype.cleanup = function()
   {
     this.destroy();
@@ -99,9 +155,9 @@ function(
 
     if (_.isObject(this.timers))
     {
-      _.each(this.timers, clearTimeout);
+      _.forEach(this.timers, clearTimeout);
 
-      this.timers = null;
+      this.timers = {};
     }
 
     this.cancelRequests();
@@ -123,7 +179,38 @@ function(
 
   View.prototype.serialize = function()
   {
-    return {idPrefix: this.idPrefix};
+    return _.assign(this.getCommonTemplateData(), this.getTemplateData());
+  };
+
+  View.prototype.getCommonTemplateData = function()
+  {
+    return {
+      idPrefix: this.idPrefix,
+      helpers: this.getTemplateHelpers()
+    };
+  };
+
+  View.prototype.getTemplateData = function()
+  {
+    return {};
+  };
+
+  View.prototype.getTemplateHelpers = function()
+  {
+    return {
+      t: this.t.bind(this),
+      props: this.props.bind(this)
+    };
+  };
+
+  View.prototype.renderPartial = function(partial, data)
+  {
+    return $(this.renderPartialHtml(partial, data));
+  };
+
+  View.prototype.renderPartialHtml = function(partial, data)
+  {
+    return partial(_.assign(this.getCommonTemplateData(), data));
   };
 
   View.prototype.afterRender = function() {};
@@ -174,6 +261,7 @@ function(
 
   View.prototype.cancelAnimations = function(clearQueue, jumpToEnd)
   {
+    this.$el.stop(clearQueue !== false, jumpToEnd !== false);
     this.$(':animated').stop(clearQueue !== false, jumpToEnd !== false);
   };
 
@@ -186,7 +274,90 @@ function(
       id += this.idPrefix + '-';
     }
 
-    return this.$(id + idSuffix);
+    return $(id + idSuffix);
+  };
+
+  View.prototype.getDefaultModel = function()
+  {
+    return this[this.modelProperty] || this.model || this.collection;
+  };
+
+  View.prototype.getDefaultNlsDomain = function()
+  {
+    var model = this.getDefaultModel();
+
+    return model.getNlsDomain ? model.getNlsDomain() : (model.nlsDomain || 'core');
+  };
+
+  View.prototype.t = function(domain, key, data)
+  {
+    if (data || typeof key === 'string')
+    {
+      return t(domain, key, data);
+    }
+
+    var defaultDomain = this.getDefaultNlsDomain();
+
+    if (typeof key === 'object')
+    {
+      return t(defaultDomain, domain, key);
+    }
+
+    return t(defaultDomain, domain);
+  };
+
+  View.prototype.props = function(data, options)
+  {
+    var view = this;
+
+    if (!options)
+    {
+      options = data;
+      data = options.data;
+    }
+
+    var html = '<div class="props ' + (options.first ? 'first' : '') + '">';
+    var defaultNlsDomain = view.getDefaultNlsDomain();
+
+    [].concat(_.isArray(options) ? options : options.props).forEach(function(prop)
+    {
+      if (typeof prop === 'string')
+      {
+        prop = {id: prop};
+      }
+
+      var escape = prop.escape === false ? false : (prop.id.charAt(0) !== '!');
+      var id = escape ? prop.id : prop.id.substring(1);
+      var className = prop.className || '';
+      var valueClassName = prop.valueClassName || '';
+      var nlsDomain = prop.nlsDomain || options.nlsDomain || defaultNlsDomain;
+      var label = prop.label || t(nlsDomain, 'PROPERTY:' + id);
+      var value = _.isFunction(prop.value)
+        ? prop.value(data[id], prop, view)
+        : _.isUndefined(prop.value) ? data[id] : prop.value;
+
+      if (_.isFunction(prop.visible) && !prop.visible(value, prop, view))
+      {
+        return;
+      }
+
+      if (prop.visible != null && !prop.visible)
+      {
+        return;
+      }
+
+      if (escape)
+      {
+        value = _.escape(value);
+      }
+
+      html += '<div class="prop ' + className + '" data-prop="' + id + '">'
+        + '<div class="prop-name">' + label + '</div>'
+        + '<div class="prop-value ' + valueClassName + '">' + value + '</div>'
+        + '</div>';
+    });
+
+    return html + '</div>';
   };
 
   return View;

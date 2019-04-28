@@ -17,8 +17,6 @@ define([
 
   function fixEl($el, defaultTime, utc)
   {
-    /*jshint -W015*/
-
     var elMoment;
 
     if ($el.hasClass('form-group-datetime'))
@@ -42,7 +40,16 @@ define([
     }
     else
     {
-      var elValue = $el.val();
+      var elValue = $el.val().trim();
+
+      if (/^[0-9]{4}.[0-9]{1,2}/.test(elValue) && !/^[0-9]{4}.[0-9]{1,2}.[0-9]{1,2}/.test(elValue))
+      {
+        var parts = elValue.split(' ');
+
+        parts[0] += '-01';
+
+        elValue = parts.join(' ');
+      }
 
       if (!/ [0-9]+:[0-9]+(:[0-9]+)?/.test(elValue))
       {
@@ -87,6 +94,10 @@ define([
           val = elMoment.format('HH:mm');
           break;
 
+        case 'month':
+          val = elMoment.format('YYYY-MM');
+          break;
+
         default:
           val = elMoment.format('YYYY-MM-DD HH:mm');
           break;
@@ -114,8 +125,11 @@ define([
       to: null
     };
 
-    var fromMoment = fixEl(view.$id(options.fromId), options.defaultTime, options.utc);
-    var toMoment = fixEl(view.$id(options.toId), options.defaultTime, options.utc);
+    var $from = view.$id(options.fromId);
+    var $to = view.$id(options.toId);
+
+    var fromMoment = fixEl($from, options.defaultTime, options.utc);
+    var toMoment = fixEl($to, options.defaultTime, options.utc);
 
     if (fromMoment.isValid())
     {
@@ -141,7 +155,7 @@ define([
       utc: false
     });
 
-    var property = rqlQueryTerm.name === 'ge' ? 'from': 'to';
+    var property = rqlQueryTerm.name === 'ge' ? 'from' : 'to';
     var formMoment = (options.utc ? moment.utc : time.getMoment)(rqlQueryTerm.args[1]);
 
     if (type === 'date+time')

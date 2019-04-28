@@ -31,7 +31,11 @@ define([
     /**
      * @type {boolean}
      */
-    replaceUrl: false
+    replaceUrl: false,
+    /**
+     * @type {boolean}
+     */
+    navigate: true
   };
 
   var PaginationView = View.extend({
@@ -87,7 +91,7 @@ define([
   {
     this.model.set({page: newPage});
 
-    if (href)
+    if (href && this.options.navigate)
     {
       this.broker.publish('router.navigate', {
         url: href,
@@ -98,12 +102,10 @@ define([
 
   /**
    * @protected
-   * @returns {object}
+   * @returns {Object}
    */
   PaginationView.prototype.serialize = function()
   {
-    /*jshint maxstatements:33*/
-
     var options = this.options;
     var model = this.model;
     var currentPage = model.get('page');
@@ -216,7 +218,7 @@ define([
    * @private
    * @param {number} firstPageNr
    * @param {number} lastPageNr
-   * @returns {Array.<object>}
+   * @returns {Array.<Object>}
    */
   PaginationView.prototype.genPages = function(firstPageNr, lastPageNr)
   {

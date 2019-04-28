@@ -2,102 +2,65 @@
 
 'use strict';
 
-var path = require('path');
-var _ = require('lodash');
+const _ = require('lodash');
 
-module.exports = function startCoreRoutes(app, express)
+module.exports = (app, express) =>
 {
-  var dev = app.options.env === 'development';
-  var updaterModule = app[app.options.updaterId || 'updater'];
-  var userModule = app[app.options.userId || 'user'];
-  var requirejsPaths;
-  var requirejsShim;
+  const updaterModule = app[app.options.updaterId || 'updater'];
+  const userModule = app[app.options.userId || 'user'];
+  const mongoose = app[app.options.mongooseId || 'mongoose'];
 
-  var ROOT_USER = JSON.stringify(_.omit(userModule.root, 'password'));
-  var GUEST_USER = JSON.stringify(userModule.guest);
-  var PRIVILEGES = JSON.stringify(userModule.config.privileges);
-  var MODULES = JSON.stringify(app.options.modules.map(m => m.id || m));
-  var DASHBOARD_URL_AFTER_LOG_IN = JSON.stringify(app.options.dashboardUrlAfterLogIn || '/');
+  const ROOT_USER = userModule ? JSON.stringify(_.omit(userModule.root, 'password')) : '{}';
+  const GUEST_USER = userModule ? JSON.stringify(userModule.guest) : '{}';
+  const PRIVILEGES = userModule ? JSON.stringify(userModule.config.privileges) : '[]';
+  const MODULES = JSON.stringify(app.options.modules.map(m => m.id || m));
+  const TRANSPORT_KINDS = JSON.stringify(
+    mongoose && _.includes(mongoose.modelNames(), 'TransportOrder')
+      ? mongoose.model('TransportOrder').KINDS
+      : []
+  );
 
-  app.broker.subscribe('updater.newVersion', reloadRequirejsConfig).setFilter(function(message)
-  {
-    return message.service === app.options.id;
-  });
+  let requirejsPaths = null;
+  let requirejsShim = null;
+
+  app.broker
+    .subscribe('updater.newVersion', reloadRequirejsConfig)
+    .setFilter(message => message.service === 'frontend');
 
   reloadRequirejsConfig();
-
-  if (updaterModule && app.options.dictionaryModules)
-  {
-    _.forEach(Object.keys(app.options.dictionaryModules), setUpFrontendVersionUpdater);
-  }
+  setUpFrontendVersionUpdater();
 
   express.get('/', showIndex);
 
   express.get('/redirect', redirectRoute);
 
-  express.get('/time', function(req, res)
+  express.options('/time', (req, res) =>
   {
-    res.send(Date.now().toString());
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET');
+    res.set('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || '*');
+    res.end();
   });
 
-  express.get('/ping', function(req, res)
+  express.get('/time', (req, res) =>
   {
-    res.type('text/plain');
-    res.send('pong');
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET');
+    res.set('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || '*');
+    res.send(Date.now().toString());
   });
 
   express.get('/config.js', sendRequireJsConfig);
 
-  express.get('/favicon.ico', sendFavicon);
-
   function showIndex(req, res)
   {
-    var sessionUser = req.session.user;
-    var locale = sessionUser && sessionUser.locale ? sessionUser.locale : 'pl';
-    var appData = {
-      ENV: JSON.stringify(app.options.env),
-      VERSIONS: JSON.stringify(updaterModule ? updaterModule.getVersions() : {}),
-      TIME: JSON.stringify(Date.now()),
-      LOCALE: JSON.stringify(locale),
-      ROOT_USER: ROOT_USER,
-      GUEST_USER: GUEST_USER,
-      PRIVILEGES: PRIVILEGES,
-      MODULES: MODULES,
-      DASHBOARD_URL_AFTER_LOG_IN: DASHBOARD_URL_AFTER_LOG_IN
-    };
-
-    _.forEach(app.options.dictionaryModules, function(appDataKey, moduleName)
-    {
-      var models = app[moduleName].models;
-
-      if (models.length === 0)
-      {
-        appData[appDataKey] = '[]';
-
-        return;
-      }
-
-      if (typeof models[0].toDictionaryObject !== 'function')
-      {
-        appData[appDataKey] = JSON.stringify(models);
-
-        return;
-      }
-
-      appData[appDataKey] = JSON.stringify(_.invokeMap(models, 'toDictionaryObject'));
-    });
-
-    _.forEach(app.options.frontendAppData, function(appDataValue, appDataKey)
-    {
-      appData[appDataKey] = JSON.stringify(appDataValue);
-    });
-
-    res.render('index', {
-      appCacheManifest: !dev ? '/manifest.appcache' : '',
-      appData: appData,
-      mainJsFile: app.options.mainJsFile || 'main.js',
-      mainCssFile: app.options.mainCssFile || 'assets/main.css'
-    });
+    res.render('index', updaterModule.getAppTemplateData('frontend', req, {
+      ROOT_USER,
+      GUEST_USER,
+      PRIVILEGES,
+      MODULES,
+      TRANSPORT_KINDS
+    }));
   }
 
   function redirectRoute(req, res)
@@ -109,38 +72,26 @@ module.exports = function startCoreRoutes(app, express)
   {
     res.type('js');
     res.render('config.js.ejs', {
+      cache: false,
       paths: requirejsPaths,
       shim: requirejsShim
     });
   }
 
-  function sendFavicon(req, res)
-  {
-    var faviconPath = path.join(
-      express.config[dev ? 'staticPath' : 'staticBuildPath'],
-      app.options.faviconFile || 'favicon.ico'
-    );
-
-    res.type('image/x-icon');
-    res.sendFile(faviconPath);
-  }
-
   function reloadRequirejsConfig()
   {
-    var configPath = require.resolve('../../config/require');
+    const configPath = require.resolve('../../config/require');
 
     delete require.cache[configPath];
 
-    var requirejsConfig = require(configPath);
+    const requirejsConfig = require(configPath);
 
     requirejsPaths = JSON.stringify(requirejsConfig.paths);
     requirejsShim = JSON.stringify(requirejsConfig.shim);
   }
 
-  function setUpFrontendVersionUpdater(topicPrefix)
+  function setUpFrontendVersionUpdater()
   {
-    app.broker.subscribe(topicPrefix + '.added', updaterModule.updateFrontendVersion);
-    app.broker.subscribe(topicPrefix + '.edited', updaterModule.updateFrontendVersion);
-    app.broker.subscribe(topicPrefix + '.deleted', updaterModule.updateFrontendVersion);
+    app.broker.subscribe('dictionaries.updated', () => updaterModule.updateFrontendVersion());
   }
 };

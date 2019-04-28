@@ -10,14 +10,19 @@ define([
   'use strict';
 
   var PLUGIN_NAME = 'expandableSelect';
+  var INSTANCE_ID = 0;
 
   function ExpandableSelect($el, options)
   {
+    this.id = ++INSTANCE_ID;
+
     this.$el = $el;
 
     this.$helper = null;
 
     this.options = options;
+
+    $(window).on('resize.' + PLUGIN_NAME + this.id, this.onWindowResize.bind(this));
 
     this.$el
       .on('mousedown.' + PLUGIN_NAME, this.onMouseDown.bind(this))
@@ -32,13 +37,15 @@ define([
     {
       this.collapse();
 
+      $(window).off('.' + PLUGIN_NAME + this.id);
+
       this.$el.off('.' + PLUGIN_NAME);
       this.$el = null;
     },
 
     isExpanded: function()
     {
-      return this.$el.hasClass(this.options.isExpandedClassName);
+      return this.$el !== null && this.$el.hasClass(this.options.isExpandedClassName);
     },
 
     expand: function()
@@ -84,6 +91,11 @@ define([
       this.$el.removeClass(this.options.isExpandedClassName);
     },
 
+    onWindowResize: function()
+    {
+      this.collapse();
+    },
+
     onMouseDown: function(e)
     {
       if (this.isExpanded())
@@ -123,7 +135,7 @@ define([
   $.fn[PLUGIN_NAME] = function()
   {
     var result;
-    var options = null;
+    var options = {};
     var methodName = null;
     var methodArgs = null;
 
@@ -134,7 +146,7 @@ define([
     }
     else
     {
-      options = _.defaults({}, arguments[0], $.fn[PLUGIN_NAME].defaults);
+      _.defaults(options, arguments[0]);
     }
 
     this.each(function()
@@ -159,7 +171,7 @@ define([
         expandableSelect.destroy();
       }
 
-      $el.data(PLUGIN_NAME, new ExpandableSelect($el, options));
+      $el.data(PLUGIN_NAME, new ExpandableSelect($el, _.defaults(options, $.fn[PLUGIN_NAME].defaults)));
     });
 
     return result === undefined ? this : result;

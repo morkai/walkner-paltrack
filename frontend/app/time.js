@@ -46,6 +46,11 @@ define([
     return moment(date, inputFormat).tz(time.zone);
   };
 
+  time.getMomentUtc = function(date, inputFormat)
+  {
+    return moment.utc(date, inputFormat);
+  };
+
   time.format = function(date, format)
   {
     var dateMoment = time.getMoment(date);
@@ -53,8 +58,45 @@ define([
     return dateMoment.isValid() ? dateMoment.format(format) : null;
   };
 
+  time.utc = {
+    getMoment: function(date, inputFormat)
+    {
+      return moment.utc(date, inputFormat);
+    },
+    format: function(date, format)
+    {
+      var dateMoment = time.getMomentUtc(date);
+
+      return dateMoment.isValid() ? dateMoment.format(format) : null;
+    }
+  };
+
+  time.toTagData = function(date, absolute)
+  {
+    if (!date)
+    {
+      return {
+        iso: '?',
+        long: '?',
+        human: '?',
+        daysAgo: 0
+      };
+    }
+
+    var timeMoment = time.getMoment(date);
+    var then = timeMoment.valueOf();
+    var now = Date.now();
+
+    return {
+      iso: timeMoment.toISOString(),
+      long: timeMoment.format('LLLL'),
+      human: absolute === true ? timeMoment.from(then > now ? then : now) : timeMoment.fromNow(),
+      daysAgo: -timeMoment.diff(now, 'days')
+    };
+  };
+
   /**
-   * @param {string} str
+   * @param {string|number} str
    * @returns {number}
    */
   time.toSeconds = function(str)
@@ -73,7 +115,8 @@ define([
       g: 3600,
       h: 3600,
       m: 60,
-      s: 1
+      s: 1,
+      ms: 0.001
     };
 
     var time = str.trim();
@@ -81,14 +124,14 @@ define([
 
     if (/^[0-9]+\.?[0-9]*$/.test(time) === false)
     {
-      var re = /([0-9\.]+) *(h|m|s)[a-z]*/ig;
+      var re = /([0-9\.]+)\s*(h|ms|m|s)[a-z]*/ig;
       var match;
 
       seconds = 0;
 
-      while ((match = re.exec(time)))
+      while ((match = re.exec(time)) !== null) // eslint-disable-line no-cond-assign
       {
-        seconds += match[1] * multipliers[match[2].toLowerCase()];
+        seconds += parseFloat(match[1]) * multipliers[match[2].toLowerCase()];
       }
     }
 
@@ -103,7 +146,7 @@ define([
    */
   time.toString = function(time, compact, ms)
   {
-    if (typeof time !== 'number' || time <= 0)
+    if (typeof time !== 'number' || time <= 0 || isNaN(time))
     {
       return compact ? '00:00:00' : '0s';
     }
@@ -114,7 +157,7 @@ define([
     if (hours > 0)
     {
       str += compact ? (rpad0(hours, 2) + ':') : (' ' + hours + 'h');
-      time = time % 3600;
+      time %= 3600;
     }
     else if (compact)
     {
@@ -126,7 +169,7 @@ define([
     if (minutes > 0)
     {
       str += compact ? (rpad0(minutes, 2) + ':') : (' ' + minutes + 'min');
-      time = time % 60;
+      time %= 60;
     }
     else if (compact)
     {
@@ -138,8 +181,8 @@ define([
     if (seconds >= 1)
     {
       str += compact
-        ? rpad0(Math.round(seconds), 2)
-        : (' ' + Math.round(seconds) + 's');
+        ? rpad0(Math[ms ? 'floor' : 'round'](seconds), 2)
+        : (' ' + Math[ms ? 'floor' : 'round'](seconds) + 's');
 
       if (ms && seconds % 1 !== 0)
       {

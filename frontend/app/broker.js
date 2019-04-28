@@ -5,6 +5,7 @@ define([
 ],
 /**
  * @param {function(new:h5.pubsub.MessageBroker)} MessageBroker
+ * @returns {h5.pubsub.MessageBroker}
  */
 function(
   MessageBroker
@@ -15,11 +16,6 @@ function(
 
   broker.on('message', function(topic, message)
   {
-    if (topic === 'controller.tagValuesChanged')
-    {
-      return;
-    }
-
     if (typeof message === 'undefined')
     {
       console.log('[%s]', topic);

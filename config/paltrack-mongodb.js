@@ -1,10 +1,10 @@
 'use strict';
 
 module.exports = {
-  uri: process.env.PALTRACK_MONGODB_URI || 'mongodb://127.0.0.1:27017/walkner-paltrack',
+  uri: process.env.TP_MONGODB_URI || 'mongodb://127.0.0.1:27017/walkner-paltrack',
   keepAliveQueryInterval: 15000,
   mongoClient: {
-    poolSize: 7,
+    poolSize: 10,
     autoReconnect: true,
     noDelay: true,
     keepAlive: 1000,
@@ -15,6 +15,9 @@ module.exports = {
     forceServerObjectId: false,
     w: 1,
     wtimeout: 5000,
-    promiseLibrary: global.Promise
+    promiseLibrary: global.Promise,
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useFindAndModify: false
   }
 };

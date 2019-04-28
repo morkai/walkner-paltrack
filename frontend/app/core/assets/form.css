@@ -1,3 +1,5 @@
+@import "./dateTimeRange.css";
+
 .form-group:last-child {
   margin-bottom: 0;
 }
@@ -66,6 +68,9 @@
 .control-label + .radio {
   margin-top: 0;
 }
+.checkbox + .form-group {
+  margin-top: 15px;
+}
 .form-group-datetime {
   display: flex;
 }
@@ -75,7 +80,15 @@
 }
 .form-group-datetime > input[type="time"],
 .form-group-datetime > input[type="text"] {
-  width: 110px;
+  width: 120px;
+}
+.form-group-datetime > label {
+  margin: 0 4px;
+  line-height: 34px;
+}
+.form-group-dateRange a {
+  text-decoration: none;
+  cursor: pointer;
 }
 .form-group-dateRange > div:first-child > .radio-inline {
   font-weight: bold;
@@ -93,12 +106,13 @@
 .form-group.has-required-select2 > input[tabindex="-1"] {
   position: absolute;
   display: block!important;
-  top: auto!important;
-  bottom: 0!important;
+  top: 25px!important;
   left: 50%!important;
   z-index: 0;
   outline: none!important;
   width: 1px;
+  height: 34px;
+  opacity: 0;
 }
 .form-group.has-required-select2 > .select2-container {
   z-index: 1;
@@ -161,4 +175,28 @@ input.no-controls[type="number"] {
 .btn-danger {
   -webkit-box-shadow: none;
   box-shadow: none;
+}
+.select2-result-with-description > h3 {
+  font-size: 1em;
+  font-weight: bold;
+  margin: 0 0 2px 0;
+}
+.select2-result-with-description > p {
+  font-size: .8em;
+  margin: 0;
+}
+label + .help-block {
+  margin-top: 0;
+}
+.form-row {
+  display: flex;
+}
+.form-row > .form-group {
+  margin-left: 15px;
+}
+.form-row > .form-group:first-child {
+  margin-left: 0;
+}
+.form-row + .checkbox {
+  margin-top: 0;
 }

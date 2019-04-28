@@ -9,19 +9,17 @@ Pallet tracking application.
 Node.js is a server side software system designed for writing scalable
 Internet applications in JavaScript.
 
-  * __Version__: 6
+  * __Version__: >= 10 < 11
   * __Website__: http://nodejs.org/
   * __Download__: http://nodejs.org/download/
-  * __Installation guide__: https://github.com/joyent/node/wiki/Installation
 
 ### MongoDB
 
 MongoDB is a scalable, high-performance, open source NoSQL database.
 
-  * __Version__: 3.2
+  * __Version__: >= 4
   * __Website__: http://mongodb.org/
   * __Download__: http://www.mongodb.org/downloads
-  * __Installation guide__: http://www.mongodb.org/display/DOCS/Quickstart
 
 ## Installation
 

@@ -1785,7 +1785,9 @@ the specific language governing permissions and limitations under the Apache Lic
 
                 // ignore a response if the select2 has been closed before it was received
                 if (!this.opened()) {
-                    this.search.removeClass("select2-active");
+                    if (this.search) {
+                      this.search.removeClass("select2-active");
+                    }
                     return;
                 }
 
@@ -1968,7 +1970,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 "<div class='select2-drop select2-display-none'>",
                 "   <div class='select2-search'>",
                 "       <label for='' class='select2-offscreen'></label>",
-                "       <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input' role='combobox' aria-expanded='true'",
+                "       <input type='text' autocomplete='new-password' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input' role='combobox' aria-expanded='true'",
                 "       aria-autocomplete='list' />",
                 "   </div>",
                 "   <ul class='select2-results' role='listbox'>",
@@ -2586,7 +2588,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 "<ul class='select2-choices'>",
                 "  <li class='select2-search-field'>",
                 "    <label for='' class='select2-offscreen'></label>",
-                "    <input type='text' autocomplete='off' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'>",
+                "    <input type='text' autocomplete='new-password' autocorrect='off' autocapitalize='off' spellcheck='false' class='select2-input'>",
                 "  </li>",
                 "</ul>",
                 "<div class='select2-drop select2-drop-multi select2-display-none'>",
