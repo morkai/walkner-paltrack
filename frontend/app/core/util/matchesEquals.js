@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore'
@@ -24,7 +24,7 @@ define([
       return true;
     }
 
-    if (term.args[0] === 'eq')
+    if (term.name === 'eq')
     {
       return String(term.args[1]) === String(value);
     }

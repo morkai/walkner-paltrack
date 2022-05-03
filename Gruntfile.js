@@ -2,11 +2,59 @@
 
 'use strict';
 
-const requirejsConfig = require('./config/require');
+const requirejsConfig = require('./frontend/config');
 
-module.exports = function(grunt)
+module.exports = grunt =>
 {
-  grunt.initConfig({
+  function buildExclusion(exclude)
+  {
+    return mod =>
+    {
+      Object.keys(mod.layer.buildPathMap).forEach(moduleName =>
+      {
+        if (exclude(moduleName))
+        {
+          mod.exclude.push(moduleName);
+        }
+      });
+    };
+  }
+
+  const include = [
+    'select2-lang/en',
+    'select2-lang/pl',
+    'moment-lang/en',
+    'moment-lang/pl'
+  ];
+  const mainModDeps = new Set();
+  const modules = [
+    {
+      name: 'paltrack-main',
+      include,
+      exclusionBuilder: buildExclusion(moduleName =>
+      {
+        mainModDeps.add(moduleName);
+
+        if (/^(highcharts|d3)/.test(moduleName))
+        {
+          return true;
+        }
+
+        return false;
+      })
+    }
+  ];
+
+  function appModule(name, options = {})
+  {
+    return {
+      name: `app/${name}/deps`,
+      exclusionBuilder: buildExclusion(moduleName => mainModDeps.has(moduleName) || !moduleName.includes(`/${name}`)),
+      ...options
+    };
+  }
+
+  const config = {
     pkg: grunt.file.readJSON('package.json'),
     clean: {
       frontendBuild: [
@@ -17,6 +65,12 @@ module.exports = function(grunt)
         './build/frontend',
         './frontend-build/**/*.ejs',
         './frontend-build/**/nls/*.json'
+      ],
+      scripts: [
+        './build/scripts'
+      ],
+      build: [
+        './build'
       ]
     },
     eslint: {
@@ -25,7 +79,7 @@ module.exports = function(grunt)
           './backend/**/*.js'
         ],
         options: {
-          configFile: '.eslintrc.json'
+          overrideConfigFile: '.eslintrc.json'
         }
       },
       frontend: {
@@ -33,7 +87,7 @@ module.exports = function(grunt)
           './frontend/app/**/*.js'
         ],
         options: {
-          configFile: 'frontend/.eslintrc.json'
+          overrideConfigFile: 'frontend/.eslintrc.json'
         }
       }
     },
@@ -76,11 +130,11 @@ module.exports = function(grunt)
           localeModulePrefix: 'app/nls/locale/',
           resolveLocaleAndDomain: function(jsonFile)
           {
-            var matches = jsonFile.match(/app\/(.*?)\/nls\/(.*?)\.json/);
+            const matches = jsonFile.match(/app\/(.*?)\/nls\/(.*?)\.json/);
 
             if (matches === null)
             {
-              throw new Error("Invalid MessageFormat JSON file: " + jsonFile);
+              throw new Error(`Invalid MessageFormat JSON file: ${jsonFile}`);
             }
 
             return {
@@ -98,9 +152,9 @@ module.exports = function(grunt)
           dir: './frontend-build',
           optimize: 'none',
           optimizeCss: 'standard',
-          modules: [
-            {name: 'paltrack-main'}
-          ],
+          buildCSS: true,
+          modules,
+          packages: requirejsConfig.packages,
           paths: requirejsConfig.buildPaths,
           shim: requirejsConfig.buildShim,
           locale: 'pl'
@@ -122,16 +176,41 @@ module.exports = function(grunt)
           dest: './frontend-build'
         }]
       }
+    },
+    concat: {
+      requireMain: {
+        files: {}
+      }
     }
+  };
+
+  modules.forEach(mod =>
+  {
+    if (mod.name.includes('/'))
+    {
+      return;
+    }
+
+    config.concat.requireMain.files[`frontend-build/${mod.name}.js`] = [
+      'frontend-build/config.js',
+      'frontend-build/vendor/require/require.js',
+      `frontend-build/${mod.name}.js`,
+      'frontend-build/main.js'
+    ];
   });
 
+  grunt.initConfig(config);
+
   grunt.loadNpmTasks('grunt-contrib-clean');
+  grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-uglify-es-multicore');
   grunt.loadNpmTasks('grunt-ejs-amd');
   grunt.loadNpmTasks('grunt-eslint');
   grunt.loadNpmTasks('grunt-messageformat-amd');
+  grunt.loadNpmTasks('grunt-run');
+  grunt.loadNpmTasks('grunt-text-replace');
 
   grunt.registerTask('default', [
     'clean',
@@ -147,6 +226,7 @@ module.exports = function(grunt)
     'messageformatAmd:frontend',
     'requirejs:frontend',
     'uglify:frontend',
+    'concat:requireMain',
     'clean:frontendBuilt'
   ]);
 

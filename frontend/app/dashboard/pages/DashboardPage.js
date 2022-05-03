@@ -23,7 +23,7 @@ define([
 
     breadcrumbs: function()
     {
-      return user.isLoggedIn() ? [] : [t.bound('dashboard', 'breadcrumbs:logIn')];
+      return user.isLoggedIn() ? [] : [t.bound('dashboard', 'BREADCRUMB:logIn')];
     },
 
     initialize: function()

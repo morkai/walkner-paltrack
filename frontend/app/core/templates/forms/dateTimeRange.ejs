@@ -2,46 +2,56 @@
 <div class="form-group <%- hidden ? 'hidden' : '' %>" data-filter="<%- property %>">
 <% } %>
 <div id="<%- idPrefix %>-dateTimeRange-<%- property %>" class="dateTimeRange" data-property="<%- property %>" data-utc="<%- utc %>" data-set-time="<%- setTime %>" data-type="<%- type %>" data-start-hour="<%- startHour %>" data-shift-length="<%- shiftLength %>">
-  <div class="dateTimeRange-labels">
-    <% labels.forEach(function(label) { %>
-    <div class="dateTimeRange-label <%- label.dropdown || label.ranges ? 'dropdown' : '' %> <%- label.input ? 'dateTimeRange-is-input' : '' %>">
+  <div class="dateTimeRange-labels <%- labels.length > maxLabels ? 'dateTimeRange-labels-overflow' : '' %>">
+    <% labels.forEach(function(label, labelI) { %>
+    <div class="dateTimeRange-label <%- label.dropdown || label.ranges ? 'dropdown' : '' %> <%- label.value ? 'dateTimeRange-is-input' : '' %> <%- labels.length > maxLabels && labelI > 0 ? 'hidden' : '' %>">
       <label
         class="control-label <%- label.dropdown || label.ranges ? 'dropdown-toggle' : '' %>"
         <%- label.dropdown || label.ranges ? 'data-toggle="dropdown"' : '' %>
-        <% if (label.input) { %>for="<%- idPrefix %>-<%- label.input.name %>-<%- label.input.value %>"<% } %>
+        <% if (label.value) { %>for="<%- idPrefix %>-<%- labelProperty %>-<%- label.value %>"<% } %>
       >
-        <% if (label.input) { %>
-        <input id="<%- idPrefix %>-<%- label.input.name %>-<%- label.input.value %>" class="dateTimeRange-label-input" type="<%- label.input.type %>" name="<%- label.input.name %>" value="<%- label.input.value %>">
+        <% if (label.value) { %>
+        <input id="<%- idPrefix %>-<%- labelProperty %>-<%- label.value %>" class="dateTimeRange-label-input" type="radio" name="<%- labelProperty %>" value="<%- label.value %>" data-utc="<%- label.utc ? 1 : 0 %>">
         <% } %>
         <%- label.text %>
         <% if (label.dropdown || label.ranges) { %><span class="caret"></span><% } %>
       </label>
       <% if (label.ranges) { %>
-      <table class="dropdown-menu dateTimeRange-ranges">
-        <% Object.keys(label.ranges).forEach(function(group) { %>
-        <tr>
-          <th><%- t('core', 'dateTimeRange:' + group) %></th>
-          <% label.ranges[group].forEach(function(range) { %>
-          <td>
-            <% if (range) { %>
-            <a href="javascript:void(0)" data-date-time-group="<%- group %>" data-date-time-range="<%- range %>">
-              <% if (t.has('core', 'dateTimeRange:' + group + ':' + range)) { %>
-              <%- t('core', 'dateTimeRange:' + group + ':' + range) %>
-              <% } else if (t.has('core', 'dateTimeRange:' + range)) { %>
-              <%- t('core', 'dateTimeRange:' + range) %>
-              <% } else { %>
-              <%- range %>
-              <% } %>
-            </a>
-            <% } %>
-          </td>
-          <% }) %>
-        </tr>
-        <% }) %>
-        <tr>
-          <td colspan="999" class="dateTimeRange-help"><%- t('core', 'dateTimeRange:help') %></td>
-        </tr>
-      </table>
+      <% ranges = Object.keys(label.ranges) %>
+        <div class="dropdown-menu dateTimeRange-ranges">
+          <% if (labels.length > maxLabels) { %>
+          <div class="dateTimeRange-ranges-labels">
+            <% labels.forEach(function(l) { %>
+            <a <% if (l !== label) { %>href="javascript:void(0)"<% } %> data-label-value="<%- l.value %>"><%- l.text %></a>
+            <% }) %>
+          </div>
+          <% } %>
+          <table class="dateTimeRange-ranges-table">
+            <% ranges.forEach(function(group, groupI) { %>
+            <tr>
+              <th><%- t('core', 'dateTimeRange:' + group) %></th>
+              <% label.ranges[group].forEach(function(range, rangeI) { %>
+              <td>
+                <% if (range) { %>
+                <a href="javascript:void(0)" data-date-time-group="<%- group %>" data-date-time-range="<%- range %>">
+                  <% if (t.has('core', 'dateTimeRange:' + group + ':' + range)) { %>
+                  <%- t('core', 'dateTimeRange:' + group + ':' + range) %>
+                  <% } else if (t.has('core', 'dateTimeRange:' + range)) { %>
+                  <%- t('core', 'dateTimeRange:' + range) %>
+                  <% } else { %>
+                  <%- range %>
+                  <% } %>
+                </a>
+                <% } %>
+              </td>
+              <% }) %>
+            </tr>
+            <% }) %>
+            <tr>
+              <td colspan="999" class="dateTimeRange-help"><%- t('core', 'dateTimeRange:help') %></td>
+            </tr>
+          </table>
+        </div>
       <% } else if (label.dropdown) { %>
       <ul class="dropdown-menu">
         <% label.dropdown.forEach(function(item) { %>
@@ -53,21 +63,22 @@
     <% }) %>
   </div>
   <div class="dateTimeRange-fields">
+    <% var inputType = /month/.test(type) ? 'month' : /week/.test(type) ? 'week' : 'date' %>
     <div class="dateTimeRange-field dateTimeRange-from">
-      <% if (/date|month/.test(type)) { %>
-        <input id="<%- idPrefix %>-from-date" name="from-date" class="form-control" type="<%- /month/.test(type) ? 'month' : 'date' %>" placeholder="<%- t('core', 'dateTimeRange:placeholder:date') %>" min="<%- minDate %>" max="<%- maxDate %>" <%- required.date ? 'required' : '' %>>
+      <% if (/date|month|week/.test(type)) { %>
+        <input id="<%- idPrefix %>-from-date" name="from-date" class="form-control" type="<%- inputType %>" placeholder="<%- t('core', 'dateTimeRange:placeholder:' + inputType) %>" min="<%- minDate %>" max="<%- maxDate %>" <%- required.date[0] ? 'required' : '' %>>
       <% } %>
       <% if (/time/.test(type)) { %>
-      <input id="<%- idPrefix %>-from-time" name="from-time" class="form-control" type="time" placeholder="<%- t('core', 'dateTimeRange:placeholder:time') %>" <%- required.time ? 'required' : '' %>>
+      <input id="<%- idPrefix %>-from-time" name="from-time" class="form-control" type="time" placeholder="<%- t('core', 'dateTimeRange:placeholder:time') %>" <%- required.time[0] ? 'required' : '' %>>
       <% } %>
     </div>
     <div class="dateTimeRange-separator"><%- separator %></div>
     <div class="dateTimeRange-field dateTimeRange-to">
-      <% if (/date|month/.test(type)) { %>
-      <input id="<%- idPrefix %>-to-date" name="to-date" class="form-control" type="<%- /month/.test(type) ? 'month' : 'date' %>" placeholder="<%- t('core', 'dateTimeRange:placeholder:date') %>" min="<%- minDate %>" max="<%- maxDate %>" <%- required.date ? 'required' : '' %>>
+      <% if (/date|month|week/.test(type)) { %>
+      <input id="<%- idPrefix %>-to-date" name="to-date" class="form-control" type="<%- inputType %>" placeholder="<%- t('core', 'dateTimeRange:placeholder:' + inputType) %>" min="<%- minDate %>" max="<%- maxDate %>" <%- required.date[1] ? 'required' : '' %>>
       <% } %>
       <% if (/time/.test(type)) { %>
-      <input id="<%- idPrefix %>-to-time" name="to-time" class="form-control" type="time" placeholder="<%- t('core', 'dateTimeRange:placeholder:time') %>" <%- required.time ? 'required' : '' %>>
+      <input id="<%- idPrefix %>-to-time" name="to-time" class="form-control" type="time" placeholder="<%- t('core', 'dateTimeRange:placeholder:time') %>" <%- required.time[1] ? 'required' : '' %>>
       <% } %>
     </div>
   </div>

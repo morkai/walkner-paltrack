@@ -1,11 +1,13 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'moment-timezone',
-  'app/socket'
+  'app/socket',
+  'app/data/localStorage'
 ], function(
   moment,
-  socket
+  socket,
+  localStorage
 ) {
   'use strict';
 
@@ -38,17 +40,12 @@ define([
 
   time.getServerMoment = function()
   {
-    return moment(Date.now() + time.offset).tz(time.zone);
+    return moment.tz(Date.now() + time.offset, time.zone);
   };
 
   time.getMoment = function(date, inputFormat)
   {
-    return moment(date, inputFormat).tz(time.zone);
-  };
-
-  time.getMomentUtc = function(date, inputFormat)
-  {
-    return moment.utc(date, inputFormat);
+    return moment.tz(date, inputFormat, time.zone);
   };
 
   time.format = function(date, format)
@@ -65,7 +62,7 @@ define([
     },
     format: function(date, format)
     {
-      var dateMoment = time.getMomentUtc(date);
+      var dateMoment = moment.utc(date);
 
       return dateMoment.isValid() ? dateMoment.format(format) : null;
     }
@@ -121,6 +118,20 @@ define([
 
     var time = str.trim();
     var seconds = parseInt(time, 10);
+    var matches = time.match(/([0-9]+):([0-9]+)(?::([0-9]+))?/);
+
+    if (matches)
+    {
+      seconds = parseInt(matches[1], 10) * 3600;
+      seconds += parseInt(matches[2], 10) * 60;
+
+      if (matches[3])
+      {
+        seconds += parseInt(matches[3], 10);
+      }
+
+      return seconds;
+    }
 
     if (/^[0-9]+\.?[0-9]*$/.test(time) === false)
     {
@@ -150,6 +161,8 @@ define([
     {
       return compact ? '00:00:00' : '0s';
     }
+
+    time = Math.round(time * 1000) / 1000;
 
     var str = '';
     var hours = Math.floor(time / 3600);

@@ -1,8 +1,8 @@
 {
-  "BREADCRUMBS:browse": "Partnerzy",
-  "BREADCRUMBS:addForm": "Dodawanie",
-  "BREADCRUMBS:editForm": "Edycja",
-  "BREADCRUMBS:ACTION_FORM:delete": "Usuwanie",
+  "BREADCRUMB:browse": "Partnerzy",
+  "BREADCRUMB:addForm": "Dodawanie",
+  "BREADCRUMB:editForm": "Edycja",
+  "BREADCRUMB:ACTION_FORM:delete": "Usuwanie",
 
   "MSG:LOADING_FAILURE": "Ładowanie partnerów nie powiodło się :(",
   "MSG:LOADING_SINGLE_FAILURE": "Ładowanie partnera nie powiodło się :(",

@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -35,7 +35,7 @@ define([
     actions: function()
     {
       return [
-        pageActions.add(this.collection, this.collection.getPrivilegePrefix() + ':MANAGE')
+        pageActions.add(this.getDefaultModel())
       ];
     },
 
@@ -47,7 +47,7 @@ define([
 
     defineModels: function()
     {
-      this.collection = bindLoadingMessage(this.options.collection, this);
+      this[this.collection ? 'collection' : 'model'] = bindLoadingMessage(this.getDefaultModel(), this);
     },
 
     defineViews: function()
@@ -71,9 +71,16 @@ define([
 
       return {
         collection: this.collection,
-        model: this.model,
-        columns: this.options.columns || this.columns || ListViewClass.prototype.columns,
-        serializeRow: this.options.serializeRow || this.serializeRow || ListViewClass.prototype.serializeRow,
+        model: this.collection ? undefined : this.getDefaultModel(),
+        columns: this.options.columns
+          || this.columns
+          || ListViewClass.prototype.columns,
+        serializeRow: this.options.serializeRow
+          || this.serializeRow
+          || ListViewClass.prototype.serializeRow,
+        serializeActions: this.options.serializeActions
+          || this.serializeActions
+          || ListViewClass.prototype.serializeActions,
         className: _.find([
           this.options.listClassName,
           this.listClassName,

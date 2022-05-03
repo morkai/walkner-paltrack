@@ -93,6 +93,21 @@ define([
       this.$id(this.firstPartnerProperty).select2('focus');
     },
 
+    focusEmptyDate: function()
+    {
+      const $from = this.$id('from-date');
+      const $to = this.$id('to-date');
+
+      if (!$from.val())
+      {
+        $from.focus();
+      }
+      else if (!$to.val())
+      {
+        $to.focus();
+      }
+    },
+
     getSuppliers: function()
     {
       return partners.withoutUsersPartner().map(idAndLabel);

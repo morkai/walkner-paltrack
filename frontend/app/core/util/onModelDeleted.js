@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'app/i18n',
@@ -11,11 +11,23 @@ define([
 
   return function onModelDeleted(broker, localModel, message, skipCheck)
   {
-    var remoteModel = message ? message.model : null;
-
-    if (!skipCheck && (!remoteModel || remoteModel._id !== localModel.id))
+    if (message)
     {
-      return;
+      var remoteModel = message.model;
+
+      if (Array.isArray(message.deleted))
+      {
+        remoteModel = message.deleted.find(m => (localModel.parse ? localModel.parse(m) : m)._id === localModel.id);
+      }
+      else if (remoteModel && localModel.parse)
+      {
+        remoteModel = localModel.parse(remoteModel);
+      }
+
+      if (!skipCheck && (!remoteModel || remoteModel._id !== localModel.id))
+      {
+        return;
+      }
     }
 
     broker.subscribe('router.executing').setLimit(1).on('message', function()

@@ -1,26 +1,32 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
   'app/i18n',
   'app/broker',
-  'app/socket'
+  'app/socket',
+  'app/core/util/embedded'
 ],
 function(
   _,
   t,
   broker,
-  socket
+  socket,
+  embedded
 ) {
   'use strict';
 
-  var embedded = document.body.classList.contains('is-embedded');
   var reloadLocks = [];
   var reloadLockI = 0;
   var user = {};
 
   socket.on('user.reload', function(userData)
   {
+    if (userData.active === false)
+    {
+      window.location.reload();
+    }
+
     user.reload(userData);
   });
 
@@ -34,6 +40,8 @@ function(
   });
 
   delete window.GUEST_USER;
+
+  user.idProperty = 'id';
 
   user.data = guestUser;
 
@@ -61,31 +69,28 @@ function(
    */
   user.reload = function(userData)
   {
-    if (embedded)
+    if (!userData)
     {
-      _.assign(userData, {
-        loggedIn: false,
-        super: false,
-        privileges: guestUser.privileges,
-        login: guestUser.login,
-        name: guestUser.name
-      });
+      userData = {};
     }
 
-    if (_.isEqual(userData, user.data))
+    if (userData.loggedIn === false)
+    {
+      userData.name = t('core', 'GUEST_USER_NAME');
+    }
+
+    var a = _.omit(userData, ['privilegesMap', 'privilegesString']);
+    var b = _.omit(user.data, ['privilegesMap', 'privilegesString']);
+
+    if (_.isEqual(a, b))
     {
       return;
     }
 
     var wasLoggedIn = user.isLoggedIn();
 
-    if (_.isObject(userData) && Object.keys(userData).length > 0)
+    if (Object.keys(userData).length > 0)
     {
-      if (userData.loggedIn === false)
-      {
-        userData.name = t.bound('core', 'GUEST_USER_NAME');
-      }
-
       user.data = userData;
     }
 
@@ -124,27 +129,32 @@ function(
    */
   user.getLabel = function(firstNameFirst)
   {
-    if (user.data.name)
+    return user.resolveLabel(user.data, firstNameFirst);
+  };
+
+  user.resolveLabel = function(data, firstNameFirst)
+  {
+    if (data.name)
     {
-      return String(user.data.name);
+      return String(data.name);
     }
 
-    if (user.data.lastName && user.data.firstName)
+    if (data.lastName && data.firstName)
     {
-      if (user.data.lastName === user.data.firstName)
+      if (data.lastName === data.firstName)
       {
-        return user.data.lastName;
+        return data.lastName;
       }
 
       if (firstNameFirst)
       {
-        return user.data.firstName + ' ' + user.data.lastName;
+        return data.firstName + ' ' + data.lastName;
       }
 
-      return user.data.lastName + ' ' + user.data.firstName;
+      return data.lastName + ' ' + data.firstName;
     }
 
-    return user.data.login;
+    return data.login;
   };
 
   /**
@@ -152,13 +162,22 @@ function(
    */
   user.getInfo = function()
   {
-    return {
-      id: user.data._id,
-      ip: user.data.ip || user.data.ipAddress || '0.0.0.0',
-      cname: window.COMPUTERNAME,
-      label: user.getLabel()
-    };
+    var userInfo = {};
+
+    userInfo[user.idProperty] = user.data._id;
+    userInfo.ip = user.data.ip || user.data.ipAddress || '0.0.0.0';
+    userInfo.cname = window.COMPUTERNAME;
+    userInfo.label = user.getLabel();
+
+    user.getInfo.decorators.forEach(function(decorate)
+    {
+      decorate(userInfo, user.data);
+    });
+
+    return userInfo;
   };
+
+  user.getInfo.decorators = [];
 
   user.isAllowedTo = function(privilege)
   {
@@ -173,23 +192,16 @@ function(
     }
 
     var userPrivileges = user.data.privileges;
-    var args = Array.prototype.slice.call(arguments);
-    var anyPrivileges = (args.length === 1 ? [privilege] : args).map(function(p)
-    {
-      return Array.isArray(p) ? p : [p];
-    });
-
-    if (anyPrivileges.length
-      && user.data.local
-      && anyPrivileges[0].some(function(privilege) { return privilege === 'LOCAL'; }))
-    {
-      return true;
-    }
 
     if (!userPrivileges)
     {
       return false;
     }
+
+    var args = Array.prototype.slice.call(arguments);
+    var anyPrivileges = (args.length === 1 ? [privilege] : args).map(
+      function(p) { return Array.isArray(p) ? p : [p]; }
+    );
 
     var isLoggedIn = user.isLoggedIn();
 
@@ -207,21 +219,42 @@ function(
       for (var ii = 0; ii < requiredMatches; ++ii)
       {
         var requiredPrivilege = allPrivileges[ii];
+        var type = typeof requiredPrivilege;
 
-        if (typeof requiredPrivilege !== 'string')
+        if (type === 'function')
+        {
+          actualMatches += requiredPrivilege() ? 1 : 0;
+        }
+        else if (type !== 'string')
         {
           requiredMatches -= 1;
-
-          continue;
         }
-
-        if (requiredPrivilege === 'USER')
+        else if (requiredPrivilege === 'USER')
         {
           actualMatches += isLoggedIn ? 1 : 0;
         }
+        else if (requiredPrivilege === 'LOCAL')
+        {
+          actualMatches += user.data.local ? 1 : 0;
+        }
+        else if (requiredPrivilege === 'EMBEDDED')
+        {
+          actualMatches += embedded.isEnabled() ? 1 : 0;
+        }
         else if (/^FN:/.test(requiredPrivilege))
         {
-          actualMatches += user.data.prodFunction === requiredPrivilege.substring(3) ? 1 : 0;
+          var requiredFn = requiredPrivilege.substring(3);
+
+          if (requiredFn.indexOf('*') !== -1)
+          {
+            var requiredFnRe = new RegExp('^' + requiredFn.replace(/\*/g, '.*?') + '$');
+
+            actualMatches += requiredFnRe.test(user.data.prodFunction) ? 1 : 0;
+          }
+          else
+          {
+            actualMatches += user.data.prodFunction === requiredFn ? 1 : 0;
+          }
         }
         else
         {

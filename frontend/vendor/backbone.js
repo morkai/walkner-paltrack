@@ -344,13 +344,20 @@
       // For each `set` attribute, update or delete the current value.
       for (attr in attrs) {
         val = attrs[attr];
-        if (!_.isEqual(current[attr], val)) changes.push(attr);
+        if (!_.isEqual(current[attr], val)) {
+          changes.push(attr);
+          if (!unset) {
+            current[attr] = val;
+          }
+        }
         if (!_.isEqual(prev[attr], val)) {
           this.changed[attr] = val;
         } else {
           delete this.changed[attr];
         }
-        unset ? delete current[attr] : current[attr] = val;
+        if (unset) {
+          delete current[attr];
+        }
       }
 
       // Trigger all relevant attribute changes.

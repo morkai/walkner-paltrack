@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'app/i18n',
@@ -29,20 +29,20 @@ define([
 
     breadcrumbs: function()
     {
-      var model = this[this.modelProperty];
+      var model = this.getDefaultModel();
 
       return createPageBreadcrumbs(this, [
-        model.getLabel() || t.bound(model.getNlsDomain(), 'BREADCRUMBS:details')
+        model.getLabel() || t.bound(model.getNlsDomain(), 'BREADCRUMB:details')
       ]);
     },
 
     actions: function()
     {
-      var model = this[this.modelProperty];
+      var model = this.getDefaultModel();
 
       return [
-        pageActions.edit(model, model.privilegePrefix + ':MANAGE'),
-        pageActions.delete(model, model.privilegePrefix + ':MANAGE')
+        pageActions.edit(model),
+        pageActions.delete(model)
       ];
     },
 
@@ -64,7 +64,14 @@ define([
 
     load: function(when)
     {
-      return when(this[this.modelProperty].fetch(this.fetchOptions));
+      var model = this.getDefaultModel();
+
+      if (model.isSynced && model.isSynced())
+      {
+        return when();
+      }
+
+      return when(model.fetch(this.fetchOptions));
     },
 
     getViewClass: function()
@@ -75,7 +82,7 @@ define([
     getViewOptions: function()
     {
       var options = {
-        model: this[this.modelProperty]
+        model: this.getDefaultModel()
       };
 
       if (typeof this.detailsTemplate === 'function')
@@ -89,6 +96,11 @@ define([
       }
 
       return options;
+    },
+
+    getDefaultModel: function()
+    {
+      return this[this.modelProperty];
     }
 
   });

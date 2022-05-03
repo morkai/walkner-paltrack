@@ -1,6 +1,6 @@
 <div class="page">
   <div class="hd <%- hdHidden ? 'hidden' : '' %>">
-    <nav class="navbar navbar-default"></nav>
+    <nav class="navbar <%- navbarClassName %>"></nav>
     <div class="page-alerts"></div>
     <div class="page-header">
       <ul class="page-actions"></ul>
@@ -8,9 +8,9 @@
     </div>
   </div>
   <div class="bd"></div>
-  <div class="ft">
+  <div class="ft <%- ftHidden ? 'hidden' : '' %>">
     <p>
-      <%- t('core', 'APP_NAME') %>
+      <%- t.has('core', 'APP_NAME:' + window.location.hostname) ? t('core', 'APP_NAME:' + window.location.hostname) : t('core', 'APP_NAME') %>
       <% if (changelogUrl) { %>
       <a href="<%- changelogUrl %>">v<%- version %></a>
       <% } else { %>

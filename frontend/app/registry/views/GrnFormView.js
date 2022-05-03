@@ -154,7 +154,7 @@ define([
       var formData = this.model.toJSON();
 
       formData.date = time.format(formData.date, 'YYYY-MM-DD');
-
+console.log(formData);
       return formData;
     },
 

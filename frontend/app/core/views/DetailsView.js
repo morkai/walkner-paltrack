@@ -1,10 +1,12 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
+  'underscore',
   'app/i18n',
   '../View',
   '../util/onModelDeleted'
 ], function(
+  _,
   t,
   View,
   onModelDeleted
@@ -24,14 +26,24 @@ define([
       return topics;
     },
 
-    getTemplateData: function()
+    initialize: function()
+    {
+      View.prototype.initialize.apply(this, arguments);
+
+      this.once('afterRender', function()
+      {
+        this.listenTo(this.model, 'change', this.onModelChanged);
+      });
+    },
+
+    serialize: function()
     {
       var nlsDomain = this.model.getNlsDomain();
 
-      return {
+      return _.assign(View.prototype.serialize.apply(this, arguments), {
         panelTitle: t(t.has(nlsDomain, 'PANEL:TITLE:details') ? nlsDomain : 'core', 'PANEL:TITLE:details'),
         model: this.serializeDetails(this.model)
-      };
+      });
     },
 
     serializeDetails: function(model)
@@ -49,29 +61,29 @@ define([
       return model.toJSON();
     },
 
-    beforeRender: function()
+    editModel: function(remoteModel)
     {
-      this.stopListening(this.model, 'change', this.render);
-    },
-
-    afterRender: function()
-    {
-      this.listenToOnce(this.model, 'change', this.render);
+      this.model.set(remoteModel);
     },
 
     onModelEdited: function(message)
     {
-      var remoteModel = message.model;
+      var remoteModel = this.model.parse ? this.model.parse(message.model) : message.model;
 
       if (remoteModel && remoteModel._id === this.model.id)
       {
-        this.model.set(remoteModel);
+        this.editModel(remoteModel);
       }
     },
 
     onModelDeleted: function(message)
     {
       onModelDeleted(this.broker, this.model, message);
+    },
+
+    onModelChanged: function()
+    {
+      this.render();
     }
 
   });

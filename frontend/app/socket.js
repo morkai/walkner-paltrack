@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -16,16 +16,22 @@ function(
 
   var query = {};
 
-  if (window.COMPUTERNAME)
+  if (window.ArrayBuffer && window.Uint8Array && window.TextDecoder)
   {
-    query.COMPUTERNAME = window.COMPUTERNAME;
+    query.binary = '1';
+  }
+
+  if (window.WMES_GET_COMMON_HEADERS)
+  {
+    Object.assign(query, window.WMES_GET_COMMON_HEADERS());// eslint-disable-line new-cap
   }
 
   var socket = new Socket(sio({
     path: '/sio',
     transports: ['websocket'],
-    timeout: 10000,
-    reconnectionDelay: 500,
+    timeout: 20000,
+    reconnectionDelay: 1000,
+    reconnectionDelayMax: window.ENV === 'development' ? 1000 : 20000,
     autoConnect: false,
     query: query
   }));

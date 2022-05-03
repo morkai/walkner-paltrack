@@ -1,10 +1,10 @@
 {
-  "BREADCRUMBS:browse": "Użytkownicy",
-  "BREADCRUMBS:account": "Moje konto",
-  "BREADCRUMBS:addForm": "Dodawanie",
-  "BREADCRUMBS:editForm": "Edycja",
-  "BREADCRUMBS:ACTION_FORM:delete": "Usuwanie",
-  "breadcrumbs:logIn": "Logowanie do systemu",
+  "BREADCRUMB:browse": "Użytkownicy",
+  "BREADCRUMB:account": "Moje konto",
+  "BREADCRUMB:addForm": "Dodawanie",
+  "BREADCRUMB:editForm": "Edycja",
+  "BREADCRUMB:ACTION_FORM:delete": "Usuwanie",
+  "BREADCRUMB:logIn": "Logowanie do systemu",
 
   "MSG:LOADING_FAILURE": "Ładowanie użytkowników nie powiodło się :(",
   "MSG:LOADING_SINGLE_FAILURE": "Ładowanie użytkownika nie powiodło się :(",

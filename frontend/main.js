@@ -1,12 +1,25 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 (function()
 {
   'use strict';
 
+  if (console)
+  {
+    console.json = function()
+    {
+      console.log.apply(
+        console,
+        Array.prototype.slice.call(arguments).map(
+          function(arg) { return JSON.parse(JSON.stringify(arg)); }
+        )
+      );
+    };
+  }
+
   var lastError = null;
 
-  window.logBrowserError = function(error, event)
+  function logBrowserError(error, event)
   {
     if (!window.fetch)
     {
@@ -18,7 +31,7 @@
       return;
     }
 
-    lastError = error.stack;
+    lastError = error.stack || '';
 
     var stack = lastError.split(/\s+at\s+/);
 
@@ -61,93 +74,12 @@
             innerHeight: window.innerHeight
           },
           location: window.location.href,
-          history: JSON.parse(localStorage.getItem('WMES_RECENT_LOCATIONS') || [])
+          history: JSON.parse(require('app/data/localStorage').getItem('WMES_RECENT_LOCATIONS') || [])
         },
         versions: window.updater && window.updater.versions || {}
       })
     }).then(function() {}, function() {});
-  };
-
-  window.addEventListener('error', function(e)
-  {
-    window.logBrowserError(e.error, e);
-  });
-
-  var navigator = window.navigator;
-  var location = window.location;
-
-  if (location.protocol === 'http:' && location.pathname === '/' && location.port === '')
-  {
-    location.protocol = 'https:';
   }
-
-  if (!location.origin)
-  {
-    location.origin = location.protocol + '//' + location.hostname + (location.port ? (':' + location.port) : '');
-  }
-
-  window.COMPUTERNAME = (location.href.match(/COMPUTERNAME=(.*?)(?:(?:#|&).*)?$/i) || [null, null])[1];
-  window.INSTANCE_ID = Math.round(Date.now() + Math.random() * 9999999).toString(36).toUpperCase();
-  window.IS_EMBEDDED = window.parent !== window;
-  window.IS_IE = navigator.userAgent.indexOf('Trident/') !== -1;
-  window.IS_MOBILE = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series[46]0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino|android|ipad|playbook|silk/i
-    .test(navigator.userAgent);
-  window.IS_LINUX = navigator.userAgent.indexOf('X11; Linux') !== -1;
-
-  document.body.classList.toggle('is-ie', window.IS_IE);
-  document.body.classList.toggle('is-mobile', window.IS_MOBILE);
-  document.body.classList.toggle('is-embedded', window.IS_EMBEDDED);
-  document.body.classList.toggle('is-linux', window.IS_LINUX);
-
-  if (window.ENV === 'production')
-  {
-    var matches = location.hash.match(/^(?:#proxy=([0-9]+))?(#.*?)?$/);
-
-    if (!matches || matches[1] === undefined || matches[1] === localStorage.getItem('PROXY'))
-    {
-      location.href = '/redirect?referrer=' + encodeURIComponent(
-        location.origin + '/#proxy=' + Date.now() + (matches && matches[2] ? matches[2] : '#')
-      );
-
-      return;
-    }
-
-    location.hash = matches && matches[2] ? matches[2] : '#';
-
-    localStorage.setItem('PROXY', matches[1]);
-  }
-
-  if (window.IS_EMBEDDED)
-  {
-    window.parent.postMessage({type: 'init', host: location.hostname}, '*');
-  }
-
-  if (window.SERVICE_WORKER
-    && !window.IS_EMBEDDED
-    && !window.IS_LINUX
-    && window.navigator.serviceWorker
-    && window.navigator.serviceWorker.getRegistrations
-    && location.protocol === 'https:'
-    && location.pathname === '/')
-  {
-    window.navigator.serviceWorker.register('/sw.js')
-      .then(function() { console.log('[sw] Registered!'); })
-      .catch(function(err) { console.error('[sw] Failed to register:', err); });
-  }
-
-  var oldSend = XMLHttpRequest.prototype.send;
-
-  XMLHttpRequest.prototype.send = function()
-  {
-    var headers = getCommonHeaders();
-
-    Object.keys(headers).forEach(function(key)
-    {
-      this.setRequestHeader(key, headers[key]);
-    }, this);
-
-    return oldSend.apply(this, arguments);
-  };
 
   function getCommonHeaders()
   {
@@ -173,12 +105,164 @@
       headers['X-WMES-LINE'] = window.WMES_LINE_ID;
     }
 
+    if (window.WMES_STATION)
+    {
+      headers['X-WMES-STATION'] = window.WMES_STATION;
+    }
+
+    if (window.socket && window.socket.getId)
+    {
+      headers['X-WMES-SOCKET'] = window.socket.getId();
+    }
+
     return headers;
   }
+
+  window.WMES_GET_COMMON_HEADERS = getCommonHeaders;
+  window.WMES_LOG_BROWSER_ERROR = logBrowserError;
+
+  window.addEventListener('error', function(e)
+  {
+    logBrowserError(e.error, e);
+  });
+
+  var navigator = window.navigator;
+  var location = window.location;
+
+  if (location.protocol === 'http:' && location.pathname === '/' && location.port === '')
+  {
+    location.protocol = 'https:';
+  }
+
+  if (!location.origin)
+  {
+    location.origin = location.protocol + '//' + location.hostname + (location.port ? (':' + location.port) : '');
+  }
+
+  window.COMPUTERNAME = (location.href.match(/COMPUTERNAME=(.*?)(?:(?:#|&).*)?$/i) || [null, null])[1];
+  window.INSTANCE_ID = Math.round(Date.now() + Math.random() * 9999999).toString(36).toUpperCase();
+  window.IS_EMBEDDED = window.IS_EMBEDDED
+    || window.parent !== window
+    || window.location.href.indexOf('_embedded=1') !== -1;
+  window.IS_IE = navigator.userAgent.indexOf('Trident/') !== -1;
+  window.IS_MOBILE = /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series[46]0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino|android|ipad|playbook|silk/i
+    .test(navigator.userAgent);
+  window.IS_LINUX = navigator.userAgent.indexOf('X11; Linux') !== -1;
+
+  if (window.IS_EMBEDDED
+    || window.IS_LINUX
+    || !navigator.serviceWorker
+    || !navigator.serviceWorker.getRegistrations
+    || location.protocol !== 'https:'
+    || location.pathname !== '/')
+  {
+    delete window.SERVICE_WORKER;
+  }
+
+  document.body.classList.toggle('is-ie', window.IS_IE);
+  document.body.classList.toggle('is-mobile', window.IS_MOBILE);
+  document.body.classList.toggle('is-embedded', window.IS_EMBEDDED);
+  document.body.classList.toggle('is-linux', window.IS_LINUX);
+
+  document.body.dataset.appId = window.WMES_APP_ID;
+
+  try
+  {
+    if (window.IS_EMBEDDED && window.parent.WMES_APP_ID)
+    {
+      document.body.dataset.parentAppId = window.parent.WMES_APP_ID;
+    }
+  }
+  catch (err) {} // eslint-disable-line no-empty
+
+  if (false && window.ENV === 'testing')
+  {
+    var matches = location.hash.match(/^(?:#proxy=([0-9]+))?(#.*?)?$/);
+
+    if (!matches || matches[1] === undefined || matches[1] === localStorage.getItem('PROXY'))
+    {
+      location.href = '/redirect?referrer=' + encodeURIComponent(
+        location.origin + location.pathname + '#proxy=' + Date.now() + (matches && matches[2] ? matches[2] : '#')
+      );
+
+      return;
+    }
+
+    location.hash = matches && matches[2] ? matches[2] : '#';
+
+    localStorage.setItem('PROXY', matches[1]);
+  }
+
+  if (window.IS_EMBEDDED)
+  {
+    window.parent.postMessage({type: 'init', host: location.hostname}, '*');
+
+    window.addEventListener('message', function onInit(e)
+    {
+      var msg = e.data;
+
+      if (msg && msg.type === 'init')
+      {
+        window.removeEventListener('message', onInit);
+
+        window.WMES_CLIENT = msg.data;
+      }
+    });
+  }
+
+  if (window.SERVICE_WORKER)
+  {
+    window.navigator.serviceWorker.register(window.SERVICE_WORKER)
+      .then(function() { console.log('[sw] Registered!'); })
+      .catch(function(err) { console.error('[sw] Failed to register:', err); });
+  }
+
+  var oldSend = XMLHttpRequest.prototype.send;
+
+  XMLHttpRequest.prototype.send = function()
+  {
+    var headers = getCommonHeaders();
+
+    Object.keys(headers).forEach(function(key)
+    {
+      this.setRequestHeader(key, headers[key]);
+    }, this);
+
+    return oldSend.apply(this, arguments);
+  };
 
   var domains = [];
   var i18n = null;
   var select2 = null;
+
+  require.ifDefined = function(id)
+  {
+    return require.defined(id) ? require(id) : null;
+  };
+
+  require.ifSpecified = function(id)
+  {
+    return require.specified(id) ? require(id) : null;
+  };
+
+  var oldMakeRequired = require.s.contexts._.makeRequire;
+
+  require.s.contexts._.makeRequire = function()
+  {
+    var localRequire = oldMakeRequired.apply(this, arguments);
+
+    localRequire.ifDefined = function(id)
+    {
+      return localRequire.defined(id) ? localRequire(id) : null;
+    };
+
+    localRequire.ifSpecified = function(id)
+    {
+      return localRequire.specified(id) ? localRequire(id) : null;
+    };
+
+    return localRequire;
+  };
 
   require.onError = function(err)
   {
@@ -248,10 +332,11 @@
   var appCache = window.applicationCache;
 
   if (!appCache
+    || appCache.status === 0
     || !navigator.onLine
     || !document.getElementsByTagName('html')[0].hasAttribute('manifest'))
   {
-    return window.requireApp();
+    return tryRequireApp(0);
   }
 
   var reload = location.reload.bind(location);
@@ -268,7 +353,7 @@
     appCache.onobsolete = null;
     appCache.onupdateready = null;
 
-    window.requireApp();
+    tryRequireApp();
   }
 
   appCache.onnoupdate = doStartApp;
@@ -276,4 +361,21 @@
   appCache.onerror = doStartApp;
   appCache.onobsolete = reload;
   appCache.onupdateready = reload;
+
+  function tryRequireApp(i)
+  {
+    if (i === 10)
+    {
+      throw new Error('No window.requireApp()?!');
+    }
+
+    if (typeof window.requireApp === 'function')
+    {
+      window.requireApp();
+    }
+    else
+    {
+      setTimeout(tryRequireApp, 1000, i + 1);
+    }
+  }
 })();

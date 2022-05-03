@@ -353,6 +353,11 @@ the specific language governing permissions and limitations under the Apache Lic
 
 
     function markMatch(text, term, markup, escapeMarkup) {
+        if (!term.trim().length) {
+            markup.push(escapeMarkup(text));
+            return;
+        }
+
         var match=stripDiacritics(text.toUpperCase()).indexOf(stripDiacritics(term.toUpperCase())),
             tl=term.length;
 
@@ -2004,6 +2009,7 @@ the specific language governing permissions and limitations under the Apache Lic
             }
             if (this.opts.shouldFocusInput(this)) {
                 this.search.focus();
+                if (!this.search) return;
                 // move the cursor to the end after focussing, otherwise it will be at the beginning and
                 // new text will appear *before* focusser.val()
                 el = this.search.get(0);
@@ -2011,7 +2017,8 @@ the specific language governing permissions and limitations under the Apache Lic
                     range = el.createTextRange();
                     range.collapse(false);
                     range.select();
-                } else if (el.setSelectionRange) {
+                }
+                else if (el.setSelectionRange) {
                     len = this.search.val().length;
                     el.setSelectionRange(len, len);
                 }
@@ -2111,7 +2118,7 @@ the specific language governing permissions and limitations under the Apache Lic
             this.focusser.attr("id", "s2id_autogen"+idSuffix);
 
             elementLabel = $("label[for='" + this.opts.element.attr("id") + "']");
-            this.opts.element.focus(this.bind(function () { this.focus(); }));
+            this.opts.element.on('focus.select2', this.bind(function () { this.focus(); }));
 
             this.focusser.prev()
                 .text(elementLabel.text())
@@ -2225,7 +2232,7 @@ the specific language governing permissions and limitations under the Apache Lic
                 this.close();
 
                 if (this.selection) {
-                    this.selection.focus();
+                    this.focus();
                 }
             }));
 
@@ -2277,7 +2284,6 @@ the specific language governing permissions and limitations under the Apache Lic
             this.initContainerWidth();
             this.opts.element.hide();
             this.setPlaceholder();
-
         },
 
         // single
@@ -2706,7 +2712,7 @@ the specific language governing permissions and limitations under the Apache Lic
             this.search.prev()
                 .text($("label[for='" + this.opts.element.attr("id") + "']").text())
                 .attr('for', this.search.attr('id'));
-            this.opts.element.focus(this.bind(function () { this.focus(); }));
+            this.opts.element.on('focus.select2', this.bind(function () { this.focus(); }));
 
             this.search.on("input paste", this.bind(function() {
                 if (this.search.attr('placeholder') && this.search.val().length == 0) return;

@@ -1,7 +1,8 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
+  'jquery',
   'app/i18n',
   '../util/bindLoadingMessage',
   '../util/pageActions',
@@ -11,6 +12,7 @@ define([
   'app/core/templates/listPage'
 ], function(
   _,
+  $,
   t,
   bindLoadingMessage,
   pageActions,
@@ -60,13 +62,26 @@ define([
       this.filterView = this.createFilterView();
 
       this.listenTo(this.filterView, 'filterChanged', this.onFilterChanged);
+      this.listenTo(this.listView, 'showFilter', this.onShowFilter);
     },
 
     createListView: function()
     {
-      var ListViewClass = this.ListView || this.options.ListView || ListView;
+      var ListViewClass = this.getListViewClass();
 
-      return new ListViewClass({
+      return new ListViewClass(this.getListViewOptions());
+    },
+
+    getListViewClass: function()
+    {
+      return this.ListView || this.options.ListView || ListView;
+    },
+
+    getListViewOptions: function()
+    {
+      var ListViewClass = this.getListViewClass();
+
+      return {
         collection: this.collection,
         model: this.collection ? undefined : this.getDefaultModel(),
         columns: this.options.columns
@@ -84,16 +99,26 @@ define([
           ListViewClass.prototype.className,
           'is-clickable'
         ], function(className) { return className !== undefined; })
-      });
+      };
     },
 
     createFilterView: function()
     {
-      var FilterViewClass = this.FilterView || this.options.FilterView;
+      var FilterViewClass = this.getFilterViewClass();
 
-      return new FilterViewClass({
+      return new FilterViewClass(this.getFilterViewOptions());
+    },
+
+    getFilterViewClass: function()
+    {
+      return this.FilterView || this.options.FilterView;
+    },
+
+    getFilterViewOptions: function()
+    {
+      return {
         model: this.getDefaultModel()
-      });
+      };
     },
 
     load: function(when)
@@ -106,6 +131,23 @@ define([
       this.getDefaultModel().rqlQuery = newRqlQuery;
 
       this.refreshCollection();
+    },
+
+    onShowFilter: function(filter)
+    {
+      if (filter === 'rid')
+      {
+        var $input = $('.page-actions-jump .form-control');
+
+        if ($input.length)
+        {
+          $input.focus();
+
+          return;
+        }
+      }
+
+      this.filterView.showFilter(filter);
     },
 
     refreshCollection: function()

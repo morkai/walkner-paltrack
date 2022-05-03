@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -8,58 +8,50 @@ module.exports = (app, express) =>
 {
   const updaterModule = app[app.options.updaterId || 'updater'];
   const userModule = app[app.options.userId || 'user'];
-  const mongoose = app[app.options.mongooseId || 'mongoose'];
 
   const ROOT_USER = userModule ? JSON.stringify(_.omit(userModule.root, 'password')) : '{}';
   const GUEST_USER = userModule ? JSON.stringify(userModule.guest) : '{}';
   const PRIVILEGES = userModule ? JSON.stringify(userModule.config.privileges) : '[]';
   const MODULES = JSON.stringify(app.options.modules.map(m => m.id || m));
-  const TRANSPORT_KINDS = JSON.stringify(
-    mongoose && _.includes(mongoose.modelNames(), 'TransportOrder')
-      ? mongoose.model('TransportOrder').KINDS
-      : []
-  );
+  const DASHBOARD_URL_AFTER_LOG_IN = JSON.stringify(app.options.dashboardUrlAfterLogIn || '/');
 
-  let requirejsPaths = null;
-  let requirejsShim = null;
-
-  app.broker
-    .subscribe('updater.newVersion', reloadRequirejsConfig)
-    .setFilter(message => message.service === 'frontend');
-
-  reloadRequirejsConfig();
   setUpFrontendVersionUpdater();
 
   express.get('/', showIndex);
 
   express.get('/redirect', redirectRoute);
 
-  express.options('/time', (req, res) =>
-  {
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'GET');
-    res.set('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || '*');
-    res.end();
-  });
+  express.options('/ping', cors, (req, res) => res.end());
+  express.get('/ping', cors, (req, res) => res.format({
+    text: () =>
+    {
+      res.send('pong');
+    },
+    json: () =>
+    {
+      res.json('pong');
+    }
+  }));
 
-  express.get('/time', (req, res) =>
+  express.options('/time', cors, (req, res) => res.end());
+  express.get('/time', cors, (req, res) =>
   {
-    res.set('Access-Control-Allow-Origin', '*');
-    res.set('Access-Control-Allow-Methods', 'GET');
-    res.set('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || '*');
     res.send(Date.now().toString());
   });
 
-  express.get('/config.js', sendRequireJsConfig);
-
-  function showIndex(req, res)
+  function showIndex(req, res, next)
   {
+    if (!updaterModule)
+    {
+      return next(app.createError('No app available.', 'SERVICE_UNAVAILABLE', 503));
+    }
+
     res.render('index', updaterModule.getAppTemplateData('frontend', req, {
       ROOT_USER,
       GUEST_USER,
       PRIVILEGES,
       MODULES,
-      TRANSPORT_KINDS
+      DASHBOARD_URL_AFTER_LOG_IN
     }));
   }
 
@@ -68,30 +60,18 @@ module.exports = (app, express) =>
     res.redirect(req.query.referrer || '/');
   }
 
-  function sendRequireJsConfig(req, res)
-  {
-    res.type('js');
-    res.render('config.js.ejs', {
-      cache: false,
-      paths: requirejsPaths,
-      shim: requirejsShim
-    });
-  }
-
-  function reloadRequirejsConfig()
-  {
-    const configPath = require.resolve('../../config/require');
-
-    delete require.cache[configPath];
-
-    const requirejsConfig = require(configPath);
-
-    requirejsPaths = JSON.stringify(requirejsConfig.paths);
-    requirejsShim = JSON.stringify(requirejsConfig.shim);
-  }
-
   function setUpFrontendVersionUpdater()
   {
     app.broker.subscribe('dictionaries.updated', () => updaterModule.updateFrontendVersion());
+  }
+
+  function cors(req, res, next)
+  {
+    res.set('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.set('Access-Control-Allow-Methods', 'GET');
+    res.set('Access-Control-Allow-Credentials', 'true');
+    res.set('Access-Control-Allow-Headers', req.headers['access-control-request-headers'] || '');
+
+    next();
   }
 };

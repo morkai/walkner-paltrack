@@ -28,7 +28,7 @@ define([
     layoutName: 'page',
 
     breadcrumbs: [
-      t.bound('registry', 'BREADCRUMBS:ob:browse')
+      t.bound('registry', 'BREADCRUMB:ob:browse')
     ],
 
     actions: function()

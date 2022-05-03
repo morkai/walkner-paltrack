@@ -1,15 +1,19 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
   'app/i18n',
+  'app/viewport',
   '../View',
-  'app/core/templates/error'
+  'app/core/templates/error',
+  'app/data/localStorage'
 ], function(
   _,
   t,
+  viewport,
   View,
-  template
+  template,
+  localStorage
 ) {
   'use strict';
 
@@ -18,12 +22,29 @@ define([
     pageId: 'error',
 
     events: {
-      'click #-notify > a': function()
+      'change #-comment': function()
+      {
+        var $comment = this.$id('comment');
+        var comment = $comment.val().trim();
+
+        if (comment.replace(/[^a-zA-Z]+/g, '').length < 3)
+        {
+          comment = '';
+        }
+
+        $comment.val(comment);
+      },
+      'submit form': function()
       {
         var page = this;
         var body = page.buildMail();
 
-        page.$id('notify').html('<i class="fa fa-spinner fa-spin"></i>');
+        page.$id('comment').prop('disabled', true);
+        page.$id('notify')
+          .prop('disabled', true)
+          .find('.fa')
+          .removeClass('fa-envelope')
+          .addClass('fa-spinner fa-spin');
 
         page.trySendMail('/mail;send', body, function(err)
         {
@@ -81,8 +102,7 @@ define([
             code += ':guest';
           }
 
-          return template({
-            idPrefix: page.idPrefix,
+          return page.renderPartialHtml(template, {
             message: t('core', 'ERROR:' + code + ':message'),
             notify: page.notify
           });
@@ -122,6 +142,9 @@ define([
     trySendMail: function(url, body, done)
     {
       var user = require('app/user');
+      var appName = t.has('core', 'APP_NAME:' + window.location.hostname)
+        ? t('core', 'APP_NAME:' + window.location.hostname)
+        : t('core', 'APP_NAME');
 
       this.ajax({
         method: 'POST',
@@ -130,7 +153,7 @@ define([
           secretKey: this.secretKey,
           to: this.adminEmail,
           subject: t('core', 'ERROR:notify:subject', {
-            APP_NAME: t('core', 'APP_NAME'),
+            APP_NAME: appName,
             code: this.model.code,
             user: user.getLabel()
           }),
@@ -149,7 +172,25 @@ define([
 
     handleMailSent: function(err)
     {
-      this.$id('notify').html(t('core', 'ERROR:notify:' + (err ? 'failure' : 'success')));
+      if (err)
+      {
+        viewport.msg.show({
+          type: 'error',
+          time: 2500,
+          text: t('core', 'ERROR:notify:failure')
+        });
+
+        this.$id('comment').prop('disabled', true);
+        this.$id('notify')
+          .prop('disabled', false)
+          .find('.fa')
+          .removeClass('fa-spinner fa-spin')
+          .addClass('fa-envelope');
+      }
+      else
+      {
+        this.$('form').html('<p>' + t('core', 'ERROR:notify:success') + '</p>');
+      }
     },
 
     buildMail: function()
@@ -168,12 +209,13 @@ define([
         );
       };
 
+      prop('comment', this.$id('comment').val().trim());
       prop('date', new Date().toLocaleString());
       prop('user', '<a href="' + window.location.origin + '/#users/' + user.data._id + '">' + user.getLabel() + '</a>'
         + '<br>' + json(_.assign({cname: window.COMPUTERNAME}, _.omit(user.data, 'privilegesMap')), null, 2));
       prop('router.currentRequest', this.model.req ? this.model.req.url : '?');
       prop('router.referrer', this.model.previousUrl || '?');
-      prop('router.recent', json(JSON.parse(localStorage.WMES_RECENT_LOCATIONS || '[]')));
+      prop('router.recent', json(JSON.parse(localStorage.getItem('WMES_RECENT_LOCATIONS') || '[]')));
       prop('response.code', this.model.code);
       prop('response.body', this.model.xhr ? this.model.xhr.responseText : '');
       prop('window.location.href', window.location.href);

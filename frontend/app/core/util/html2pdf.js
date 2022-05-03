@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -41,7 +41,7 @@ define([
     {
       if (typeof printer === 'string' && /^[a-f0-9]{24}$/.test(printer))
       {
-        printInPrinter(msg, printer, res.hash);
+        printInPrinter(msg, options, printer, res.hash);
       }
       else
       {
@@ -57,19 +57,26 @@ define([
         time: 2500,
         text: t('core', 'html2pdf:failure')
       });
+
+      broker.publish('html2pdf.completed');
+
+      if (options.done)
+      {
+        options.done();
+      }
     });
   };
 
-  function printInBrowser(msg, windowOptions, hash)
+  function printInBrowser(msg, options, hash)
   {
     var width = Math.min(window.screen.availWidth - 200, 1400);
 
-    windowOptions = _.assign({
+    var windowOptions = _.assign({
       top: 80,
       width: width,
       height: Math.min(window.screen.availHeight - 160, 800),
       left: window.screen.availWidth - width - 80
-    }, _.pick(windowOptions, ['top', 'left', 'width', 'height']));
+    }, _.pick(options, ['top', 'left', 'width', 'height']));
 
     var features = [];
 
@@ -78,7 +85,16 @@ define([
       features.push(k + '=' + windowOptions[k]);
     });
 
-    var win = window.open('/html2pdf/' + hash + '.pdf', '_blank', features.join(','));
+    var href = '/html2pdf/' + hash;
+
+    if (options.filename)
+    {
+      href += '/' + options.filename;
+    }
+
+    href += '.pdf';
+
+    var win = window.open(href, '_blank', features.join(','));
 
     if (!win)
     {
@@ -97,9 +113,14 @@ define([
     }
 
     broker.publish('html2pdf.completed');
+
+    if (options.done)
+    {
+      options.done();
+    }
   }
 
-  function printInPrinter(msg, printer, hash)
+  function printInPrinter(msg, options, printer, hash)
   {
     viewport.msg.hide(msg);
 
@@ -140,6 +161,11 @@ define([
     req.always(function()
     {
       broker.publish('html2pdf.completed');
+
+      if (options.done)
+      {
+        options.done();
+      }
     });
   }
 });

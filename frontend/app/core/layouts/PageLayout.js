@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -75,6 +75,8 @@ define([
   {
     return _.assign(View.prototype.serialize.call(this), {
       hdHidden: !!this.options.hdHidden,
+      ftHidden: !!this.options.ftHidden,
+      navbarClassName: this.options.navbarClassName || 'navbar-default',
       version: this.options.version,
       changelogUrl: this.options.changelogUrl
     });
@@ -147,15 +149,17 @@ define([
       this.setClassName(page.pageClassName);
     }
 
+    if (page.title)
+    {
+      this.setTitle(page.title, page);
+    }
+
     if (page.breadcrumbs)
     {
       this.setBreadcrumbs(page.breadcrumbs, page);
     }
-    else if (page.title)
-    {
-      this.setTitle(page.title, page);
-    }
-    else
+
+    if (!page.breadcrumbs && !page.title)
     {
       this.changeTitle();
     }
@@ -188,14 +192,19 @@ define([
    */
   PageLayout.prototype.setClassName = function(className)
   {
-    if (this.model.className)
+    if (document.body)
     {
-      document.body.classList.remove(this.model.className);
-    }
+      var $body = $(document.body);
 
-    if (this.isRendered() && className)
-    {
-      document.body.classList.add(className);
+      if (this.model.className)
+      {
+        $body.removeClass(this.model.className);
+      }
+
+      if (this.isRendered() && className)
+      {
+        $body.addClass(className);
+      }
     }
 
     this.model.className = className;
@@ -249,7 +258,10 @@ define([
       this.renderBreadcrumbs();
     }
 
-    this.changeTitle();
+    if (!this.model.page)
+    {
+      this.changeTitle();
+    }
 
     return this;
   };
@@ -315,7 +327,9 @@ define([
       actions = [actions];
     }
 
-    this.model.actions = actions.map(this.prepareAction.bind(this, context));
+    this.model.actions = actions
+      .filter(_.isObject)
+      .map(this.prepareAction.bind(this, context));
 
     if (this.$actions)
     {
@@ -423,7 +437,7 @@ define([
    */
   PageLayout.prototype.adjustBreadcrumbsPosition = function()
   {
-    if (window.innerWidth < 768)
+    if (window.innerWidth < 801)
     {
       var top = (this.$('.navbar-header').outerHeight() - this.$breadcrumbs.outerHeight()) / 2;
 
@@ -444,6 +458,12 @@ define([
     for (var i = 0, l = actions.length; i < l; ++i)
     {
       var action = actions[i];
+
+      if (action.visible === false)
+      {
+        continue;
+      }
+
       var privileges = action.privileges;
 
       if (privileges)
@@ -506,7 +526,10 @@ define([
         }
         else
         {
-          html += '<a id="' + id + '" class="' + className + '" href="' + action.href + '">';
+          html += '<a id="' + id
+            + '" class="' + className
+            + '" href="' + action.href
+            + '" target="' + (action.target || '_self') + '">';
         }
 
         if (typeof action.icon === 'string')

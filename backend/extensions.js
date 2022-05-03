@@ -1,10 +1,11 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 /* eslint-disable no-extend-native */
 
 'use strict';
 
-const util = require('util');
+const {inspect} = require('util');
+const {formatDateTime} = require('util/dateFormatter');
 
 Object.defineProperty(Error.prototype, 'toJSON', {
   configurable: false,
@@ -32,7 +33,7 @@ Object.defineProperty(Error.prototype, 'toJSON', {
 
 console.inspect = function(value, depth, colors)
 {
-  console.log(util.inspect(value, {depth: depth || null, colors: colors !== false}));
+  console.log(inspect(value, {depth: depth || null, colors: colors !== false}));
 };
 
 console.bench = function(label, context, func)
@@ -46,9 +47,16 @@ console.bench = function(label, context, func)
   return result;
 };
 
-if (process.env.NODE_ENV === 'development')
+let chalk = null;
+
+try
 {
-  const chalk = require('chalk');
+  chalk = require('chalk');
+}
+catch (err) {} // eslint-disable-line no-empty
+
+if (chalk && process.env.NODE_ENV === 'development')
+{
   const SEVERITY_COLORS = {
     debug: chalk.bgRgb(255, 255, 255).rgb(0, 0, 0),
     info: chalk.bgRgb(0, 0, 255).rgb(255, 255, 255),
@@ -56,14 +64,14 @@ if (process.env.NODE_ENV === 'development')
     error: chalk.bgRgb(255, 0, 0).rgb(255, 255, 255)
   };
 
-  Object.assign(util.inspect.styles, {
+  Object.assign(inspect.styles, {
     name: 'white',
     date: 'yellow'
   });
 
   require('h5.main/lib/utils/log').write = (log) =>
   {
-    let line = `>>> ${log.severity.padEnd(5)} ${log.time.toISOString()}`;
+    let line = `>>> ${log.severity.padEnd(5)} ${formatDateTime(log.time, true)}`;
 
     if (log.module)
     {
@@ -113,6 +121,19 @@ if (process.env.NODE_ENV === 'development')
       console.log(line);
     }
 
+    if (log.error)
+    {
+      delete log.error.message;
+      delete log.error.stack;
+      delete log.error.code;
+      delete log.error.statusCode;
+
+      if (!Object.keys(log.error).length)
+      {
+        delete log.error;
+      }
+    }
+
     if (errorStack)
     {
       console.log(errorStack);
@@ -124,11 +145,10 @@ if (process.env.NODE_ENV === 'development')
     delete log.module;
     delete log.submodule;
     delete log.message;
-    delete log.error;
 
     if (Object.keys(log).length)
     {
-      console.log(chalk.rgb(255, 255, 255)(util.inspect(log, {colors: true})));
+      console.log(chalk.rgb(255, 255, 255)(inspect(log, {colors: true})));
     }
   };
 }

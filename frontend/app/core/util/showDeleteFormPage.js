@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -13,6 +13,12 @@ define([
   {
     var model;
     var deps = ['app/core/pages/ActionFormPage'];
+
+    if (Model && Model.Model)
+    {
+      options = Model;
+      Model = options.Model;
+    }
 
     if (typeof Model === 'string')
     {

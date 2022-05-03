@@ -1525,7 +1525,6 @@ define("socket.io", [], function() { return /******/ (function(modules) { // web
 	  debug('onclose');
 
 	  this.cleanup();
-	  this.backoff.reset();
 	  this.readyState = 'closed';
 	  this.emit('close', reason);
 
@@ -1595,7 +1594,7 @@ define("socket.io", [], function() { return /******/ (function(modules) { // web
 	Manager.prototype.onreconnect = function () {
 	  var attempt = this.backoff.attempts;
 	  this.reconnecting = false;
-	  this.backoff.reset();
+	  this.backoff.scheduleReset();
 	  this.updateSocketIds();
 	  this.emitAll('reconnect', attempt);
 	};
@@ -5266,6 +5265,7 @@ define("socket.io", [], function() { return /******/ (function(modules) { // web
 	  this.factor = opts.factor || 2;
 	  this.jitter = opts.jitter > 0 && opts.jitter <= 1 ? opts.jitter : 0;
 	  this.attempts = 0;
+		this.resetTimer = null;
 	}
 
 	/**
@@ -5276,6 +5276,7 @@ define("socket.io", [], function() { return /******/ (function(modules) { // web
 	 */
 
 	Backoff.prototype.duration = function(){
+		clearTimeout(this.resetTimer);
 	  var ms = this.ms * Math.pow(this.factor, this.attempts++);
 	  if (this.jitter) {
 	    var rand =  Math.random();
@@ -5292,7 +5293,13 @@ define("socket.io", [], function() { return /******/ (function(modules) { // web
 	 */
 
 	Backoff.prototype.reset = function(){
-	  this.attempts = 0;
+		clearTimeout(this.resetTimer);
+		this.attempts = 0;
+	};
+
+	Backoff.prototype.scheduleReset = function(){
+		clearTimeout(this.resetTimer);
+		this.resetTimer = setTimeout(this.reset.bind(this), this.max * 2);
 	};
 
 	/**

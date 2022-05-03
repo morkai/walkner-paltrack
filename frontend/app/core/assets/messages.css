@@ -13,15 +13,18 @@
   top: 1.5em;
   left: 50%;
   margin: 0;
-  padding: .5em;
+  padding: .25em .5em;
   font-size: 1em;
   font-weight: bold;
-  line-height: 1;
+  line-height: 1.4;
   text-align: center;
   background-color: #FFF;
   border: 1px solid transparent;
   box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
   opacity: 0;
+}
+.message.text-left {
+  text-align: left;
 }
 .message-inline {
   position: static;
@@ -30,6 +33,9 @@
   opacity: 1;
   text-align: left;
   font-weight: normal;
+}
+.message.text-justify {
+  text-align: justify;
 }
 .panel > .message-inline {
   box-shadow: none;
@@ -53,7 +59,8 @@
   background-color: #EAF7D9;
   border-color: #BBDF8D;
 }
-.message-error {
+.message-error,
+.message-danger {
   background-color: #FFD1D1;
   border-color: #F8ACAC;
 }

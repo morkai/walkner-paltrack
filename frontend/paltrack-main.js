@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 (function()
 {
@@ -25,14 +25,14 @@
       'app/user',
       'app/updater/index',
       'app/data/loadedModules',
-      'app/data/partners',
+      'app/core/util/embedded',
       'app/core/layouts/PageLayout',
       'app/core/layouts/PrintLayout',
       'app/core/layouts/BlankLayout',
       'app/core/views/NavbarView',
+      'app/core/templates/navbar/inner',
       'app/core/views/FormView',
       'app/users/views/LogInFormView',
-      'app/reports/views/CurrentBalanceBarView',
       'app/time',
       'app/paltrack-routes',
       'bootstrap',
@@ -58,20 +58,25 @@
     user,
     updater,
     loadedModules,
-    partners,
+    embedded,
     PageLayout,
     PrintLayout,
     BlankLayout,
     NavbarView,
+    navbarTemplate,
     FormView,
-    LogInFormView,
-    CurrentBalanceBarView)
+    LogInFormView)
   {
     var startBroker = broker.sandbox();
 
     socket.connect();
 
     moment.locale(window.appLocale);
+
+    if (!window.PRODUCTION_DATA_START_DATE)
+    {
+      window.PRODUCTION_DATA_START_DATE = moment().format('YYYY-01-01');
+    }
 
     $.ajaxSetup({
       dataType: 'json',
@@ -91,12 +96,19 @@
 
     viewport.registerLayout('page', function createPageLayout()
     {
+      var views = {};
+
+      if (!embedded.isEnabled() || window.WMES_APP_ID === 'main')
+      {
+        views['.navbar'] = createNavbarView();
+      }
+
       return new PageLayout({
-        views: {
-          '.navbar': createNavbarView(),
-          '.currentBalanceBarContainer': new CurrentBalanceBarView()
-        },
-        version: updater.getCurrentVersionString()
+        views: views,
+        version: updater.getCurrentVersionString(),
+        changelogUrl: '#changelog',
+        hdHidden: !!window.toolbar && !window.toolbar.visible && !window.IS_MOBILE,
+        navbarClassName: 'navbar-default navbar-small'
       });
     });
 
@@ -112,7 +124,11 @@
 
     broker.subscribe('page.titleChanged', function(newTitle)
     {
-      newTitle.unshift(i18n('core', 'TITLE'));
+      var title = i18n.has('core', 'TITLE:' + window.location.hostname)
+        ? i18n('core', 'TITLE:' + window.location.hostname)
+        : i18n('core', 'TITLE');
+
+      newTitle.unshift(title);
 
       document.title = newTitle.reverse().join(' < ');
     });
@@ -135,24 +151,15 @@
     {
       var req = router.getCurrentRequest();
       var navbarView = new NavbarView({
+        template: navbarTemplate,
         currentPath: req === null ? '/' : req.path,
         loadedModules: loadedModules.map
-      });
-
-      navbarView.on('afterRender', function()
-      {
-        var partner = partners.get(user.data.partner);
-
-        if (partner)
-        {
-          navbarView.$('.navbar-brand').append('<span>' + partner.getLabel() + '</span>');
-        }
       });
 
       navbarView.on('logIn', function()
       {
         viewport.showDialog(
-          new LogInFormView(), i18n('core', 'LOG_IN_FORM:DIALOG_TITLE')
+          new LogInFormView(), i18n('users', 'LOG_IN_FORM:TITLE:LOG_IN')
         );
       });
 
@@ -171,11 +178,16 @@
         });
       });
 
+      window.navbar = navbarView;
+
       return navbarView;
     }
 
     function doStartApp()
     {
+      startBroker.destroy();
+      startBroker = broker.sandbox();
+
       var userReloadTimer = null;
 
       broker.subscribe('i18n.reloaded', function(message)
@@ -205,7 +217,11 @@
           var url = window.location.hash.replace(/^#/, '/');
 
           viewport.render();
-          router.dispatch(url);
+
+          if (!/^\/production\//.test(url))
+          {
+            router.dispatch(url);
+          }
         }, 1);
       });
 
@@ -257,12 +273,12 @@
 
       if (typeof window.onPageShown === 'function')
       {
-        broker.subscribe('viewport.page.shown', window.onPageShown);
+        broker.subscribe('viewport.page.shown', window.onPageShown).setLimit(1);
       }
 
       domReady(function()
       {
-        startBroker.subscribe('viewport.page.shown', reveal);
+        startBroker.subscribe('viewport.page.shown', reveal).setLimit(1);
 
         if (window.ENV)
         {
@@ -275,18 +291,26 @@
           pushState: false
         });
       });
+    }
 
-      function reveal()
+    function reveal()
+    {
+      if (startBroker !== null)
       {
-        if (startBroker !== null)
-        {
-          startBroker.destroy();
-          startBroker = null;
-        }
-
-        $('#app-loading').remove();
-        $('body').removeClass('is-loading');
+        startBroker.destroy();
+        startBroker = null;
       }
+
+      $('#app-loading').remove();
+      $('body').removeClass('is-loading');
+
+      embedded.ready('remote');
+      embedded.render(viewport.currentPage);
+
+      broker.subscribe('viewport.page.shown', function()
+      {
+        embedded.render(viewport.currentPage);
+      });
     }
   }
 })();

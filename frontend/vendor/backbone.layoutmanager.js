@@ -617,6 +617,8 @@ var LayoutManager = Backbone.View.extend({
 
   // Ensure the cleanup function is called whenever remove is called.
   remove: function() {
+    this.trigger('remove', this);
+
     // Force remove itself from its parent.
     LayoutManager._removeView(this, true);
 
@@ -897,7 +899,7 @@ var defaultOptions = {
 
   // By default, render using underscore's templating and trim output.
   renderTemplate: function(template, context) {
-    return trim(template(context));
+    return trim(template.call(this, context));
   },
 
   // By default, pass model attributes to the templates

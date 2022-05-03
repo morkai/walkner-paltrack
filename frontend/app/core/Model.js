@@ -1,8 +1,10 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
+  'underscore',
   'backbone'
 ], function(
+  _,
   Backbone
 ) {
   'use strict';
@@ -23,14 +25,73 @@ define([
 
     labelAttribute: null,
 
+    constructor: function()
+    {
+      Backbone.Model.apply(this, arguments);
+
+      this._loading = false;
+
+      this.on('request', function() { this._loading = true; });
+      this.on('sync error', function()
+      {
+        this._loading = false;
+        this.trigger('requestComplete');
+      });
+    },
+
+    isLoading: function()
+    {
+      return this._loading;
+    },
+
+    genUrl: function(action, base)
+    {
+      var urlRoot = _.result(this, 'urlRoot');
+
+      if (!urlRoot)
+      {
+        throw new Error("'urlRoot' was not specified!");
+      }
+
+      var url = urlRoot;
+
+      if (action === 'base')
+      {
+        return url;
+      }
+
+      if (base !== true)
+      {
+        url += '/';
+
+        if (this.isNew())
+        {
+          url += encodeURIComponent(this.cid);
+        }
+        else
+        {
+          url += encodeURIComponent(this.id);
+        }
+      }
+
+      if (typeof action === 'string')
+      {
+        url += ';' + action;
+      }
+
+      return url;
+    },
+
     genClientUrl: function(action)
     {
-      if (this.clientUrlRoot === null)
+      var clientUrlRoot = _.result(this, 'clientUrlRoot');
+
+      if (!clientUrlRoot)
       {
         throw new Error('`clientUrlRoot` was not specified');
       }
 
-      var url = this.clientUrlRoot;
+      var url = clientUrlRoot;
 
       if (action === 'base')
       {
@@ -120,6 +181,34 @@ define([
       });
 
       model.currentReadRequest = req;
+    },
+
+    isSynced: function()
+    {
+      return this.currentReadRequest === null || (!!this.collection && !!this.collection.get(this));
+    },
+
+    findRqlTerm: function(prop, name)
+    {
+      if (!this.rqlQuery)
+      {
+        return null;
+      }
+
+      return _.find(this.rqlQuery.selector.args, function(term)
+      {
+        if (term.args[0] !== prop)
+        {
+          return false;
+        }
+
+        if (Array.isArray(name))
+        {
+          return name.indexOf(term.name) !== -1;
+        }
+
+        return !name || term.name === name;
+      });
     }
 
   });

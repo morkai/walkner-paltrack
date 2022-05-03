@@ -19,7 +19,7 @@ define([
     {
       return [
         {
-          label: t.bound('registry', 'BREADCRUMBS:ob:browse'),
+          label: t.bound('registry', 'BREADCRUMB:ob:browse'),
           href: this.model.genClientUrl('base')
         },
         this.model.getLabel()

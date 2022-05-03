@@ -69,7 +69,7 @@ define([
 
   router.map('/registry/grn/:id;delete', canManage, showDeleteFormPage.bind(null, {
     Model: Grn,
-    breadcrumbsBrowseKey: 'BREADCRUMBS:grn:browse'
+    browseBreadcrumb: 'BREADCRUMB:grn:browse'
   }));
 
   router.map('/registry/gdn', canView, function(req)
@@ -94,7 +94,7 @@ define([
 
   router.map('/registry/gdn/:id;delete', canManage, showDeleteFormPage.bind(null, {
     Model: Gdn,
-    breadcrumbsBrowseKey: 'BREADCRUMBS:gdn:browse'
+    browseBreadcrumb: 'BREADCRUMB:gdn:browse'
   }));
 
   router.map('/registry/ob', canView, function(req)
@@ -119,6 +119,6 @@ define([
 
   router.map('/registry/ob/:id;delete', canManage, showDeleteFormPage.bind(null, {
     Model: Ob,
-    breadcrumbsBrowseKey: 'BREADCRUMBS:ob:browse'
+    browseBreadcrumb: 'BREADCRUMB:ob:browse'
   }));
 });

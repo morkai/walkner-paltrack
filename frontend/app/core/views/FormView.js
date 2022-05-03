@@ -1,16 +1,18 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
   'form2js',
   'js2form',
   'app/viewport',
+  '../Model',
   '../View'
 ], function(
   _,
   form2js,
   js2form,
   viewport,
+  Model,
   View
 ) {
   'use strict';
@@ -27,14 +29,24 @@ define([
 
     initialize: function()
     {
-      this.$errorMessage = null;
+      var view = this;
 
-      this.listenTo(this.model, 'change', function()
+      view.$errorMessage = null;
+
+      if (!view.model)
       {
-        if (this.isRendered() && this.updateOnChange)
+        view.model = new Model();
+      }
+
+      view.once('afterRender', function()
+      {
+        view.listenTo(view.model, 'change', function()
         {
-          js2form(this.el, this.serializeToForm(true), '.', null, false, false);
-        }
+          if (view.updateOnChange)
+          {
+            js2form(view.el, view.serializeToForm(true), '.', null, false, false);
+          }
+        });
       });
     },
 
@@ -53,13 +65,18 @@ define([
         formAction: options.formAction,
         formActionText: options.formActionText,
         panelTitleText: options.panelTitleText,
-        model: this.model.toJSON()
+        model: this.serializeModel()
       });
     },
 
     afterRender: function()
     {
       js2form(this.el, this.serializeToForm(false));
+    },
+
+    serializeModel: function()
+    {
+      return this.model.toJSON();
     },
 
     serializeToForm: function(partial) // eslint-disable-line no-unused-vars
@@ -77,11 +94,23 @@ define([
       return this.serializeForm(form2js(this.el));
     },
 
-    submitForm: function()
+    getSubmitButtons: function()
+    {
+      var $actions = this.$('.form-actions');
+
+      if (!$actions.length)
+      {
+        $actions = this.$('.panel-footer');
+      }
+
+      return $actions.find('.btn:not(.cancel)');
+    },
+
+    submitForm: function(checkValidity)
     {
       this.hideErrorMessage();
 
-      if (!this.el.checkValidity())
+      if (!this.el.checkValidity() && checkValidity !== false)
       {
         return false;
       }
@@ -95,7 +124,7 @@ define([
         return false;
       }
 
-      var $submitEl = this.$('[type="submit"]').attr('disabled', true);
+      var $submitEl = this.getSubmitButtons().prop('disabled', true);
 
       this.submitRequest($submitEl, formData);
 
@@ -108,7 +137,7 @@ define([
 
       req.done(this.handleSuccess.bind(this));
       req.fail(this.handleFailure.bind(this));
-      req.always(function() { $submitEl.attr('disabled', false); });
+      req.always(function() { $submitEl.prop('disabled', false); });
     },
 
     request: function(formData)
@@ -132,7 +161,7 @@ define([
       {
         this.options.done(true);
       }
-      else
+      else if (this.broker)
       {
         this.broker.publish('router.navigate', {
           url: this.model.genClientUrl(),
@@ -141,14 +170,14 @@ define([
       }
     },
 
-    handleFailure: function()
+    handleFailure: function(jqXhr)
     {
-      this.showErrorMessage(this.getFailureText());
+      this.showErrorMessage(this.getFailureText(jqXhr));
     },
 
     getFailureText: function()
     {
-      return this.options.failureText;
+      return this.options.failureText || this.t('core', 'MSG:SAVING_FAILURE');
     },
 
     showErrorMessage: function(text)

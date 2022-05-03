@@ -1,5 +1,13 @@
+.modal {
+  display: unset;
+}
 .modal-open .modal {
   overflow-y: scroll;
+}
+.modal-full .modal-dialog {
+  width: auto;
+  margin-left: 30px;
+  margin-right: 30px;
 }
 .modal-header {
   padding: 15px;

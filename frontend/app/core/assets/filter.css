@@ -64,7 +64,14 @@
   min-width: 150px;
 }
 .filter-btn-group {
-  display: block;
+  display: flex;
+}
+.filter-btn-group.btn-group-vertical {
+  flex-direction: column;
+}
+.filter-btn-group > .btn {
+  position: static;
+  float: none;
 }
 .filter-form .filter-dateRange {
   margin-bottom: 0;
@@ -83,10 +90,11 @@
   margin-bottom: 15px;
   width: 12em;
 }
-.filter-dateRange input[type=radio] {
+.filter-dateRange input[type="radio"] {
   margin-top: 0;
 }
-input[type=checkbox].filter-inLabel {
+input[type="checkbox"].filter-inLabel,
+input[type="radio"].filter-inLabel {
   margin-top: -2px;
   vertical-align: middle;
 }
@@ -135,7 +143,45 @@ input[type=checkbox].filter-inLabel {
 .filter-form .no-label {
   align-self: flex-end;
 }
-@media (max-width: 767px) {
+.filter-clear-select2 {
+  position: absolute;
+  top: 1px;
+  right: 9px;
+  font-size: 12px;
+  line-height: 32px;
+  font-family: FontAwesome;
+  color: #777;
+}
+.filter-clear-select2-clear:before {
+  content: "\f12d";
+}
+.filter-clear-select2-clear:hover {
+  color: hotpink;
+  cursor: pointer;
+}
+.filter-clear-label {
+  margin-left: 15px;
+  font-family: FontAwesome;
+  color: #777;
+}
+.filter-clear-label:before {
+  content: "\f12d";
+}
+.filter-clear-label:hover {
+  color: hotpink;
+  cursor: pointer;
+}
+.filter-interval {
+  display: flex;
+}
+.filter-interval .form-control[type="number"] {
+  margin-left: -1px;
+  width: 70px;
+}
+.filter-interval .form-control[type="number"]:focus {
+  z-index: 1;
+}
+@media (max-width: 800px) {
   .filter-container > .well {
     align-items: flex-start;
     padding: 15px;
@@ -154,6 +200,9 @@ input[type=checkbox].filter-inLabel {
     display: block;
     width: 100%;
     margin-left: 0;
+  }
+  .filter-form .select2-container {
+    width: 100%!important;
   }
   .filter-form .no-label {
     padding-top: 0;

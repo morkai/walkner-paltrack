@@ -7,24 +7,25 @@ define([
 ) {
   'use strict';
 
-  return function createColorTdAttrs(row, colorProperty)
+  return function createColorTdAttrs(row, column)
   {
-    if (!colorProperty)
-    {
-      colorProperty = this.colorProperty || this.id;
-    }
-
-    var className = [this.colorClassName || ''];
+    const colorProperty = column.colorProperty || column.id;
+    const className = [column.colorClassName || ''];
 
     if (!row[colorProperty])
     {
-      return 'class="' + className.join(' ') + '"';
+      return {
+        className: className.join(' ')
+      };
     }
 
     className.push('partners-color');
 
-    var backgroundColor = row[colorProperty];
+    const backgroundColor = row[colorProperty];
 
-    return 'class="' + className.join(' ') + '" style="background-color: ' + backgroundColor + '"';
+    return {
+      className: className.join(' '),
+      style: `background-color: ${backgroundColor}`
+    };
   };
 });

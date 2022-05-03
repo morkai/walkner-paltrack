@@ -1,11 +1,11 @@
 {
   "root": {
-    "BREADCRUMBS:grn:browse": "Goods received notes",
-    "BREADCRUMBS:gdn:browse": "Goods dispatched notes",
-    "BREADCRUMBS:ob:browse": "Opening balance notes",
-    "BREADCRUMBS:addForm": "Adding",
-    "BREADCRUMBS:editForm": "Editing",
-    "BREADCRUMBS:ACTION_FORM:delete": "Deleting",
+    "BREADCRUMB:grn:browse": "Goods received notes",
+    "BREADCRUMB:gdn:browse": "Goods dispatched notes",
+    "BREADCRUMB:ob:browse": "Opening balance notes",
+    "BREADCRUMB:addForm": "Adding",
+    "BREADCRUMB:editForm": "Editing",
+    "BREADCRUMB:ACTION_FORM:delete": "Deleting",
 
     "MSG:LOADING_FAILURE": "Failed to load the notes :(",
     "MSG:LOADING_SINGLE_FAILURE": "Failed to load the note :(",

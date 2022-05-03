@@ -1,3 +1,7 @@
+<% if (panel) { %>
+<div class="panel panel-<%- panel.type || 'default' %> <%- panel.className || '' %> <%- panel.hideEmpty && rows.length === 0 ? 'hidden' : '' %>">
+  <div class="panel-heading"><%- panel.title || '' %></div>
+<% } %>
 <div class="list <%- typeof className === 'undefined' ? '' : className %>">
   <div class="table-responsive"><table class="table <%- tableClassName %>">
       <thead>
@@ -26,17 +30,11 @@
           <% if (row._id) { %>data-id="<%- row._id %>"<% } %>
         >
           <% columns.forEach(function(column) { %>
-          <td <%- typeof column.tdAttrs === 'function' ? column.tdAttrs(row) : (column.tdAttrs || '') %> data-id="<%- column.id %>">
-          <% if (row[column.id] == null) { %>
-            <% if (column.noData == null) { %>
-            <em><%- t('core', 'LIST:NO_DATA:cell') %></em>
-            <% } else { %>
-            <%- column.noData %>
-            <% } %>
-            <% } else { %>
-            <%- typeof column.tdDecorator === 'function' ? column.tdDecorator(column.id, row[column.id]) : row[column.id] %>
-            <% } %>
-          </td>
+          <td
+            <%- typeof column.tdAttrs === 'function' ? column.tdAttrs(row, column) : (column.tdAttrs || '') %>
+            data-id="<%- column.id %>"
+            <% if (column.titleProperty && row[column.titleProperty]) { %>title="<%= row[column.titleProperty] %>"<% } %>
+          ><%- renderValue(column, row) %></td>
           <% }) %>
           <% if (typeof actions === 'function') { %>
           <td class="actions">
@@ -45,7 +43,7 @@
               <% if (action.href) { %>
               <a href="<%- action.href %>" class="btn btn-<%- action.type || 'default' %> <%- action.id ? ('action-' + action.id) : '' %> <%- action.className || '' %>" title="<%= action.label %>"><i class="fa fa-<%- action.icon %>"></i><%- action.text || '' %></a>
               <% } else { %>
-              <button type="button" class="btn btn-<%- action.type || 'default' %> <%- action.id ? ('action-' + action.id) : '' %> <%- action.className || '' %>" title="<%= action.label %>"><i class="fa fa-<%- action.icon %>"></i><%- action.text || '' %></button>
+              <button type="button" class="btn btn-<%- action.type || 'default' %> <%- action.id ? ('action-' + action.id) : '' %> <%- action.className || '' %>" title="<%= action.label %>" data-id="<%- action.id || '' %>"><i class="fa fa-<%- action.icon %>"></i><%- action.text || '' %></button>
               <% } %>
               <% }) %>
             </div>
@@ -57,3 +55,6 @@
     </table></div>
   <div class="pagination-container"></div>
 </div>
+<% if (panel) { %>
+</div>
+<% } %>

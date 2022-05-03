@@ -16,9 +16,9 @@
     "@link-color": "@brand-primary",
     "@link-hover-color": "darken(@link-color, 15%)",
     "@link-hover-decoration": "underline",
-    "@font-family-sans-serif": "\"Helvetica Neue\", Helvetica, Arial, sans-serif",
-    "@font-family-serif": "Georgia, \"Times New Roman\", Times, serif",
-    "@font-family-monospace": "Menlo, Monaco, Consolas, \"Courier New\", monospace",
+    "@font-family-sans-serif": "Arial, sans-serif",
+    "@font-family-serif": "\"Times New Roman\", serif",
+    "@font-family-monospace": "Consolas, \"Courier New\", monospace",
     "@font-family-base": "@font-family-sans-serif",
     "@font-size-base": "14px",
     "@font-size-large": "ceil((@font-size-base * 1.25))",
@@ -114,7 +114,7 @@
     "@screen-xs": "480px",
     "@screen-xs-min": "@screen-xs",
     "@screen-phone": "@screen-xs-min",
-    "@screen-sm": "768px",
+    "@screen-sm": "800px",
     "@screen-sm-min": "@screen-sm",
     "@screen-tablet": "@screen-sm-min",
     "@screen-md": "992px",
@@ -127,8 +127,8 @@
     "@screen-sm-max": "(@screen-md-min - 1)",
     "@screen-md-max": "(@screen-lg-min - 1)",
     "@grid-columns": "12",
-    "@grid-gutter-width": "30px",
-    "@grid-float-breakpoint": "@screen-sm-min",
+    "@grid-gutter-width": "15px",
+    "@grid-float-breakpoint": "(@screen-sm-min + 1)",
     "@grid-float-breakpoint-max": "(@grid-float-breakpoint - 1)",
     "@container-tablet": "(720px + @grid-gutter-width)",
     "@container-sm": "@container-tablet",
@@ -413,5 +413,5 @@
     "collapse.js",
     "transition.js"
   ],
-  "customizerUrl": "http://getbootstrap.com/customize/?id=3fc4d804a53dbaac22c8"
+  "customizerUrl": "<none>"
 }

@@ -1,15 +1,18 @@
 'use strict';
 
+const ROOT_PATH = `${__dirname}/..`;
+const DATA_PATH = `${ROOT_PATH}/data`;
+
 const fs = require('fs-extra');
 const mongodb = require('./paltrack-mongodb');
 
 try
 {
   require('pmx').init({
-    ignore_routes: [/socket\.io/]
+    ignore_routes: [/socket\.io/] // eslint-disable-line camelcase
   });
 }
-catch (err) {}
+catch (err) {} // eslint-disable-line no-empty
 
 exports.id = 'paltrack-frontend';
 
@@ -32,8 +35,39 @@ exports.modules = [
   'sio'
 ];
 
+exports.updater = {
+  manifestPath: `${__dirname}/paltrack-manifest.appcache`,
+  packageJsonPath: `${__dirname}/../package.json`,
+  restartDelay: 5000,
+  pull: {
+    exe: 'git.exe',
+    cwd: `${__dirname}/../`,
+    timeout: 30000
+  },
+  versionsKey: 'paltrack',
+  manifests: [
+    {
+      frontendVersionKey: 'frontend',
+      path: '/manifest.appcache',
+      mainJsFile: '/paltrack-main.js',
+      mainCssFile: '/assets/paltrack-main.css',
+      template: fs.readFileSync(`${__dirname}/paltrack-manifest.appcache`, 'utf8'),
+      frontendAppData: {
+        XLSX_EXPORT: process.platform === 'win32',
+        PRODUCTION_DATA_START_DATE: exports.productionDataStartDate,
+        CORS_PING_URL: 'https://test.wmes.pl/ping',
+        DASHBOARD_URL_AFTER_LOG_IN: '/'
+      },
+      dictionaryModules: {
+        partners: 'PARTNERS',
+        palletKinds: 'PALLET_KINDS'
+      }
+    }
+  ]
+};
+
 exports.events = {
-  collection: function(app) { return app.mongoose.model('Event').collection; },
+  collection: app => app.mongoose.model('Event').collection,
   insertDelay: 1000,
   topics: {
     debug: [
@@ -57,15 +91,15 @@ exports.httpServer = {
 exports.httpsServer = {
   host: '0.0.0.0',
   port: 443,
-  key: `${__dirname}/privatekey.pem`,
-  cert: `${__dirname}/certificate.pem`
+  key: `${ROOT_PATH}/config/https.key`,
+  cert: `${ROOT_PATH}/config/https.crt`
 };
 
 exports.sio = {
   httpServerIds: ['httpServer'],
   socketIo: {
-    pingInterval: 10000,
-    pingTimeout: 5000
+    pingInterval: 20000,
+    pingTimeout: 7500
   }
 };
 
@@ -80,7 +114,7 @@ exports.pubsub = {
 exports.mongoose = {
   uri: mongodb.uri,
   mongoClient: Object.assign(mongodb.mongoClient, {
-    poolSize: 10
+    maxPoolSize: 10
   }),
   maxConnectTries: 10,
   connectAttemptDelay: 500
@@ -93,7 +127,9 @@ exports.express = {
   sessionCookie: {
     httpOnly: true,
     path: '/',
-    maxAge: 3600 * 24 * 30 * 1000
+    maxAge: 3600 * 24 * 90 * 1000,
+    sameSite: 'lax',
+    secure: false
   },
   sessionStore: {
     touchInterval: 10 * 60 * 1000,
@@ -114,11 +150,26 @@ exports.express = {
   jsonBody: {limit: '1mb'},
   routes: [
     require('../backend/routes/core')
-  ]
-};
+  ],
+  noSessionPatterns: [
+    req =>
+    {
+      if (req.headers['x-api-key']
+        || req.headers.cookie
+        || req.headers['x-wmes-app'] === 'main'
+        || req.url === '/')
+      {
+        return false;
+      }
 
-exports.users = {
-  browsePrivileges: ['USER']
+      if (req.url.startsWith('/ping'))
+      {
+        return true;
+      }
+
+      return !!req.headers['user-agent'] && req.headers['user-agent'].includes('X11');
+    }
+  ]
 };
 
 exports.user = {
@@ -126,6 +177,12 @@ exports.user = {
     'DICTIONARIES:VIEW', 'DICTIONARIES:MANAGE',
     'REPORTS:VIEW'
   ]
+};
+
+exports.users = {
+  browsePrivileges: ['USER'],
+  loginIn: {},
+  loginAs: {}
 };
 
 exports['mail/sender'] = {
@@ -143,37 +200,7 @@ exports['mail/sender'] = {
   replyTo: 'support+paltrack@localhost'
 };
 
-exports.updater = {
-  manifestPath: `${__dirname}/paltrack-manifest.appcache`,
-  packageJsonPath: `${__dirname}/../package.json`,
-  restartDelay: 5000,
-  pull: {
-    exe: 'git.exe',
-    cwd: `${__dirname}/../`,
-    timeout: 30000
-  },
-  versionsKey: 'paltrack',
-  manifests: [
-    {
-      frontendVersionKey: 'frontend',
-      path: '/manifest.appcache',
-      mainJsFile: '/paltrack-main.js',
-      mainCssFile: '/assets/paltrack-main.css',
-      template: fs.readFileSync(`${__dirname}/paltrack-manifest.appcache`, 'utf8'),
-      frontendAppData: {
-        XLSX_EXPORT: process.platform === 'win32',
-        CORS_PING_URL: 'https://test.wmes.pl/ping',
-        DASHBOARD_URL_AFTER_LOG_IN: '/'
-      },
-      dictionaryModules: {
-        partners: 'PARTNERS',
-        palletKinds: 'PALLET_KINDS'
-      }
-    }
-  ]
-};
-
 exports.registry = {
-  gdnStoragePath: __dirname + '/../data/gdn',
+  gdnStoragePath: `${__dirname}/../data/gdn`,
   automate: true
 };

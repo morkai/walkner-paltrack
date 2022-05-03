@@ -1,9 +1,9 @@
 {
   "root": {
-    "BREADCRUMBS:browse": "Partners",
-    "BREADCRUMBS:addForm": "Adding",
-    "BREADCRUMBS:editForm": "Editing",
-    "BREADCRUMBS:ACTION_FORM:delete": "Deleting",
+    "BREADCRUMB:browse": "Partners",
+    "BREADCRUMB:addForm": "Adding",
+    "BREADCRUMB:editForm": "Editing",
+    "BREADCRUMB:ACTION_FORM:delete": "Deleting",
 
     "MSG:LOADING_FAILURE": "Failed to load the partners :(",
     "MSG:LOADING_SINGLE_FAILURE": "Failed to load the partner :(",

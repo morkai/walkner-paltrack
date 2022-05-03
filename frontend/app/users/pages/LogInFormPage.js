@@ -17,7 +17,7 @@ define([
 
     layoutName: 'page',
 
-    breadcrumbs: [t.bound('users', 'breadcrumbs:logIn')],
+    breadcrumbs: [t.bound('users', 'BREADCRUMB:logIn')],
 
     initialize: function()
     {

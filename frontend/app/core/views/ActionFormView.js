@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -184,6 +184,11 @@ define([
 
         this.$errorMessage = null;
       }
+    },
+
+    onDialogShown: function()
+    {
+      this.$('.form-actions').find('.btn').first().focus();
     }
 
   }, {

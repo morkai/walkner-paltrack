@@ -1,0 +1,9 @@
+.hljs {
+  font-family: Consolas, Menlo, Monaco, monospace;
+  font-size: 16px;
+}
+.hljs-comment,
+.hljs-deletion,
+.hljs-meta {
+  color: #999;
+}

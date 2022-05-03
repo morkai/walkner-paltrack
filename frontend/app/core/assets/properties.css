@@ -32,11 +32,30 @@
   padding-left: 0;
   list-style-position: inside;
 }
+.props.vertical {
+  display: block;
+}
+.vertical .prop {
+  display: block;
+}
+.vertical .prop-name,
+.vertical .prop-value {
+  display: block;
+}
+.vertical .prop-name {
+  padding-bottom: 1px;
+}
+.vertical .prop-value {
+  padding-top: 1px;
+}
 @media (min-width: 992px) {
   .prop:first-child {
     border-top: 0;
   }
   .prop-name {
     width: 1%;
+  }
+  .vertical .prop-name {
+    width: 100%;
   }
 }

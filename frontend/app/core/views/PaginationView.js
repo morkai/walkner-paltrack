@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -77,7 +77,7 @@ define([
   {
     var limit = this.model.get('limit');
 
-    if (limit === -1 || (this.model.get('totalCount') <= limit))
+    if (limit <= 0 || this.model.get('totalCount') <= limit)
     {
       this.$el.hide();
     }

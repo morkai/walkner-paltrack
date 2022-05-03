@@ -1,0 +1,23 @@
+<ul class="dropdown-menu planning-menu <%- className %>" style="top: <%- top %>px; left: -1000px">
+  <% menu.forEach(function(item, i) { %>
+  <% if (item.type === 'header') { %>
+  <li class="dropdown-header"><%- item.label %></li>
+  <% } else if (item.type === 'divider') { %>
+  <li class="divider"></li>
+  <% } else { %>
+  <li data-action="<%- i %>">
+    <% if (item.template) { %>
+    <%- item.template({i: i, item: item}) %>
+    <% } else { %>
+    <a data-action="<%- i %>" class="<%- item.disabled ? 'planning-menu-disabled' : '' %>" <%- item.disabled ? '' : 'tabindex="100000"' %>>
+      <% if (icons) { %>
+      <i class="fa <%- item.icon || 'fa-blank' %>"></i><span><%- item.label %></span>
+      <% } else { %>
+      <%- item.label %>
+      <% } %>
+    </a>
+    <% } %>
+  </li>
+  <% } %>
+  <% }) %>
+</ul>

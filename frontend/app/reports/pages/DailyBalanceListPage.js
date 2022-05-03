@@ -28,7 +28,7 @@ define([
     actions: null,
 
     breadcrumbs: [
-      t.bound('reports', 'BREADCRUMBS:dailyBalance')
+      t.bound('reports', 'BREADCRUMB:dailyBalance')
     ],
 
     initialize: function()

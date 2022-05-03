@@ -26,10 +26,10 @@ define([
 
       return [
         {
-          label: t.bound('users', 'BREADCRUMBS:myAccount'),
+          label: t.bound('users', 'BREADCRUMB:myAccount'),
           href: this.model.genClientUrl()
         },
-        t.bound('users', 'BREADCRUMBS:editForm')
+        t.bound('users', 'BREADCRUMB:editForm')
       ];
     }
 

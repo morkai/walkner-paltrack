@@ -17,9 +17,9 @@
     "LIST:ACTION:delete": "Delete",
     "LIST:ACTION:print": "Print",
 
-    "BREADCRUMBS:edit": "Editing",
-    "BREADCRUMBS:delete": "Deleting",
-    "BREADCRUMBS:error": "Error {code}: {codeStr, select, e401{unauthorized access} e404{not found} other{bad request}}",
+    "BREADCRUMB:edit": "Editing",
+    "BREADCRUMB:delete": "Deleting",
+    "BREADCRUMB:error": "Error {code}: {codeStr, select, e401{unauthorized access} e404{not found} other{bad request}}",
 
     "ERROR:400": "The request cannot be fulfilled due to bad syntax :(",
     "ERROR:401": "Unfortunately, you do not have the right privileges to perform the requested action :(",

@@ -1,6 +1,6 @@
 {
-  "BREADCRUMBS:dailyBalance": "Bilans dzienny",
-  "BREADCRUMBS:partnerBalance": "Bilans partnera",
+  "BREADCRUMB:dailyBalance": "Bilans dzienny",
+  "BREADCRUMB:partnerBalance": "Bilans partnera",
 
   "MSG:LOADING_FAILURE": "Nie udało się załadować danych do raportu :(",
 

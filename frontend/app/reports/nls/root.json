@@ -1,7 +1,7 @@
 {
   "root": {
-    "BREADCRUMBS:dailyBalance": "Daily balance",
-    "BREADCRUMBS:partnerBalance": "Partner balance",
+    "BREADCRUMB:dailyBalance": "Daily balance",
+    "BREADCRUMB:partnerBalance": "Partner balance",
 
     "MSG:LOADING_FAILURE": "Failed to load the report data :(",
 

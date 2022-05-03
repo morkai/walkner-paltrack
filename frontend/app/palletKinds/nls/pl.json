@@ -1,8 +1,8 @@
 {
-  "BREADCRUMBS:browse": "Rodzaje palet",
-  "BREADCRUMBS:addForm": "Dodawanie",
-  "BREADCRUMBS:editForm": "Edycja",
-  "BREADCRUMBS:ACTION_FORM:delete": "Usuwanie",
+  "BREADCRUMB:browse": "Rodzaje palet",
+  "BREADCRUMB:addForm": "Dodawanie",
+  "BREADCRUMB:editForm": "Edycja",
+  "BREADCRUMB:ACTION_FORM:delete": "Usuwanie",
 
   "MSG:LOADING_FAILURE": "Ładowanie rodzajów palet nie powiodło się :(",
   "MSG:LOADING_SINGLE_FAILURE": "Ładowanie rodzaju palet nie powiodło się :(",

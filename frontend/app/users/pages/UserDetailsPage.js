@@ -27,7 +27,7 @@ define([
       }
 
       return [
-        t.bound('users', 'BREADCRUMBS:account')
+        t.bound('users', 'BREADCRUMB:account')
       ];
     },
 

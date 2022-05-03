@@ -7,6 +7,7 @@
 .navbar-brand {
   padding: 16px;
   font-size: 18px;
+  min-width: 48px;
   height: auto;
 }
 .navbar-default .navbar-brand,
@@ -16,6 +17,9 @@
 }
 .navbar-account-dropdown {
   font-weight: bold;
+}
+.navbar-account-status {
+  vertical-align: top;
 }
 .navbar-status-offline {
   color: #DA4F49;
@@ -54,21 +58,38 @@
 .navbar-feedback:active {
   text-shadow: 1px 1px 3px #333;
 }
-.dropdown-menu > .navbar-with-button {
-  position: relative;
+.dropdown-menu > .navbar-with-button,
+.navbar-nav .open .dropdown-menu .navbar-with-button {
+  display: flex;
+  padding: 0;
 }
 .navbar-with-button > .btn {
-  position: absolute;
-  right: 0;
-  top: 0;
-  padding: 0;
+  padding: 0!important;
   width: 26px;
   height: 26px;
   line-height: 26px;
+  color: inherit;
+  border-width: 0;
+}
+.navbar-with-button > .btn-default {
+  background: transparent;
+}
+.navbar-with-button > .btn:last-child {
   border-right-width: 0;
 }
-.navbar-with-button + .navbar-with-button > .btn {
-  border-top-width: 0;
+.navbar-with-button > a:first-child,
+.navbar-with-button > span:first-child {
+  flex: 1 1 auto;
+}
+.navbar-with-button > span:first-child {
+  padding: 3px 15px 3px 20px;
+}
+.navbar-with-button > a:first-child + .btn,
+.navbar-with-button > span:first-child + .btn {
+  margin-left: auto;
+}
+.navbar-with-button > span:first-child + .btn {
+  margin-top: -3px;
 }
 .navbar-search {
   position: relative;
@@ -85,6 +106,9 @@
 .navbar-search .has-feedback .form-control-feedback {
   top: 10px;
 }
+.navbar-search-empty.has-camera {
+  cursor: pointer;
+}
 .navbar-right .navbar-search-results {
   right: 10px;
   margin: -2px 0 0 0;
@@ -96,20 +120,34 @@
   font-weight: bold;
   color: #777;
 }
-.navbar .dropdown-header a {
+.navbar-group-hidden {
+  display: none!important;
+}
+.navbar-group-header {
+  display: inline-flex;
+}
+.navbar-group-header a {
   display: inline-block;
   padding: 0 4px;
   color: #337ab7;
   min-width: 42px;
   text-align: center;
+  font-weight: normal;
 }
-.navbar .dropdown-header a.active {
+.navbar-group-header a:first-child {
+  padding-left: 0;
+}
+.navbar-group-header a.active {
   color: #777;
   font-weight: bold;
   cursor: default;
-  background: #fff;
+  text-decoration: none;
 }
-@media (min-width: 768px) {
+.navbar .dropdown-message {
+  padding: 0 7px;
+  color: #333;
+}
+@media (min-width: 801px) {
   .navbar {
     min-height: 0;
   }
@@ -132,16 +170,53 @@
   .navbar-default .navbar-nav > .open > a:focus {
     background: linear-gradient(to bottom, #e8e8e8 70%, #e0e0e0);
   }
+  .navbar .dropdown-header a.active {
+    background: #fff;
+  }
 }
-@media (max-width: 767px) {
+@media (max-width: 800px) {
   .navbar-with-button > .btn {
     width: 52px;
+    height: 30px;
+    line-height: 30px!important;
   }
-  .navbar-with-button + .navbar-with-button > .btn {
-    border-top-width: 1px;
+  .navbar-with-button > span:first-child {
+    padding-left: 25px;
   }
   .navbar-mor,
-  .navbar-form {
+  .navbar-search {
     display: none;
+  }
+  .navbar-search {
+    position: absolute;
+    top: 13px;
+    right: 68px;
+    z-index: 1;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+  }
+  .navbar-search .form-group {
+    margin: 0;
+  }
+  .navbar-default .navbar-search .navbar-search-phrase {
+    margin: 0;
+    height: 40px;
+  }
+  .navbar-collapse.collapsing {
+    position: static;
+  }
+  .navbar-collapse.collapsing .navbar-search,
+  .navbar-collapse.in .navbar-search {
+    display: block;
+  }
+  .navbar-search .has-feedback .form-control-feedback {
+    top: 0;
+    height: auto;
+    line-height: 40px;
+  }
+  .navbar-right .navbar-search-results {
+    left: auto;
+    right: 0;
   }
 }

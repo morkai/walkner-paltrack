@@ -318,7 +318,7 @@ if (typeof jQuery === 'undefined') {
     this.$body          = $(document.body)
     this.$element       = $(element)
     this.$backdrop      =
-    this.isShown        = null
+      this.isShown        = null
     this.scrollbarWidth = 0
 
     if (this.options.remote) {
@@ -372,7 +372,7 @@ if (typeof jQuery === 'undefined') {
       }
 
       that.$element
-        .show()
+        .removeClass('hidden')
         .scrollTop(0)
 
       if (that.options.backdrop) that.adjustBackdrop()
@@ -385,6 +385,8 @@ if (typeof jQuery === 'undefined') {
       that.$element
         .addClass('in')
         .attr('aria-hidden', false)
+
+      that.$element.trigger('in.bs.modal', { relatedTarget: _relatedTarget });
 
       that.enforceFocus()
 
@@ -458,7 +460,7 @@ if (typeof jQuery === 'undefined') {
 
   Modal.prototype.hideModal = function () {
     var that = this
-    this.$element.hide()
+    this.$element.addClass('hidden')
     this.backdrop(function () {
       that.$body.removeClass('modal-open')
       that.resetAdjustments()
@@ -526,6 +528,7 @@ if (typeof jQuery === 'undefined') {
   }
 
   Modal.prototype.adjustBackdrop = function () {
+    if (!this.$backdrop) return;
     this.$backdrop
       .css('height', 0)
       .css('height', this.$element[0].scrollHeight)
@@ -676,6 +679,7 @@ if (typeof jQuery === 'undefined') {
     this.$element  = $(element)
     this.options   = this.getOptions(options)
     this.$viewport = this.options.viewport && $(this.options.viewport.selector || this.options.viewport)
+    this.children  = []
 
     var triggers = this.options.trigger.split(' ')
 
@@ -771,7 +775,9 @@ if (typeof jQuery === 'undefined') {
     }, self.options.delay.hide)
   }
 
-  Tooltip.prototype.show = function () {
+  Tooltip.prototype.show = function (opts) {
+    this.children.forEach(function (child) { child.show(opts); })
+
     var e = $.Event('show.bs.' + this.type)
 
     if (this.hasContent() && this.enabled) {
@@ -817,10 +823,10 @@ if (typeof jQuery === 'undefined') {
         var containerDim = this.getPosition($container)
 
         placement = placement == 'bottom' && pos.bottom + actualHeight > containerDim.bottom ? 'top'    :
-                    placement == 'top'    && pos.top    - actualHeight < containerDim.top    ? 'bottom' :
-                    placement == 'right'  && pos.right  + actualWidth  > containerDim.width  ? 'left'   :
-                    placement == 'left'   && pos.left   - actualWidth  < containerDim.left   ? 'right'  :
-                    placement
+          placement == 'top'    && pos.top    - actualHeight < containerDim.top    ? 'bottom' :
+            placement == 'right'  && pos.right  + actualWidth  > containerDim.width  ? 'left'   :
+              placement == 'left'   && pos.left   - actualWidth  < containerDim.left   ? 'right'  :
+                placement
 
         $tip
           .removeClass(orgPlacement)
@@ -837,9 +843,9 @@ if (typeof jQuery === 'undefined') {
         that.hoverState = null
 
         if (prevHoverState == 'out') that.leave(that)
-      }
+      };
 
-      $.support.transition && this.$tip.hasClass('fade') ?
+      (!opts || opts.transition !== false) && $.support.transition && this.$tip.hasClass('fade') ?
         $tip
           .one('bsTransitionEnd', complete)
           .emulateTransitionEnd(Tooltip.TRANSITION_DURATION) :
@@ -913,6 +919,9 @@ if (typeof jQuery === 'undefined') {
 
   Tooltip.prototype.hide = function (callback) {
     var that = this
+
+    that.children.forEach(function (child) { child.hide(); })
+
     var $tip = this.tip()
     var e    = $.Event('hide.bs.' + this.type)
 
@@ -972,9 +981,9 @@ if (typeof jQuery === 'undefined') {
 
   Tooltip.prototype.getCalculatedOffset = function (placement, pos, actualWidth, actualHeight) {
     return placement == 'bottom' ? { top: pos.top + pos.height,   left: pos.left + pos.width / 2 - actualWidth / 2 } :
-           placement == 'top'    ? { top: pos.top - actualHeight, left: pos.left + pos.width / 2 - actualWidth / 2 } :
-           placement == 'left'   ? { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth } :
-        /* placement == 'right' */ { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width }
+      placement == 'top'    ? { top: pos.top - actualHeight, left: pos.left + pos.width / 2 - actualWidth / 2 } :
+        placement == 'left'   ? { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left - actualWidth } :
+          /* placement == 'right' */ { top: pos.top + pos.height / 2 - actualHeight / 2, left: pos.left + pos.width }
 
   }
 
@@ -1044,12 +1053,14 @@ if (typeof jQuery === 'undefined') {
   }
 
   Tooltip.prototype.toggle = function (e) {
-    var self = this
+    var parent = this
+    var self = parent
     if (e) {
       self = $(e.currentTarget).data('bs.' + this.type)
       if (!self) {
         self = new this.constructor(e.currentTarget, this.getDelegateOptions())
         $(e.currentTarget).data('bs.' + this.type, self)
+        parent.children.push(self)
       }
     }
 
@@ -1062,6 +1073,8 @@ if (typeof jQuery === 'undefined') {
     this.hide(function () {
       that.$element.off('.' + that.type).removeData('bs.' + that.type)
     })
+    that.children.forEach(function (child) { child.destroy() })
+    that.children = []
   }
 
 
@@ -1146,7 +1159,7 @@ if (typeof jQuery === 'undefined') {
     $tip.find('.popover-title')[this.options.html ? 'html' : 'text'](title)
     $tip.find('.popover-content').children().detach().end()[ // we use append for html objects to maintain js events
       this.options.html ? (typeof content == 'string' ? 'html' : 'append') : 'text'
-    ](content)
+      ](content)
 
     $tip.removeClass('fade top bottom left right in')
 
@@ -1165,8 +1178,8 @@ if (typeof jQuery === 'undefined') {
 
     return $e.attr('data-content')
       || (typeof o.content == 'function' ?
-            o.content.call($e[0]) :
-            o.content)
+        o.content.call($e[0]) :
+        o.content)
   }
 
   Popover.prototype.arrow = function () {
@@ -1283,15 +1296,15 @@ if (typeof jQuery === 'undefined') {
       $active
         .removeClass('active')
         .find('> .dropdown-menu > .active')
-          .removeClass('active')
+        .removeClass('active')
         .end()
         .find('[data-toggle="tab"]')
-          .attr('aria-expanded', false)
+        .attr('aria-expanded', false)
 
       element
         .addClass('active')
         .find('[data-toggle="tab"]')
-          .attr('aria-expanded', true)
+        .attr('aria-expanded', true)
 
       if (transition) {
         element[0].offsetWidth // reflow for transition
@@ -1303,10 +1316,10 @@ if (typeof jQuery === 'undefined') {
       if (element.parent('.dropdown-menu')) {
         element
           .closest('li.dropdown')
-            .addClass('active')
+          .addClass('active')
           .end()
           .find('[data-toggle="tab"]')
-            .attr('aria-expanded', true)
+          .attr('aria-expanded', true)
       }
 
       callback && callback()

@@ -1,10 +1,10 @@
 {
-  "BREADCRUMBS:grn:browse": "Przyjęcia zewnętrzne",
-  "BREADCRUMBS:gdn:browse": "Wydania zewnętrzne",
-  "BREADCRUMBS:ob:browse": "Bilanse otwarcia",
-  "BREADCRUMBS:addForm": "Dodawanie",
-  "BREADCRUMBS:editForm": "Edycja",
-  "BREADCRUMBS:ACTION_FORM:delete": "Usuwanie",
+  "BREADCRUMB:grn:browse": "Przyjęcia zewnętrzne",
+  "BREADCRUMB:gdn:browse": "Wydania zewnętrzne",
+  "BREADCRUMB:ob:browse": "Bilanse otwarcia",
+  "BREADCRUMB:addForm": "Dodawanie",
+  "BREADCRUMB:editForm": "Edycja",
+  "BREADCRUMB:ACTION_FORM:delete": "Usuwanie",
 
   "MSG:LOADING_FAILURE": "Ładowanie wpisów nie powiodło się :(",
   "MSG:LOADING_SINGLE_FAILURE": "Ładowanie wpisu nie powiodło się :(",

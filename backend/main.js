@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 'use strict';
 
@@ -9,13 +9,13 @@ if (!process.env.NODE_ENV)
   process.env.NODE_ENV = 'development';
 }
 
-require('./extensions');
-
 const requireCache = require('./requireCache');
 const helpers = require('./helpers');
 const moment = require('moment');
 const main = require('h5.main');
 const config = require(process.argv[2]);
+
+require('./extensions');
 
 if (!config.id)
 {

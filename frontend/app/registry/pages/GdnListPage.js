@@ -22,7 +22,7 @@ define([
     ListView: GdnListView,
 
     breadcrumbs: [
-      t.bound('registry', 'BREADCRUMBS:gdn:browse')
+      t.bound('registry', 'BREADCRUMB:gdn:browse')
     ]
 
   });

@@ -19,14 +19,14 @@ define([
     {
       return [
         {
-          label: t.bound('registry', 'BREADCRUMBS:gdn:browse'),
+          label: t.bound('registry', 'BREADCRUMB:gdn:browse'),
           href: this.model.genClientUrl('base')
         },
         {
           label: this.model.getLabel(),
           href: this.model.genClientUrl()
         },
-        t.bound('registry', 'BREADCRUMBS:editForm')
+        t.bound('registry', 'BREADCRUMB:editForm')
       ];
     }
 

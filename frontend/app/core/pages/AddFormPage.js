@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'app/i18n',
@@ -30,11 +30,14 @@ define([
     {
       this.defineModels();
       this.defineViews();
+      this.defineBindings();
     },
 
     load: function(when)
     {
-      return when(this.model.id ? this.model.fetch(this.options.fetchOptions) : null);
+      var model = this.getDefaultModel();
+
+      return when(model.id ? model.fetch(this.options.fetchOptions) : null);
     },
 
     defineModels: function()
@@ -49,6 +52,11 @@ define([
       this.view = new FormViewClass(this.getFormViewOptions());
     },
 
+    defineBindings: function()
+    {
+
+    },
+
     getFormViewClass: function()
     {
       return this.options.FormView || this.FormView || FormView;
@@ -56,7 +64,7 @@ define([
 
     getFormViewOptions: function()
     {
-      var model = this.model;
+      var model = this.getDefaultModel();
       var nlsDomain = model.getNlsDomain();
       var options = {
         editMode: false,
@@ -74,6 +82,11 @@ define([
       }
 
       return options;
+    },
+
+    getDefaultModel: function()
+    {
+      return this.model;
     }
 
   });

@@ -65,8 +65,8 @@
   cursor: pointer;
   font-size: 24px;
 }
-.gn-checked.is-editable:hover {
-  font-size: 28px;
+.gn-checked.is-editable:hover .fa {
+  transform: scale(1.2);
 }
 .gn-checked > .fa-thumbs-down,
 .gn-checked.is-editable:active > .fa-thumbs-up{
@@ -77,7 +77,6 @@
   color: #0c0;
 }
 .gn-checked.is-loading {
-  font-size: 28px!important;
   cursor: default!important;
 }
 .registryPanel {

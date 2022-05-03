@@ -95,17 +95,15 @@ define([
 
       var checkedColumn = {
         id: 'checked',
-        tdAttrs: ''
+        tdClassName: ['gn-checked'],
+        tdAttrs: {}
       };
-      var checkedClassNames = ['gn-checked'];
 
       if (user.isAllowedTo('REGISTRY:CHECK'))
       {
-        checkedClassNames.push('is-editable');
-        checkedColumn.tdAttrs += 'tabindex="0"';
+        checkedColumn.tdClassName.push('is-editable');
+        checkedColumn.tdAttrs.tabindex = '0';
       }
-
-      checkedColumn.tdAttrs += ' class="' + checkedClassNames.join(' ') + '"';
 
       columns.push(checkedColumn);
 

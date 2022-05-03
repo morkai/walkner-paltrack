@@ -1,4 +1,4 @@
-// Part of <https://miracle.systems/p/walkner-paltrack> licensed under <CC BY-NC-SA 4.0>
+// Part of <https://miracle.systems/p/walkner-wmes> licensed under <CC BY-NC-SA 4.0>
 
 define([
   'underscore',
@@ -6,13 +6,6 @@ define([
   'app/broker',
   'app/socket'
 ],
-/**
- * @param {underscore} _
- * @param {function(new:h5.pubsub.MessageBroker)} MessageBroker
- * @param {h5.pubsub.Broker} broker
- * @param {Socket} socket
- * @returns {h5.pubsub.Broker}
- */
 function(
   _,
   MessageBroker,
@@ -22,6 +15,7 @@ function(
   'use strict';
 
   var pubsub = new MessageBroker();
+  var textDecoder = window.TextDecoder ? new window.TextDecoder('utf-8', {fatal: true}) : null;
 
   var pendingUnsubscriptions = {};
   var pendingSubscriptions = [];
@@ -98,16 +92,31 @@ function(
     }
   });
 
-  socket.on('pubsub.message', function(topic, message, meta)
+  socket.on('pubsub.message', function(message)
   {
-    meta.remote = true;
-
-    if (meta.json && typeof message === 'string')
+    try
     {
-      message = JSON.parse(message);
+      if (message instanceof ArrayBuffer)
+      {
+        message = textDecoder.decode(new Uint8Array(message));
+      }
+
+      if (typeof message === 'string')
+      {
+        message = JSON.parse(message);
+      }
+
+      message[2].remote = true;
+    }
+    catch (err)
+    {
+      return console.error('[pubsub] Failed to parse remote message:', {
+        message: message,
+        error: err
+      });
     }
 
-    pubsub.publish(topic, message, meta);
+    pubsub.publish(message[0], message[1], message[2]);
   });
 
   function onSocketSubscribe(topics, err, notAllowedTopics)
