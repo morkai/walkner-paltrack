@@ -135,7 +135,8 @@ exports.express = {
     touchInterval: 10 * 60 * 1000,
     touchChance: 0,
     gcInterval: 8 * 3600,
-    cacheInMemory: false
+    cacheInMemory: false,
+    indexes: [{key: {'data.user._id': 1}}]
   },
   cookieSecret: '1ee7\\/\\/alkner-paltrack',
   ejsAmdHelpers: {

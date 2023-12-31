@@ -9,7 +9,7 @@ Pallet tracking application.
 Node.js is a server side software system designed for writing scalable
 Internet applications in JavaScript.
 
-  * __Version__: >= 16
+  * __Version__: >= 20
   * __Website__: http://nodejs.org/
   * __Download__: http://nodejs.org/download/
 
@@ -17,7 +17,7 @@ Internet applications in JavaScript.
 
 MongoDB is a scalable, high-performance, open source NoSQL database.
 
-  * __Version__: >= 5
+  * __Version__: >= 7
   * __Website__: http://mongodb.org/
   * __Download__: http://www.mongodb.org/downloads
 
